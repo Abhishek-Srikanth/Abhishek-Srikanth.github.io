@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
+<html class="no-js" lang="en" >
+
+<head>
+    <meta charset="utf-8">
+    <!-- If you delete this meta tag World War Z will become a reality -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Solver</title>
+
+    <!-- If you are using the CSS version, only link these 2 files, you may add app.css to use for your overrides if you like -->
+    <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico" />
+
+    <link rel="stylesheet" href="../Foundation/css/normalize.css">
+    <link rel="stylesheet" href="../Foundation/css/foundation.css">
+</head>
+
+<body style="background-image:url(./VidPic/Background.png)">
+
+    <div class="contain-to-grid sticky">
+        <nav class="top-bar" data-topbar role="navigation" data-options = "sticky-on: large">
+            <ul class="title-area">
+                <li class="name">
+                    <h1><a href="../index.html">Abhishek Srikanth</a></h1>
+                </li>
+                <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
+                <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
+            </ul>
+
+            <section class="top-bar-section">
+                <!-- Right Nav Section -->
+                <ul class="right">
+                    <li>
+                        <a href="../Projects.html">Projects</a>
+
+                    </li>
+                    <li>
+                        <a href="../Thoughts.html">Thoughts</a>
+                    </li>
+                    <li><a href="../index.html#contactMe">Contact Me</a></li>
+                </ul>
+
+                <!-- Left Nav Section
+                <ul class="left">
+                <li><a href="#">Left Nav Button</a></li>
+            </ul> -->
+        </section>
+    </nav>
+</div>
+
+<div class = "row">
+    <h1 style = "text-align:center; border-bottom:#000000 solid thin; ">Sudoku Solver</h1>
+    <!-- Above styling allows for a thin line to created below the contained text -->
+</div>
+
+
+<div class = "row hide-for-medium-up">
+    <div class= "flex-video widescreen">
+        <center>
+            <img width="540" height="360" src="./VidPic/sudoku_main.png" style="border:5px groove gold;" frameborder="0" allowfullscreen></img><br>
+        </center>
+    </div>
+</div>
+<div class = "row show-for-medium-up">
+    <center>
+        <img width="540" height="360" src="./VidPic/sudoku_main.png" style="border:5px groove gold;" frameborder="0" allowfullscreen></img><br><br>
+    </center>
+</div>
+
+<div class="row">
+    <div class = "panel callout radius">
+        <h3 class = "subheader">Description:</h3>
+        This was the first big programming project I undertook. This program was meant to read an unsolved 9x9 sudokus by taking
+        input from the user and then solving the same sudoku so that the user is provided with a completed sudoku.
+        It also allowed the user to save the sudoku to file if needed.<br>
+        <a href="./VidPic/sudokuSolver_Report.pdf" target="_blank">Project report available here.</a>&nbsp;&nbsp;||&nbsp;&nbsp;
+        <a href="https://github.com/Abhishek-Srikanth/someOfMyPrograms_09_14/tree/master/sudoku_3" target="_blank">
+            Link to github repository here.
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="column large-6 medium-6">
+        <h1 style = "text-align:center; border-bottom:#000000 solid thin; ">The 9x9 sudoku</h1>
+
+        The Sudoku is a logic-based, combinatorial numberplacement
+        puzzle. The objective is to fill a 9×9 grid with digits
+        so that each column, each row, and each of the nine 3×3 subgrids
+        contain all of the digits from 1 to 9. An additional
+        constraint on the contents of individual regions is that the same
+        single integer may not appear twice in the same 9×9 playing
+        board row or column or in any of the nine 3×3 sub-regions of
+        the 9×9 playing board.<br><br>
+        The puzzle was popularized in 1986 by the Japanese puzzle
+        company Nikoli, under the name Sudoku, meaning single
+        number. It became an international hit in 2005.<br><br>
+        There a total of 6,670,903,752,021,072,936,960 possible
+        permutations. This number is equal to 9! × 722 × 27 ×
+        27,704,267,971, the last factor of which is prime. The result
+        was derived through logic and “brute force computation."
+
+
+    </div>
+    <div class="column large-6 medium-6">
+        <h1 class = "show-for-large-up" style = "text-align:center; border-bottom:#000000 solid thin;">Major challenges faced</h1>
+        <h1 class = "hide-for-large-up" style = "text-align:center; border-bottom:#000000 solid thin;">Challenges faced</h1>
+
+        Designing the Algorithm for the Sudoku solver and determining the best way to have the data stored in memory for quick
+        access was a major challenge. To solve the sudoku, initially each box had possible values set. All single possible values
+        were saved as the value of the cell then. This process was repeated after every computation.<br><br>
+        Besides this, frequency of numbers in rows, columns and sub-boxes(3x3) were measured and single frequency values were set.
+        If sudoku was not solved by now, guesses were made and each newly guessed sudoku was attempted to be solved. This was
+        carried on until the complete sudoku was solved.<br><br>
+        Another challenge then was accessing each sub-box individually, and to do so a 1-4-7 co-ordinate system was created where
+        1,4,7 represent the middle point of each 3x3 box.
+
+    </div>
+</div>
+
+
+<div class="row">
+    <h1 style = "text-align:center; border-bottom:#000000 solid thin; ">Some Pics</h1>
+    <ul class="small-block-grid-2 medium-block-grid-2 large-block-grid-3">
+        <li><center><img src="./VidPic/sudoku_input.jpg" height = "200" width = "350"><br>User input</center></li>
+        <li><center><img src="./VidPic/sudoku_output.jpg" height = "200" width = "350"><br>Program output</center></li>
+        <li><center><img src="./VidPic/sudoku_notepad.jpg" height = "200" width = "350"><br>Notepad file</center></li>
+    </ul>
+</div>
+
+
+<script src="../Foundation/js/vendor/jquery.js"></script>
+<script src="../Foundation/js/foundation/foundation.js"></script>
+<script src="../Foundation/js/foundation/foundation.topbar.js"></script>
+<!-- Other JS plugins can be included here -->
+
+<script>
+    $(document).foundation();
+</script>
+
+</body>
+</html>
