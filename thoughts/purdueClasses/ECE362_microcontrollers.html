@@ -1,0 +1,102 @@
+<html>
+<body>
+<h1 id="ece-362-microcontroller-design">ECE 362 - Microcontroller design</h1>
+<h2 id="module-1">Module 1</h2>
+<h3 id="addressing-modes">Addressing modes</h3>
+<ol>
+<li><strong>Immediate Addressing Mode</strong><ul>
+<li>programmer provides value to be acted upon <br></li>
+<li>This value is hard-coded and not read from memory <br></li>
+<li>eg. <code> movl $1,%eax </code><ul>
+<li>move value "1" into register eax</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Direct Addressing Mode</strong><ul>
+<li>The address of mentioned location/variable is acted upon</li>
+<li>eg. <code> movl $data1,%ecx </code><ul>
+<li>address of variable data1 is stored into register ecx</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Register Addressing Mode</strong><ul>
+<li>Moving data in and out of a register</li>
+<li>Since eax and ecx are registers, above examples hold true</li>
+</ul>
+</li>
+<li><strong>Indexed Addressing Mode</strong><pre class="editor-colors lang-ruby"><div class="line"><span class="source ruby"><span class="punctuation separator method ruby"><span>.</span></span><span>data</span></span></div><div class="line"><span class="source ruby"><span>data1&nbsp;</span><span class="constant numeric ruby"><span>10</span></span><span class="punctuation separator object ruby"><span>,</span></span><span class="constant numeric ruby"><span>11</span></span><span class="punctuation separator object ruby"><span>,</span></span><span class="constant numeric ruby"><span>22</span></span><span class="punctuation separator object ruby"><span>,</span></span><span class="constant numeric ruby"><span>33</span></span><span class="punctuation separator object ruby"><span>,</span></span><span class="constant numeric ruby"><span>44</span></span><span class="punctuation separator object ruby"><span>,</span></span><span class="constant numeric ruby"><span>55</span></span><span class="punctuation separator object ruby"><span>,</span></span><span class="constant numeric ruby"><span>66</span></span><span class="punctuation separator object ruby"><span>,</span></span><span class="constant numeric ruby"><span>77</span></span><span class="punctuation separator object ruby"><span>,</span></span><span class="constant numeric ruby"><span>88</span></span><span class="punctuation separator object ruby"><span>,</span></span><span class="constant numeric ruby"><span>99</span></span></span></div><div class="line"><span class="source ruby"><span class="punctuation separator method ruby"><span>.</span><span>.</span><span>.</span></span></span></div><div class="line"><span class="source ruby"><span class="constant other symbol hashkey ruby"><span>_start</span><span class="punctuation definition constant ruby"><span>:</span></span></span></span></div><div class="line"><span class="source ruby"><span>movl&nbsp;</span><span class="variable other readwrite global pre-defined ruby"><span class="punctuation definition variable ruby"><span>$</span></span><span>0</span></span><span class="punctuation separator object ruby"><span>,</span></span><span class="keyword operator arithmetic ruby"><span>%</span></span><span>edi&nbsp;</span><span class="punctuation separator statement ruby"><span>;</span></span><span>&nbsp;direct&nbsp;addressing&nbsp;here</span><span class="punctuation separator method ruby"><span>.</span></span><span>&nbsp;</span><span class="variable other constant ruby"><span>Index</span></span><span>&nbsp;register</span></span></div><div class="line"><span class="source ruby"><span>movl&nbsp;data</span><span class="punctuation section function ruby"><span>(</span></span><span class="punctuation separator object ruby"><span>,</span></span><span class="keyword operator arithmetic ruby"><span>%</span></span><span>edi</span><span class="punctuation separator object ruby"><span>,</span></span><span class="constant numeric ruby"><span>4</span></span><span class="punctuation section function ruby"><span>)</span></span><span class="punctuation separator object ruby"><span>,</span></span><span class="keyword operator arithmetic ruby"><span>%</span></span><span>eax</span></span></div><div class="line"><span class="source ruby"><span class="punctuation separator statement ruby"><span>;</span></span><span>&nbsp;movl&nbsp;addr_or_offset</span><span class="punctuation section function ruby"><span>(</span></span><span class="keyword operator arithmetic ruby"><span>%</span></span><span>base_or_offset</span><span class="punctuation separator object ruby"><span>,</span></span><span class="keyword operator arithmetic ruby"><span>%</span></span><span>index</span><span class="punctuation separator object ruby"><span>,</span></span><span>multiplier</span><span class="punctuation section function ruby"><span>)</span></span></span></div><div class="line"><span class="source ruby"><span class="punctuation separator statement ruby"><span>;</span></span><span>&nbsp;index&nbsp;</span><span class="punctuation separator other ruby"><span>:</span></span><span>&nbsp;index&nbsp;location</span></span></div><div class="line"><span class="source ruby"><span class="punctuation separator statement ruby"><span>;</span></span><span>&nbsp;multiplier&nbsp;</span><span class="punctuation separator other ruby"><span>:</span></span><span>&nbsp;space&nbsp;taken&nbsp;by&nbsp;each&nbsp;block&nbsp;of&nbsp;memory</span></span></div><div class="line"><span class="source ruby"><span class="punctuation separator statement ruby"><span>;</span></span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="constant other symbol hashkey ruby"><span>eg</span><span class="punctuation definition constant ruby"><span>:</span></span></span><span>&nbsp;long&nbsp;takes&nbsp;</span><span class="constant numeric ruby"><span>4</span></span><span>&nbsp;blocks</span></span></div><div class="line"><span class="source ruby"><span class="punctuation separator statement ruby"><span>;</span></span><span>&nbsp;</span><span class="variable other constant ruby"><span>IF</span></span><span>&nbsp;</span><span class="keyword operator arithmetic ruby"><span>%</span></span><span>edi&nbsp;was&nbsp;some&nbsp;other&nbsp;value</span><span class="punctuation separator object ruby"><span>,</span></span><span>&nbsp;that&nbsp;location&nbsp;would&nbsp;be</span></span></div><div class="line"><span class="source ruby"><span class="punctuation separator statement ruby"><span>;</span></span><span>&nbsp;&nbsp;&nbsp;&nbsp;extracted&nbsp;</span><span class="keyword operator logical ruby"><span>and</span></span><span>&nbsp;the&nbsp;content&nbsp;be&nbsp;saved&nbsp;into&nbsp;eax</span></span></div></pre>
+</li>
+<li><strong>Indirect Addressing Mode</strong><ul>
+<li>Store memory address in register</li>
+<li>Access register to get address to read that location to get value</li>
+<li>example still due</li>
+</ul>
+</li>
+<li><p><strong>Base Pointer Addressing Mode</strong></p>
+<ul>
+<li>Given a pointer to an address, Can get data at pointed location and other nearby locations by using offsets</li>
+</ul>
+<pre class="editor-colors lang-ruby"><div class="line"><span class="source ruby"><span>pushl&nbsp;</span><span class="variable other readwrite global pre-defined ruby"><span class="punctuation definition variable ruby"><span>$</span></span><span>7</span></span></span></div><div class="line"><span class="source ruby"><span>pushl&nbsp;</span><span class="variable other readwrite global pre-defined ruby"><span class="punctuation definition variable ruby"><span>$</span></span><span>8</span></span></span></div><div class="line"><span class="source ruby"><span>pushl&nbsp;</span><span class="variable other readwrite global pre-defined ruby"><span class="punctuation definition variable ruby"><span>$</span></span><span>77</span></span></span></div><div class="line"><span class="source ruby"><span>pushl&nbsp;</span><span class="keyword operator arithmetic ruby"><span>%</span></span><span>ebp&nbsp;</span><span class="punctuation separator statement ruby"><span>;</span></span><span>&nbsp;save&nbsp;value&nbsp;of&nbsp;base&nbsp;ptr&nbsp;to&nbsp;stack</span><span class="punctuation separator object ruby"><span>,</span></span><span>&nbsp;now&nbsp;can&nbsp;overwrite</span></span></div><div class="line"><span class="source ruby"><span>movl&nbsp;</span><span class="keyword operator arithmetic ruby"><span>%</span></span><span>esp</span><span class="punctuation separator object ruby"><span>,</span></span><span class="keyword operator arithmetic ruby"><span>%</span></span><span>ebp&nbsp;</span><span class="punctuation separator statement ruby"><span>;</span></span><span>&nbsp;over</span><span class="keyword operator arithmetic ruby"><span>-</span></span><span>write&nbsp;base&nbsp;ptr&nbsp;with&nbsp;stack&nbsp;ptr</span></span></div><div class="line"><span class="source ruby"><span>&nbsp;</span></span></div><div class="line"><span class="source ruby"><span>movl&nbsp;</span><span class="constant numeric ruby"><span>4</span></span><span class="punctuation section function ruby"><span>(</span></span><span class="keyword operator arithmetic ruby"><span>%</span></span><span>ebp</span><span class="punctuation section function ruby"><span>)</span></span><span class="punctuation separator object ruby"><span>,</span></span><span class="keyword operator arithmetic ruby"><span>%</span></span><span>eax&nbsp;</span><span class="punctuation separator statement ruby"><span>;</span></span><span>&nbsp;save&nbsp;</span><span class="constant numeric ruby"><span>4</span></span><span class="keyword operator arithmetic ruby"><span>+</span></span><span>esp&nbsp;</span><span class="punctuation section function ruby"><span>(</span></span><span class="constant numeric ruby"><span>77</span></span><span class="punctuation section function ruby"><span>)</span></span><span>&nbsp;to&nbsp;eax&nbsp;register</span></span></div><div class="line"><span class="source ruby"><span>movl&nbsp;</span><span class="constant numeric ruby"><span>8</span></span><span class="punctuation section function ruby"><span>(</span></span><span class="keyword operator arithmetic ruby"><span>%</span></span><span>ebp</span><span class="punctuation section function ruby"><span>)</span></span><span class="punctuation separator object ruby"><span>,</span></span><span class="keyword operator arithmetic ruby"><span>%</span></span><span>eax&nbsp;&nbsp;</span><span class="punctuation separator statement ruby"><span>;</span></span></span></div><div class="line"><span class="source ruby"><span>movl&nbsp;</span><span class="constant numeric ruby"><span>12</span></span><span class="punctuation section function ruby"><span>(</span></span><span class="keyword operator arithmetic ruby"><span>%</span></span><span>ebp</span><span class="punctuation section function ruby"><span>)</span></span><span class="punctuation separator object ruby"><span>,</span></span><span class="keyword operator arithmetic ruby"><span>%</span></span><span>eax&nbsp;</span><span class="punctuation separator statement ruby"><span>;</span></span><span>&nbsp;base&nbsp;pointer&nbsp;addressing</span></span></div></pre>
+</li>
+</ol>
+<h3 id="addressing-modes-iit-m-">Addressing Modes (IIT-M)</h3>
+<p>Consider having an operation:
+ADD X,Y
+[opcode | source operand  | destionation operand]
+[opcode | (mode,register) | (mode,register) ]
+(mode : ~16 codes) (register : ~8 registers)</p>
+<p>We need a way to address the data points X and Y</p>
+<ol>
+<li><strong>Register</strong><ul>
+<li>The register itself holds the data</li>
+</ul>
+</li>
+<li><strong>Direct Addressing Mode</strong><ul>
+<li>The register holds address of a location that contains payload</li>
+<li>(Needs one machine cycle - puts data on bus once)</li>
+</ul>
+</li>
+<li><p><strong>Indirect (Deffered) Addressing Mode</strong></p>
+<ul>
+<li><p>The register holds the address of a location that then holds the address of another location which contains payload</p>
+<blockquote>
+<p>Consider Register in CPU to have address "1000"<br>
+In the Memory, let us have locations numbers 1000 to 1200<br>
+Let value in address "1000" be the address "1010"<br>
+Here, register points to 1000 in memory which points to 1010 in memory, which in turn contains the final payload.</p>
+</blockquote>
+</li>
+<li><p>(Needs 2 machine cycles)</p>
+</li>
+</ul>
+</li>
+<li><strong>Index Mode</strong><ul>
+<li>An index Value / Displacement, say 'X' is provided</li>
+<li>The Register address is added with 'X' to arrive to the Final/Expected address</li>
+<li>Register is called Base register</li>
+</ul>
+</li>
+<li><strong>Index Deffered Mode</strong><ul>
+<li>Here, the Final?Expected Address points to another final address</li>
+</ul>
+</li>
+<li><strong>Auto-(Increment|Decrement) Mode</strong><ul>
+<li>Register holds address</li>
+<li>After the data required is extracted, the register value is incremented or decremented</li>
+</ul>
+</li>
+<li><strong>Immediate Mode</strong><ul>
+<li>Here the address is available as part of the instruction</li>
+<li>No need to use the register</li>
+</ul>
+</li>
+<li><strong>Relative Addressing</strong><ul>
+<li>Usually, program counter is used instead of register</li>
+<li>Relative allows you to see how far away in either direction of base</li>
+</ul>
+</li>
+</ol>
+</body>
+</html>

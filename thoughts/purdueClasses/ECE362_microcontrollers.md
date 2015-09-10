@@ -51,3 +51,42 @@
   movl 8(%ebp),%eax  ;
   movl 12(%ebp),%eax ; base pointer addressing
   ```
+
+### Addressing Modes (IIT-M)
+
+Consider having an operation:
+ADD X,Y
+[opcode | source operand  | destionation operand]
+[opcode | (mode,register) | (mode,register) ]
+(mode : ~16 codes) (register : ~8 registers)
+
+We need a way to address the data points X and Y
+
+1. **Register**
+  * The register itself holds the data
+2. **Direct Addressing Mode**
+  * The register holds address of a location that contains payload
+  * (Needs one machine cycle - puts data on bus once)
+3. **Indirect (Deffered) Addressing Mode**
+  * The register holds the address of a location that then holds the address of another location which contains payload
+  > Consider Register in CPU to have address "1000"<br>
+    In the Memory, let us have locations numbers 1000 to 1200<br>
+    Let value in address "1000" be the address "1010"<br>
+    Here, register points to 1000 in memory which points to 1010 in memory, which in turn contains the final payload.
+
+  * (Needs 2 machine cycles)
+4. **Index Mode**
+  * An index Value / Displacement, say 'X' is provided
+  * The Register address is added with 'X' to arrive to the Final/Expected address
+  * Register is called Base register
+5. **Index Deffered Mode**
+  * Here, the Final?Expected Address points to another final address
+6. **Auto-(Increment|Decrement) Mode**
+  * Register holds address
+  * After the data required is extracted, the register value is incremented or decremented
+7. **Immediate Mode**
+  * Here the address is available as part of the instruction
+  * No need to use the register
+8. **Relative Addressing**
+  * Usually, program counter is used instead of register
+  * Relative allows you to see how far away in either direction of base
