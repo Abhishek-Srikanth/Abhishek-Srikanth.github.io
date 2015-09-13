@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="materializecss/css/materialize.min.css"  media="screen,projection"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title> Debating Portal </title>
+</head>
+
+<body>
+<!--Import jQuery before materialize.js-->
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="https://www.parsecdn.com/js/parse-1.2.7.min.js"></script>
+<script type="text/javascript" src="materializecss/js/materialize.min.js"></script>
+<script type="text/javascript" src="functions.js"></script>
+
+
+<!-- Dropdown Structure -->
+<ul id="Account" class="dropdown-content">
+    <li><a style="cursor: pointer;" onclick = "pageChanged(this)" id="link_settings">Settings</a></li>
+    <li><a style="cursor: pointer;" onclick = "pageChanged(this)" id="link_notifications">Notifications</a></li>
+    <li><a style="cursor: pointer;" onclick = "pageChanged(this)" id="link_logOut">Log Out</a></li>
+</ul>
+<div class="navbar-fixed">
+    <nav>
+        <div class="nav-wrapper light-blue">
+            <a class="brand-logo center" style="cursor: pointer;" onclick = "pageChanged(this)" id="link_login">DebatingPortal</a>
+            <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
+            <ul class="right hide-on-med-and-down">
+                <li><a style="cursor: pointer;" onclick = "pageChanged(this)" id="link_about">About</a></li>
+                <li><a style="cursor: pointer;" onclick = "pageChanged(this)" id="link_contactUs">Contact Us</a></li>
+                <li><a style="cursor: pointer;" onclick = "pageChanged(this)" id="link_policy">Policy</a></li>
+                <li><a class="dropdown-button" href="#!" data-activates="Account">Account<i class="material-icons right">arrow_drop_down</i></a></li>
+            </ul>
+            <ul class="side-nav" id="mobile-demo">
+                <li><a style="cursor: pointer;" onclick = "pageChanged(this)" id="link_about">About</a></li>
+                <li><a style="cursor: pointer;" onclick = "pageChanged(this)" id="link_contactUs">Contact Us</a></li>
+                <li><a style="cursor: pointer;" onclick = "pageChanged(this)" id="link_policy">Policy</a></li>
+                <li><a style="cursor: pointer;" onclick = "pageChanged(this)" id="link_settings">Settings</a></li>
+                <li><a style="cursor: pointer;" onclick = "pageChanged(this)" id="link_notifications">Notifications</a></li>
+                <li><a style="cursor: pointer;" onclick = "pageChanged(this)" id="link_logOut">Log Out</a></li>
+            </ul>
+        </div>
+    </nav>
+</div>
+
+<div class="row" id="page_login">
+    <div class="col s12 l7">
+        <div class="row">
+            <h5><blockquote class="flow-text">"We promote civic engagement and critical thinking among the
+                youth focussed on analyzing important social, economic,
+                environmental and political issues."</blockquote></h5>
+
+        </div>
+    </div>
+
+    <div class="col s12 l5">
+
+        <ul class="collapsible popout" data-collapsible="accordion">
+            <li>
+                <div class="collapsible-header active"><i class="material-icons">filter_drama</i>Sign in</div>
+                <div class="collapsible-body">
+                    <form>
+                        <div class="input-field" style="margin-top="0%"">
+                            <input autocomplete="off" id="signIn_email" type="email" class="validate">
+                            <label for="signIn_email">Email</label>
+                        </div>
+                        <div class="input-field" style="margin-top="0%"">
+                            <input autocomplete="off" id="signIn_password" type="password" class="validate">
+                            <label for="signIn_password">Password</label>
+                        </div>
+                    </form>
+                    <div class="row right-align">
+                        <button class="btn waves-effect waves-light light-blue" \
+                          onclick = "signIn()" type="submit" name="action">I'm back!
+                            <i class="material-icons">send</i>
+                        </button> &nbsp; &nbsp;
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="collapsible-header"><i class="material-icons">whatshot</i>Sign up</div>
+                <div class="collapsible-body">
+
+                    <form>
+                    <div class="row">
+                        <div class="col s6">
+                            <div class="input-field">
+                                <input autocomplete="off" id="signUp_firstName" type="text" class="validate">
+                                <label for="signUp_firstName">First Name</label>
+                            </div>
+                        </div>
+                        <div class="col s6">
+                            <div class="input-field">
+                                <input autocomplete="off" id="signUp_lastName" type="text" class="validate">
+                                <label for="signUp_lastName">Last Name</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <input autocomplete="off" id="signUp_email" type="email" class="validate">
+                        <label for="signUp_email">Email</label>
+                    </div>
+                    <div class="input-field">
+                        <input autocomplete="off" id="signUp_password" type="password" class="validate">
+                        <label for="signUp_password">Password</label>
+                    </div>
+                    <div class="input-field">
+                        <input autocomplete="off" id="signUp_repassword" type="password" class="validate">
+                        <label for="signUp_repassword">Confirm Password</label>
+                    </div>
+                    </form>
+
+                    <div class="row right-align">
+                        <button class="btn waves-effect waves-light light-blue" \
+                          onclick = "signUp()" type="submit" name="action">Sign me up!
+                            <i class="material-icons">send</i>
+                        </button> &nbsp; &nbsp;
+                    </div>
+
+                </div>
+            </li>
+        </ul>
+
+    </div>
+
+</div>
+
+<div id="page_home" class="row">
+
+    <div class="row">
+        <div class="col s12">
+            <ul class="tabs">
+                <li class="tab col s3">
+                    <a href="#tab_completed">
+                        <span class="hide-on-small-only">Completed Debates</span>
+                        <span class="hide-on-med-and-up">Completed</span>
+                    </a>
+                </li>
+                <li class="tab col s3">
+                    <a class="active" href="#tab_current">
+                        <span class="hide-on-small-only">Current Debates</span>
+                        <span class="hide-on-med-and-up">Current</span>
+                    </a>
+                </li>
+                <li class="tab col s3">
+                    <a href="#tab_mine">
+                        <span class="hide-on-small-only">My Debates</span>
+                        <span class="hide-on-med-and-up">Mine</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div id="tab_completed" class="col s12">
+            <ol data-role="list-view" data-inset="true" id="debateList_completed" title="nodes list">
+            </ol>
+        </div>
+        <div id="tab_current" class="col s12">
+            <ol data-role="list-view" data-inset="true" id="debateList_current" title="nodes list">
+            </ol>
+        </div>
+        <div id="tab_mine" class="col s12">
+            <ol data-role="list-view" data-inset="true" id="debateList_mine" title="nodes list">
+            </ol>
+        </div>
+    </div>
+
+</div>
+
+<div id="page_debate" class="row">
+    <div class="row" style="padding-left:6%; padding-right:6%; text-align:justify">
+        <h3 id="debate_title" class="center-align">
+            This house is for the advantages of unhealthy food for a healthy living
+        </h3>
+        <p id="debate_description">
+            ipsum ipsum ipsum
+        </p>
+    </div>
+
+    <div class="row center-align">
+        <a class="btn-floating btn-large waves-effect waves-light red"
+            style="position:fixed; top:90%; right:2%" onclick = "addPost()">
+            <i class="material-icons">add</i>
+        </a>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="inputModal" class="modal bottom-sheet">
+        <div class="modal-content">
+            <h4>Your Voice!</h4>
+            <form>
+                <div class="row">
+                    <div class="switch col s12 m4 l2 center-align">
+                        <label>
+                            For
+                            <input type="checkbox" id="submitPost_motion">
+                            <span class="lever"></span>
+                            Against
+                        </label>
+                    </div>
+                    <div class="switch col s12 m4 l2 center-align">
+                        <label>
+                            Constructive
+                            <input type="checkbox" id="submitPost_type">
+                            <span class="lever"></span>
+                            Rebuttal
+                        </label>
+                    </div>
+                </div>
+            </form>
+            <div class="row">
+                <form class="col s12">
+                    <div class="row">
+                        <div class="input-field col s6">
+                            <input id="submitPost_title" type="text" class="validate">
+                            <label for="submitPost_title">Title</label>
+                        </div>
+                        <div class="input-field col s10">
+                            <textarea id="submitPost_description" class="materialize-textarea"></textarea>
+                            <label for="submitPost_description">Description</label>
+                        </div>
+                    </div>
+                </form>
+                <div class="col s12 right-align">
+                    <button class="btn waves-effect waves-light light-blue" type="submit" name="action" onclick = "submitPost()">
+                        Submit <i class="material-icons">send</i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12 m6">
+            <h3 class="center-align">For</h3>
+            <ul data-role="list-view" data-inset="true" id="post_forConstructive" title="nodes list" style="list-style-type:none">
+            </ul>
+        </div>
+        <div class="col s12 m6">
+            <h3 class="center-align">Against</h3>
+            <ul data-role="list-view" data-inset="true" id="post_againstConstructive" title="nodes list" style="list-style-type:none">
+            </ul>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col s12 m6">
+            <h3 class="center-align hide-on-med-and-up">For (Rebuttal)</h3>
+            <ul data-role="list-view" data-inset="true" id="post_forRebuttal" title="nodes list" style="list-style-type:none">
+            </ul>
+        </div>
+        <div class="col s12 m6">
+            <h3 class="center-align hide-on-med-and-up">Against (Rebuttal)</h3>
+            <ul data-role="list-view" data-inset="true" id="post_againstRebuttal" title="nodes list" style="list-style-type:none">
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div id="page_about" class="row">
+    yo
+</div>
+
+<div id="page_contactUs" class="row">
+    yolo
+</div>
+
+<div id="page_policy" class="row">
+    <div class="row">
+        <h3 class="center-align">Policies</h3>
+    </div>
+</div>
+
+<div id="page_settings" class="row">
+    yo
+</div>
+
+<div id="page_notifications" class="row">
+    yo
+</div>
+
+
+
+<script>
+$( document ).ready(function()
+{
+
+})
+</script>
+</body>
+</html>
