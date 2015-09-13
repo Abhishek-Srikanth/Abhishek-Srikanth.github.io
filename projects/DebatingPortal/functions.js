@@ -12,7 +12,7 @@ $(function()
 		document.getElementById("page_login").style.display="initial";
 	}
 
-	hideAll();document.getElementById("page_debate").style.display="initial";
+	//hideAll();document.getElementById("page_debate").style.display="initial";
 
 });
 
