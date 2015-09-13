@@ -1,3 +1,5 @@
+var debateId = "";
+
 $(function()
 {
 	Parse.$ = jQuery;
@@ -18,7 +20,7 @@ $(function()
 
 function showDebateParent(elem)
 {
-	var debateId = elem.id;
+	debateId = elem.id;
 	console.log(debateId);
 	var debateQuery = new Parse.Query("Debate");
 	debateQuery.equalTo("objectId", debateId);
@@ -31,7 +33,7 @@ function showDebateParent(elem)
 
 function showDebate(debate)
 {
-	console.log(debate);
+	//console.log(debate);
 
 	// var elem = document.getElementById('post_forConstructive');
 	// elem.parentNode.removeChild(elem);
@@ -54,7 +56,7 @@ function showDebate(debate)
 
 	for(i=0; i < postList.length; i++)
 	{
-		console.log(postList[i]);
+		//console.log(postList[i]);
 
 		var query = new Parse.Query("Post");
 		query.equalTo("objectId", postList[i]);
@@ -69,11 +71,11 @@ function showDebate(debate)
 				else
 				{
 					postInfo = (results[0].toJSON());
-					console.log(postInfo); // JSON object
+					// console.log(postInfo); // JSON object
 					var cardString = cardGenerate(postInfo);
 
 					// following decides where to add the post to
-					console.log(postInfo.type + "," + postInfo.motion);
+					// console.log(postInfo.type + "," + postInfo.motion);
 					if(postInfo.type == 'C')
 					{
 						if(postInfo.motion == 'F')
@@ -159,7 +161,7 @@ function cardGenerate(postInfo)
 	cardString += "</p>";
 	cardString += "</div></div></div></div>"
 	cardString += "</li>";
-	console.log(cardString);
+	//console.log(cardString);
 	return cardString;
 }
 
@@ -433,10 +435,52 @@ function addPost()
 
 function submitPost()
 {
+	console.log("debateId is " + debateId);
+	if(debateId == "")
+	{
+		Materialize.toast("Sorry. Some error occured in gathering debate data",4000);
+		return;
+	}
+
 	$('#inputModal').closeModal();
-	var motion = document.getElementById("submitPost_motion").value ;
-	var type = document.getElementById("submitPost_type").value ;
+
+	var motion=$("#submitPost_motion").is(":checked");
+	if(motion == true) motion = "A";
+	else motion = "F";
+
+
+	var type = $("#submitPost_type").is(":checked");
+	if(type == true) type = "R";
+	else type = "C";
+
+
 	var title = document.getElementById("submitPost_title").value ;
 	var description = document.getElementById("submitPost_description").value ;
 	console.log(motion + "," + type + "," + title + "," + description);
+
+	var post = new Parse.Object("Post");
+	post.set("motion",motion);
+	post.set("type",type);
+	post.set("title",title);
+	post.set("description",description);
+	post.set("crossQuestionList", []);
+	post.save().then(function(post){
+		//successfully posted
+		var query = new Parse.Query("Debate");
+		query.equalTo('objectId',debateId);
+		query.find().then(
+			function(results)
+			{
+				myObject = results[0];
+				myObject.add('postIdList', post.toJSON().objectId );
+				myObject.save().then(function(post){Materialize.toast("added post", 1000);},function(error){Materialize.toast(error.message,4000);});
+			},
+			function(error)
+			{
+				Materialize.toast("Failed to update corresponding debate", 4000);
+			});
+	},function(error) {
+		//unsuccessful
+		Materialize.toast(error.message, 4000);
+	});
 }
