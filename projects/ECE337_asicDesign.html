@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
+<html class="no-js" lang="en" >
+
+<head>
+    <meta charset="utf-8">
+    <!-- If you delete this meta tag World War Z will become a reality --><!-- I believe him -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASIC Design</title>
+
+    <!-- If you are using the CSS version, only link these 2 files, you may add app.css to use for your overrides if you like -->
+    <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico" />
+
+    <link rel="stylesheet" href="../Foundation/css/normalize.css">
+    <link rel="stylesheet" href="../Foundation/css/foundation.css">
+</head>
+
+<body style="background-image:url(./VidPic/Background.png)">
+
+    <div class="contain-to-grid sticky">
+        <nav class="top-bar" data-topbar role="navigation" data-options = "sticky-on: large">
+            <ul class="title-area">
+                <li class="name">
+                    <h1><a href="../index.html">Abhishek Srikanth</a></h1>
+                </li>
+                <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
+                <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
+            </ul>
+
+            <section class="top-bar-section">
+                <!-- Right Nav Section -->
+                <ul class="right">
+                    <li>
+                        <a href="../Projects.html">Projects</a>
+
+                    </li>
+                    <li>
+                        <a href="../Thoughts.html">Thoughts</a>
+                    </li>
+                    <li><a href="../index.html#contactMe">Contact Me</a></li>
+                </ul>
+
+                <!-- Left Nav Section
+                <ul class="left">
+                <li><a href="#">Left Nav Button</a></li>
+            </ul> -->
+            </section>
+        </nav>
+    </div>
+
+    <div class = "row">
+        <h1 style = "text-align:center; border-bottom:#000000 solid thin; ">
+            ECE 337: ASIC Design
+        </h1>
+        <!-- Above styling allows for a thin line to created below the contained text -->
+    </div>
+
+    <div class = "row hide-for-medium-up">
+        <div class= "flex-video widescreen">
+            <center>
+                <img width="480" height="480" src="VidPic/ece337_tiger_results.png" style="border:2px groove gold;" frameborder="0" allowfullscreen></img><br>
+            </center>
+        </div>
+    </div>
+    <div class = "row show-for-medium-up">
+        <center>
+            <img width="480" height="480" src="VidPic/ece337_tiger_results.png" style="border:2px groove gold;" frameborder="0" allowfullscreen></img><br><br>
+        </center>
+    </div>
+
+    <div class="row">
+        <div class = "panel callout radius">
+            <h3 class = "subheader">Description:</h3>
+            This page contains the description of lab assignments I completed for my ASIC Design class at Purdue University.
+            ASIC is short fo Application Specific Integrated Circuits and this was a design class for standard cell ASICs.
+
+            This page talks about the lab assignments and projects I worked on.<br>
+            <a href="https://github.com/Abhishek-Srikanth/ece_337_project" target="_blank">
+                Final Project Code here
+            </a> (lab assignments not uploaded)
+        </div>
+    </div>
+    <div class="row">
+        <div class="small-12 medium-6 large-4 columns">
+            <h3 align="center">Lab 1</h3>
+            <ul>
+                <li>Learnt tools used</li>
+                <li>16 bit comparator circuit</li>
+            </ul>
+        </div>
+        <div class="small-12 medium-6 large-4 columns">
+            <h3 align="center">Lab 2</h3>
+            <ul>
+                <li>Adder circuit</li>
+                <!--li>Comparator circuit</li-->
+                <li>Application specific sensors</li>
+            </ul>
+        </div>
+        <div class="small-12 medium-6 large-4 columns">
+            <h3 align="center">Lab 3</h3>
+            <ul>
+                <!--li>Adder circuits</li-->
+                <li>Parameter based up counter</li>
+                <li>Shift registers (SP and PS)</li>
+            </ul>
+        </div>
+        <div class="small-12 medium-6 large-4 columns">
+            <h3 align="center">Lab 4</h3>
+            <ul>
+                <li>Universal Asynchronous Receiver</li>
+                <li>With Test Benches</li>
+            </ul>
+        </div>
+        <div class="small-12 medium-6 large-4 columns">
+            <h3 align="center">Lab 5</h3>
+            <ul>
+                <li>FIR filter Implementation</li>
+                <li>With Test Benches</li>
+            </ul>
+        </div>
+        <div class="small-12 medium-6 large-4 columns">
+            <h3 align="center">Lab 6</h3>
+            <ul>
+                <li>NRZi USB Receiver</li>
+                <li>With Test Benches</li>
+            </ul>
+        </div>
+    </div>
+    <div class="row">
+        <hr>
+        <h3 align="center">Project: Raw Image demosaicing and filters</h3>
+        <p>
+            In cameras today, image data is captured through a massive array of sensors where
+            each sensor detects the intensity of one of the RGB (red, green blue) colors in set
+            pattern. These sensor values gets processed through a demosaicing algorithm that then
+            generates the digital images that are commonly seen today in standard image viewers.
+            <br><br>
+            Our design is a hardware implementation of Bayer demosaicing process which
+            processes the raw images array pattern to generate pixel data. In addition
+            to converting sensor values into pixel data, our chip is also designed to
+            apply filters such as brightness enhancement, white balancing and horizontal blurring.
+            <br><br>
+            Having this chip on­board a camera will help convert the sensor values instantly and
+            allow storage of the processed image. Although this process can be done on computers
+            using special software, an on­board chip will enhance user experience by allowing
+            immediate viewback of images taken, an element that would draw or retain customers
+            to a specific company.
+            <br><br>
+            The report delves into the technicalities of our design, the interfaces,
+            the operational characteristics, detailed block diagrams of modules, budgeting
+            information, verification plans and results obtained. <a href="./VidPic/ece337_report.pdf">Click here to view report.</a>
+
+        </p>
+    </div>
+
+<script src="../Foundation/js/vendor/jquery.js"></script>
+<script src="../Foundation/js/foundation/foundation.js"></script>
+<script src="../Foundation/js/foundation/foundation.topbar.js"></script>
+<!-- Other JS plugins can be included here -->
+
+<script>
+    $(document).foundation();
+</script>
+
+</body>
+</html>
