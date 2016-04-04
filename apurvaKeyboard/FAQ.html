@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="materialize/css/materialize.min.css"  media="screen,projection"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title id="title"> Apurva Keyboard </title>
+</head>
+
+<body class = "teal darken-1">
+<!--Import jQuery before materialize.js-->
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="https://www.parsecdn.com/js/parse-1.2.7.min.js"></script>
+<script type="text/javascript" src="materialize/js/materialize.min.js"></script>
+
+<!-- Dropdown Structure (not supporting now) -->
+<ul id="Language" class="dropdown-content">
+    <li><a style="cursor: pointer;" onclick = "reWritePage('ENGLISH')" id="lang_english">English</a></li>
+    <li><a style="cursor: pointer;" onclick = "reWritePage('TAMIL')" id="link_tamil">Tamil</a></li>
+    <!--li><a style="cursor: pointer;" onclick = "reWritePage('HINDI')" id="link_hindi">Hindi</a></li>
+    <li><a style="cursor: pointer;" onclick = "reWritePage('MALAYALAM')" id="link_malyalam">Malayalam</a></li>
+    <li><a style="cursor: pointer;" onclick = "reWritePage('TELUGU')" id="link_telugu">Telugu</a></li-->
+</ul>
+
+<div class="navbar-fixed">
+    <nav>
+        <div class="nav-wrapper light-blue">
+            <a class="brand-logo center" style="cursor: pointer;" href = "index.html" id = "navbar_title">
+                Apurva Keyboard
+            </a>
+
+            <ul class="right hide-on-med-and-down">
+                <li><a style="cursor: pointer;" id="navbar_Demo" href = "demo.html">Demo</a></li>
+                <li><a style="cursor: pointer;" id="navbar_feedback" href = "https://docs.google.com/forms/d/1xxCZlW2IhN8bq4zoPzyjamWl4fhT6KMtjVNlFSNQXFM/viewform">Feedback</a></li>
+                <li><a style="cursor: pointer;" id="navbar_FAQ" href = "FAQ.html">F.A.Q.</a></li>
+                <li>
+                    <a class="dropdown-button" href="#!" data-activates="Language">
+                        <span id="link_language_drop"> Language </span>
+                        <i class="material-icons right">
+                            arrow_drop_down
+                        </i>
+                    </a>
+                </li>
+            </ul>
+
+            <a href="#" data-activates="mobile-demo" class="button-collapse">
+                <i class="material-icons">menu</i>
+            </a>
+            <ul class="side-nav"id="mobile-demo">
+                <li><a style="cursor: pointer;" href = "demo.html">Demo</a></li>
+                <li><a style="cursor: pointer;" href = "https://docs.google.com/forms/d/1xxCZlW2IhN8bq4zoPzyjamWl4fhT6KMtjVNlFSNQXFM/viewform">Feedback</a></li>
+                <li><a style="cursor: pointer;" href = "FAQ.html">F.A.Q.</a></li>
+                <!--li><a style="cursor: pointer;" id="link_language_pop">Language</a></li-->
+            </ul>
+        </div>
+    </nav>
+</div>
+
+<div class="container">
+    <h2 id="txt_title" class="center-align">Frequently Asked Questions</h2>
+    <h4 id="txt_sub_title" class="center-align">Because... information transparency</h4>
+
+    <br>
+
+    <ul class="collapsible popout" data-collapsible="accordion">
+        <li>
+            <div class="collapsible-header">
+                <i class="material-icons">play_arrow</i>
+                <span id="q_whenLangAdded"> When will (insert language) be added ? </span>
+            </div>
+            <div class="collapsible-body">
+                <p>
+                    Popular languages that can fit into this framework
+                    are constantly being added one after another.
+                    <br>
+                    Having just one developer makes things come out a
+                    little slowly since focus is on quality and testing
+                    takes time.
+                    <br>
+                    I would appreciate it if, in the feedback section,
+                    you would add your language.
+                </p>
+            </div>
+        </li>
+        <li>
+            <div class="collapsible-header">
+                <i class="material-icons">play_arrow</i>
+                <span id="q_whenSpellCheck"> Will a spell check feature for English be added ? </span>
+            </div>
+            <div class="collapsible-body">
+                <p>
+                    Most definitely it will. Unfortunately, it is a
+                    hard feature to programme and so it will take time
+                    to test and release.
+                </p>
+            </div>
+        </li>
+        <li>
+            <div class="collapsible-header">
+                <i class="material-icons">play_arrow</i>
+                <span id="q_willSteal"> Should I worry about this keyboard stealing information written by me ? </span>
+            </div>
+            <div class="collapsible-body">
+                <p>
+                    This is a great and very important question.
+                    <br>
+                    <srtong>NO!</strong>
+                    Apurva Keyboard does not save, transmit or re-use any thing you type.<br>
+                    Another great reason to use Apurva Keyboard!
+                </p>
+            </div>
+        </li>
+
+        <li>
+            <div class="collapsible-header">
+                <i class="material-icons">play_arrow</i>
+                <span id="q_whatPermissions"> What permissions does Apurva Keyboard use, and why ? </span>
+            </div>
+            <div class="collapsible-body">
+                <p>
+                    Android permissions used are:
+                    <br>
+                        ->&ensp;VIBRATE (To vibrate the phone on keypress)
+
+                    <br><br>
+                    Yup! That's it. Simple is better, no ?
+                </p>
+            </div>
+        </li>
+    </ul>
+
+</div>
+
+<script type="text/javascript" src="language_FAQ.js"></script>
+<script>
+$( document ).ready(function()
+{
+  $(".button-collapse").sideNav();  // to initialize top nav bar
+})
+</script>
+</body>
+</html>

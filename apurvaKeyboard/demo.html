@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="materialize/css/materialize.min.css"  media="screen,projection"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title> Apurva Keyboard </title>
+</head>
+
+<body>
+<!--Import jQuery before materialize.js-->
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="https://www.parsecdn.com/js/parse-1.2.7.min.js"></script>
+<script type="text/javascript" src="materialize/js/materialize.min.js"></script>
+
+
+<!-- Dropdown Structure (not supporting now) >
+<ul id="Language" class="dropdown-content">
+    <li><a style="cursor: pointer;" id="lang_english">English</a></li>
+    <li><a style="cursor: pointer;" id="link_tamil">Tamil</a></li>
+    <li><a style="cursor: pointer;" id="link_hindi">Hindi</a></li>
+    <li><a style="cursor: pointer;" id="link_malyalam">Malayalam</a></li>
+    <li><a style="cursor: pointer;" id="link_telugu">Telugu</a></li>
+</ul-->
+
+<div class="navbar-fixed">
+    <nav>
+        <div class="nav-wrapper light-blue">
+            <a class="brand-logo center" style="cursor: pointer;" href = "index.html">
+                Apurva Keyboard
+            </a>
+
+            <ul class="right hide-on-med-and-down">
+                <li><a style="cursor: pointer;" href = "demo.html">Demo</a></li>
+                <li><a style="cursor: pointer;" href = "https://docs.google.com/forms/d/1xxCZlW2IhN8bq4zoPzyjamWl4fhT6KMtjVNlFSNQXFM/viewform">Feedback</a></li>
+                <li><a style="cursor: pointer;" href = "FAQ.html">F.A.Q.</a></li>
+                <!--li>
+                    <a class="dropdown-button" href="#!" id="link_language_drop" data-activates="Language">
+                        Language
+                        <i class="material-icons right">
+                            arrow_drop_down
+                        </i>
+                    </a>
+                </li-->
+            </ul>
+
+            <a href="#" data-activates="mobile-demo" class="button-collapse">
+                <i class="material-icons">menu</i>
+            </a>
+            <ul class="side-nav"id="mobile-demo">
+                <li class="active"><a style="cursor: pointer;" href = "demo.html">Demo</a></li>
+                <li><a style="cursor: pointer;" href = "https://docs.google.com/forms/d/1xxCZlW2IhN8bq4zoPzyjamWl4fhT6KMtjVNlFSNQXFM/viewform">Feedback</a></li>
+                <li><a style="cursor: pointer;" href = "FAQ.html">F.A.Q.</a></li>
+                <!--li><a style="cursor: pointer;" id="link_language_pop">Language</a></li-->
+            </ul>
+        </div>
+    </nav>
+</div>
+
+<script>
+$( document ).ready(function()
+{
+  $(".button-collapse").sideNav();  // to initialize top nav bar
+})
+</script>
+</body>
+</html>
