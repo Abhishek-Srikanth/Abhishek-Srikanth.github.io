@@ -10,49 +10,49 @@
     <title> Apurva Keyboard </title>
 </head>
 
-<body>
+<body class="yellow lighten-3">
 <!--Import jQuery before materialize.js-->
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script type="text/javascript" src="https://www.parsecdn.com/js/parse-1.2.7.min.js"></script>
 <script type="text/javascript" src="materialize/js/materialize.min.js"></script>
+<script type="text/javascript" src="common.js"></script>
 
-
-<!-- Dropdown Structure (not supporting now) >
+<!-- Dropdown Structure (not supporting now) -->
 <ul id="Language" class="dropdown-content">
-    <li><a style="cursor: pointer;" id="lang_english">English</a></li>
-    <li><a style="cursor: pointer;" id="link_tamil">Tamil</a></li>
-    <li><a style="cursor: pointer;" id="link_hindi">Hindi</a></li>
-    <li><a style="cursor: pointer;" id="link_malyalam">Malayalam</a></li>
-    <li><a style="cursor: pointer;" id="link_telugu">Telugu</a></li>
-</ul-->
+    <li><a style="cursor: pointer;" onclick = "reWritePage('ENGLISH')" id="lang_english">English</a></li>
+    <li><a style="cursor: pointer;" onclick = "reWritePage('TAMIL')" id="link_tamil">Tamil</a></li>
+    <!--li><a style="cursor: pointer;" onclick = "reWritePage('HINDI')" id="link_hindi">Hindi</a></li>
+    <li><a style="cursor: pointer;" onclick = "reWritePage('MALAYALAM')" id="link_malyalam">Malayalam</a></li>
+    <li><a style="cursor: pointer;" onclick = "reWritePage('TELUGU')" id="link_telugu">Telugu</a></li-->
+</ul>
 
 <div class="navbar-fixed">
     <nav>
         <div class="nav-wrapper light-blue">
-            <a class="brand-logo center" style="cursor: pointer;" href = "index.html">
+            <a class="brand-logo center" style="cursor: pointer;" href = "index.html" id = "navbar_title">
                 Apurva Keyboard
             </a>
 
             <ul class="right hide-on-med-and-down">
-                <li><a style="cursor: pointer;" href = "demo.html">Demo</a></li>
-                <li><a style="cursor: pointer;" href = "https://docs.google.com/forms/d/1xxCZlW2IhN8bq4zoPzyjamWl4fhT6KMtjVNlFSNQXFM/viewform">Feedback</a></li>
-                <li><a style="cursor: pointer;" href = "FAQ.html">F.A.Q.</a></li>
-                <!--li>
-                    <a class="dropdown-button" href="#!" id="link_language_drop" data-activates="Language">
-                        Language
+                <li><a style="cursor: pointer;" id="navbar_Demo" href = "demo.html">Demo</a></li>
+                <li><a style="cursor: pointer;" id="navbar_feedback" href = "feedback.html">Feedback</a></li>
+                <li><a style="cursor: pointer;" id="navbar_FAQ" href = "FAQ.html">F.A.Q.</a></li>
+                <li>
+                    <a class="dropdown-button" href="#!" data-activates="Language">
+                        <span id="link_language_drop"> Language </span>
                         <i class="material-icons right">
                             arrow_drop_down
                         </i>
                     </a>
-                </li-->
+                </li>
             </ul>
 
             <a href="#" data-activates="mobile-demo" class="button-collapse">
                 <i class="material-icons">menu</i>
             </a>
             <ul class="side-nav"id="mobile-demo">
-                <li class="active"><a style="cursor: pointer;" href = "demo.html">Demo</a></li>
-                <li><a style="cursor: pointer;" href = "https://docs.google.com/forms/d/1xxCZlW2IhN8bq4zoPzyjamWl4fhT6KMtjVNlFSNQXFM/viewform">Feedback</a></li>
+                <li><a style="cursor: pointer;" href = "demo.html">Demo</a></li>
+                <li><a style="cursor: pointer;" href = "feedback.html">Feedback</a></li>
                 <li><a style="cursor: pointer;" href = "FAQ.html">F.A.Q.</a></li>
                 <!--li><a style="cursor: pointer;" id="link_language_pop">Language</a></li-->
             </ul>
@@ -60,10 +60,81 @@
     </nav>
 </div>
 
+<div class="container">
+
+
+    <div class="fixed-action-btn" style="bottom: 45px; right: 24px;">
+        <a class="btn-floating btn-large red" onclick="install()">
+            <i class="large material-icons">android</i>
+        </a>
+    </div>
+
+    <div class="row center">
+        <h2>Setting up</h2>
+    </div>
+
+    <div class="row center">
+        <h2>Basic typing</h2>
+    </div>
+
+    <div class="row center">
+        <h2>Advanced typing</h2>
+    </div>
+
+    <div class="row center">
+        <h2>Changing modes</h2>
+    </div>
+
+    <div class="row center">
+        <h2>English Keyboard</h2>
+    </div>
+
+    <div class="row center">
+        <h2>Settings Menu</h2>
+    </div>
+
+    <div class="row center">
+        <h2>Installation</h2>
+
+        <div class="row center">
+            <a class="waves-effect waves-light btn" onclick="install()">Install</a>
+        </div>
+    </div>
+
+</div>
+
+<footer class="page-footer">
+    <div class="container">
+        <div class="row center">
+            <p class="grey-text text-lighten-4">
+                Hope you liked the app.<br>
+                I would love to hear from you. Please do leave me somefeedback!
+            </p>
+        </div>
+    </div>
+    <div class="footer-copyright">
+        <div class="container">
+            Copyright © 2016 Abhishek Srikanth. All Rights Reserved.
+            <!--a class="grey-text text-lighten-4 right" onclick="install" href="#!">Install</a-->
+            <span class="right">
+                <a class="waves-effect waves-light btn text-lighten-4 grey-text red lighten-2" onclick="install()">
+                    Install
+                </a>
+
+                <a class="waves-effect waves-light btn text-lighten-4 grey-text red lighten-2" href="feedback.html">
+                    FeedBack
+                </a>
+            </span>
+        </div>
+    </div>
+</footer>
+
+
 <script>
 $( document ).ready(function()
 {
   $(".button-collapse").sideNav();  // to initialize top nav bar
+  $('.scrollspy').scrollSpy();
 })
 </script>
 </body>

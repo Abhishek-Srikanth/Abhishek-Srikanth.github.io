@@ -10,11 +10,12 @@
     <title id="title"> Apurva Keyboard </title>
 </head>
 
-<body class = "teal darken-1">
+<body class = "red lighten-3" >
 <!--Import jQuery before materialize.js-->
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script type="text/javascript" src="https://www.parsecdn.com/js/parse-1.2.7.min.js"></script>
 <script type="text/javascript" src="materialize/js/materialize.min.js"></script>
+<script type="text/javascript" src="common.js"></script>
 
 <!-- Dropdown Structure (not supporting now) -->
 <ul id="Language" class="dropdown-content">
@@ -34,7 +35,7 @@
 
             <ul class="right hide-on-med-and-down">
                 <li><a style="cursor: pointer;" id="navbar_Demo" href = "demo.html">Demo</a></li>
-                <li><a style="cursor: pointer;" id="navbar_feedback" href = "https://docs.google.com/forms/d/1xxCZlW2IhN8bq4zoPzyjamWl4fhT6KMtjVNlFSNQXFM/viewform">Feedback</a></li>
+                <li><a style="cursor: pointer;" id="navbar_feedback" href = "feedback.html">Feedback</a></li>
                 <li><a style="cursor: pointer;" id="navbar_FAQ" href = "FAQ.html">F.A.Q.</a></li>
                 <li>
                     <a class="dropdown-button" href="#!" data-activates="Language">
@@ -51,7 +52,7 @@
             </a>
             <ul class="side-nav"id="mobile-demo">
                 <li><a style="cursor: pointer;" href = "demo.html">Demo</a></li>
-                <li><a style="cursor: pointer;" href = "https://docs.google.com/forms/d/1xxCZlW2IhN8bq4zoPzyjamWl4fhT6KMtjVNlFSNQXFM/viewform">Feedback</a></li>
+                <li><a style="cursor: pointer;" href = "feedback.html">Feedback</a></li>
                 <li><a style="cursor: pointer;" href = "FAQ.html">F.A.Q.</a></li>
                 <!--li><a style="cursor: pointer;" id="link_language_pop">Language</a></li-->
             </ul>
@@ -60,6 +61,13 @@
 </div>
 
 <div class="container">
+
+    <div class="fixed-action-btn" style="bottom: 45px; right: 24px;">
+        <a class="btn-floating btn-large red" onclick="install()">
+            <i class="large material-icons">android</i>
+        </a>
+    </div>
+
     <h2 id="txt_title" class="center-align">Frequently Asked Questions</h2>
     <h4 id="txt_sub_title" class="center-align">Because... information transparency</h4>
 
@@ -67,8 +75,7 @@
 
     <ul class="collapsible popout" data-collapsible="accordion">
         <li>
-            <div class="collapsible-header">
-                <i class="material-icons">play_arrow</i>
+            <div class="collapsible-header active">
                 <span id="q_whenLangAdded"> When will (insert language) be added ? </span>
             </div>
             <div class="collapsible-body">
@@ -87,7 +94,6 @@
         </li>
         <li>
             <div class="collapsible-header">
-                <i class="material-icons">play_arrow</i>
                 <span id="q_whenSpellCheck"> Will a spell check feature for English be added ? </span>
             </div>
             <div class="collapsible-body">
@@ -100,7 +106,6 @@
         </li>
         <li>
             <div class="collapsible-header">
-                <i class="material-icons">play_arrow</i>
                 <span id="q_willSteal"> Should I worry about this keyboard stealing information written by me ? </span>
             </div>
             <div class="collapsible-body">
@@ -116,7 +121,6 @@
 
         <li>
             <div class="collapsible-header">
-                <i class="material-icons">play_arrow</i>
                 <span id="q_whatPermissions"> What permissions does Apurva Keyboard use, and why ? </span>
             </div>
             <div class="collapsible-body">
@@ -133,6 +137,32 @@
     </ul>
 
 </div>
+
+<footer class="page-footer">
+    <div class="container">
+        <div class="row center">
+            <p class="grey-text text-lighten-4">
+                Hope you liked the app.<br>
+                I would love to hear from you. Please do leave me somefeedback!
+            </p>
+        </div>
+    </div>
+    <div class="footer-copyright">
+        <div class="container">
+            Copyright © 2016 Abhishek Srikanth. All Rights Reserved.
+            <!--a class="grey-text text-lighten-4 right" onclick="install" href="#!">Install</a-->
+            <span class="right">
+                <a class="waves-effect waves-light btn text-lighten-4 grey-text red lighten-2" onclick="install()">
+                    Install
+                </a>
+
+                <a class="waves-effect waves-light btn text-lighten-4 grey-text red lighten-2" href="feedback.html">
+                    FeedBack
+                </a>
+            </span>
+        </div>
+    </div>
+</footer>
 
 <script type="text/javascript" src="language_FAQ.js"></script>
 <script>

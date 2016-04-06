@@ -12,7 +12,7 @@ function reWritePage(language)
             document.getElementById("navbar_FAQ").innerHTML = "கெள்விகள்";
             document.getElementById("link_language_drop").innerHTML = "மொழிகள்";
             document.getElementById("txt_title").innerHTML = "அடிக்கடி கேட்கப்படும் கேள்விகள்";
-            document.getElementById("txt_sub_title").innerHTML = "என்னெனில், தகவல் வெளிப்படுத்தல் ";
+            document.getElementById("txt_sub_title").innerHTML = "ஏன்னெனில், தகவல் வெளிப்படுத்தல் ";
 
             document.getElementById("q_whenLangAdded").innerHTML = "எப்போது (உங்கள் மொழி) சேர்க்க படும் ?";
             document.getElementById("q_whenSpellCheck").innerHTML = " ஆங்கில மொழி திருத்தல் சேர்க்கப்படுமா ? ";

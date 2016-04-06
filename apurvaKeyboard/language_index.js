@@ -26,12 +26,12 @@ function reWritePage(language)
             document.getElementById("navbar_feedback").innerHTML = "Feedback";
             document.getElementById("navbar_FAQ").innerHTML = "F.A.Q.";
             document.getElementById("link_language_drop").innerHTML = "Laungage";
-            document.getElementById("txt_keyboardRedesigned").innerHTML = "Keyboard redesigned";
+            document.getElementById("txt_keyboardRedesigned").innerHTML = "The Keyboard redesigned";
             document.getElementById("txt_optimizedLayout").innerHTML = "Optimized layout";
             document.getElementById("txt_single_swipe").innerHTML = "A single swipe";
             document.getElementById("txt_quick_change").innerHTML = "quick switch design";
             document.getElementById("txt_languages").innerHTML = "Languages targeted";
-            document.getElementById("txt_customizability").innerHTML = "Customizability";
+            document.getElementById("txt_customizability").innerHTML = "Customizable";
             document.getElementById("txt_qwerty_keyboard").innerHTML = "Dedicated qwerty Keyboard";
 
     }

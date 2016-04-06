@@ -10,12 +10,12 @@
     <title id="title"> Apurva Keyboard </title>
 </head>
 
-<body class="teal darken-2">
+<body class="blue-grey lighten-5">
 <!--Import jQuery before materialize.js-->
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script type="text/javascript" src="https://www.parsecdn.com/js/parse-1.2.7.min.js"></script>
 <script type="text/javascript" src="materialize/js/materialize.min.js"></script>
-
+<script type="text/javascript" src="common.js"></script>
 
 <!-- Dropdown Structure (not supporting now) -->
 <ul id="Language" class="dropdown-content">
@@ -35,7 +35,7 @@
 
             <ul class="right hide-on-med-and-down">
                 <li><a style="cursor: pointer;" id="navbar_Demo" href = "demo.html">Demo</a></li>
-                <li><a style="cursor: pointer;" id="navbar_feedback" href = "https://docs.google.com/forms/d/1xxCZlW2IhN8bq4zoPzyjamWl4fhT6KMtjVNlFSNQXFM/viewform">Feedback</a></li>
+                <li><a style="cursor: pointer;" id="navbar_feedback" href = "feedback.html">Feedback</a></li>
                 <li><a style="cursor: pointer;" id="navbar_FAQ" href = "FAQ.html">F.A.Q.</a></li>
                 <li>
                     <a class="dropdown-button" href="#!" data-activates="Language">
@@ -52,7 +52,7 @@
             </a>
             <ul class="side-nav"id="mobile-demo">
                 <li><a style="cursor: pointer;" href = "demo.html">Demo</a></li>
-                <li><a style="cursor: pointer;" href = "https://docs.google.com/forms/d/1xxCZlW2IhN8bq4zoPzyjamWl4fhT6KMtjVNlFSNQXFM/viewform">Feedback</a></li>
+                <li><a style="cursor: pointer;" href = "feedback.html">Feedback</a></li>
                 <li><a style="cursor: pointer;" href = "FAQ.html">F.A.Q.</a></li>
                 <!--li><a style="cursor: pointer;" id="link_language_pop">Language</a></li-->
             </ul>
@@ -68,9 +68,15 @@
 
 <div class="container">
 
-<div class="row teal darken-1 center">
+<div class="fixed-action-btn" style="bottom: 45px; right: 24px;">
+    <a class="btn-floating btn-large red" onclick="install()">
+        <i class="large material-icons">android</i>
+    </a>
+</div>
+
+<div class="row center">
     <div class="col s12 m12 l12">
-        <h2 id="txt_keyboardRedesigned">Keyboard redesigned</h2>
+        <h2 id="txt_keyboardRedesigned">The Keyboard redesigned</h2>
         <p>
             <!--div class="container"-->
                 Ever felt the pain of finding a consonant only to hunt for a vowel to combine it with ?
@@ -87,9 +93,9 @@
     </div>
 </div>
 
-<div class="row teal darken-1 center">
+<div class="row center">
     <div class="col s12 m12 l6">
-        .
+        <img src="http://lorempixel.com/250/250/nature/4">
     </div>
     <div class="col s12 m12 l6">
         <h2 id="txt_optimizedLayout">Optimized layout</h2>
@@ -101,7 +107,10 @@
     </div>
 </div>
 
-<div class="row teal darken-1 center">
+<div class="row center">
+    <div class="col s12 m12 hide-on-large-only">
+        <img src="http://lorempixel.com/250/250/nature/1">
+    </div>
     <div class="col s12 m12 l6">
         <h2 id="txt_single_swipe">A single swipe</h2>
         <p>
@@ -111,11 +120,14 @@
             click on 3-5 different buttons to get just one character ready.
         </p>
     </div>
+    <div class="col s12 m12 l6 hide-on-med-and-down">
+        <img src="http://lorempixel.com/250/250/nature/1">
+    </div>
 </div>
 
-<div class="row teal darken-1 center">
+<div class="row center">
     <div class="col s12 m12 l6">
-        .
+        <img src="http://lorempixel.com/250/250/nature/2">
     </div>
     <div class="col s12 m12 l6">
         <h2 id="txt_quick_change">quick switch design</h2>
@@ -127,8 +139,8 @@
     </div>
 </div>
 
-<div class="row teal darken-1 center">
-    <div class="col s12 m12 l6">
+<div class="row center">
+    <div class="col s12 m12 l6 hide-on-med-and-down">
         <h2 id="txt_languages">Languages targeted</h2>
         <p> <!--style="font-size : 25px"-->
             Currently supports Tamil, Telugu, Hindi, Malayalam, Gujarati, Kannada &amp; English.
@@ -143,9 +155,17 @@
         <a class="carousel-item" href="#four!"><img src="http://lorempixel.com/250/250/nature/4"></a>
         <a class="carousel-item" href="#five!"><img src="http://lorempixel.com/250/250/nature/5"></a>
     </div>
+    <div class="col s12 m12 l6 hide-on-large-only">
+        <h2 id="txt_languages">Languages targeted</h2>
+        <p> <!--style="font-size : 25px"-->
+            Currently supports Tamil, Telugu, Hindi, Malayalam, Gujarati, Kannada &amp; English.
+            <br>
+            A lot more languages will be added shortly!
+        </p>
+    </div>
 </div>
 
-<div class="row teal darken-1 center">
+<div class="row center">
     <div class="carousel col s12 m12 l6">
         <a class="carousel-item" href="#one!"><img src="http://lorempixel.com/250/250/nature/1"></a>
         <a class="carousel-item" href="#two!"><img src="http://lorempixel.com/250/250/nature/2"></a>
@@ -154,7 +174,7 @@
         <a class="carousel-item" href="#five!"><img src="http://lorempixel.com/250/250/nature/5"></a>
     </div>
     <div class="col s12 m12 l6">
-        <h2 id="txt_customizability">Customizability</h2>
+        <h2 id="txt_customizability">Customizable</h2>
         <p>
             Great effort has been put to ensure that you get to decide on
             every aspect of the keyboard, no matter how trivial.<br>
@@ -165,22 +185,53 @@
     </div>
 </div>
 
-<div class="row teal darken-1 center">
-    <div class="col s12 m12 l6">
-        .
+<div class="row center">
+    <div class="col s12 m12 hide-on-large-only">
+        <img src="http://lorempixel.com/250/250/nature/5">
     </div>
     <div class="col s12 m12 l6">
         <h2 id="txt_qwerty_keyboard">Dedicated qwerty Keyboard</h2>
         <p>
             No matter how awesome your language is, there comes a time when you
             might need to type in English. To make sure you don't struggle with
-            this, we have recreated the well known qwerty keyboard format.
+            this, we have recreated the ever familiar qwerty keyboard format.
         </p>
     </div>
+    <div class="col l6 hide-on-med-and-down">
+        <img src="http://lorempixel.com/250/250/nature/5">
+    </div>
+
 </div>
 
 
 </div>
+
+
+<footer class="page-footer">
+    <div class="container">
+        <div class="row center">
+            <p class="grey-text text-lighten-4">
+                Hope you liked the app.<br>
+                I would love to hear from you. Please do leave me somefeedback!
+            </p>
+        </div>
+    </div>
+    <div class="footer-copyright">
+        <div class="container">
+            Copyright © 2016 Abhishek Srikanth. All Rights Reserved.
+            <!--a class="grey-text text-lighten-4 right" onclick="install" href="#!">Install</a-->
+            <span class="right">
+                <a class="waves-effect waves-light btn text-lighten-4 grey-text red lighten-2" onclick="install()">
+                    Install
+                </a>
+
+                <a class="waves-effect waves-light btn text-lighten-4 grey-text red lighten-2" href="feedback.html">
+                    FeedBack
+                </a>
+            </span>
+        </div>
+    </div>
+</footer>
 
 <script type="text/javascript" src="language_index.js"></script>
 <script>
