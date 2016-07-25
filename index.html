@@ -1,269 +1,199 @@
 <!DOCTYPE html>
-<!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
-<html class="no-js" lang="en" >
-
+<html>
 <head>
-  <meta charset="utf-8">
-  <!-- If you delete this meta tag World War Z will become a reality -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Abhishek Srikanth</title>
+    <!--Import Google Icon Font-->
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="materialize/css/materialize.min.css"  media="screen,projection"/>
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <!-- If you are using the CSS version, only link these 2 files, you may add app.css to use for your overrides if you like -->
-  <link rel="shortcut icon" type="image/x-icon" href="./favicon.ico" />
-
-  <link rel="stylesheet" href="Foundation/css/normalize.css">
-  <link rel="stylesheet" href="Foundation/css/foundation.css">
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="materialize/js/materialize.min.js"></script>
+    <script>
+    $(function(){
+        $("#navbar").load("navbar.html");
+        $("#footer").load("footer.html");
+    });
+    </script>
 </head>
 
-<body style="background-image:url(./projects/VidPic/Background.png)">
+<body class="grey darken-4"> <!-- so that bottom of parallax is not white -->
+    <div id="navbar"></div>
 
-    <div class="contain-to-grid sticky">
-        <nav class="top-bar" data-topbar role="navigation" data-options = "sticky-on: large">
-            <ul class="title-area">
-                <li class="name">
-                    <h1><a href="index.html">Abhishek Srikanth</a></h1>
+    <div class="parallax-container" style="height:200px">
+        <div class="parallax"><img src="projects/VidPic/parallax9.jpg"></div>
+    </div>
+
+    <div class="section white">
+        <div class="row container center">
+            <h2 class="header">Abhishek Srikanth</h2>
+            <h4>Developer, Designer, Innovator</h4>
+            <p class="grey-text text-darken-3 lighten-3">
+                Senior - Computer Engineering (BS), Purdue University.<br>
+                An avid programmer who loves creating and developing new and interesting technologies.
+            </p>
+        </div>
+    </div>
+
+    <div class="parallax-container" style="height:200px">
+        <div class="parallax"><img src="projects/VidPic/parallax9.jpg"></div>
+    </div>
+
+    <div class="section white">
+        <div class="row container center">
+            <h2 class="header">About</h2>
+            <p class="grey-text text-darken-3 lighten-3">
+                I am a student at Purdue University and am working towards my Bachelors degree in Computer Engineering.
+                I love learning new technologies and spend my time imagining and creating products with am aim to make
+                lives of people easier and more productive than it already is.
+            </p>
+            <p class="grey-text text-darken-3 lighten-3">
+                When I am not busy changing the world, Just like most other people, I enjoy listening to music, watching
+                movies, playing games and hanging out with my friends! I also have a thing for roaming around, discovering new
+                places, people, their language and culture.
+            </p>
+        </div>
+    </div>
+
+    <div class="parallax-container" style="height:200px">
+        <div class="parallax"><img src="projects/VidPic/parallax9.jpg"></div>
+    </div>
+
+    <div class="section white">
+        <div class="row container">
+            <h2 class="header center">Education</h2>
+            <p class="grey-text text-darken-3 lighten-3">
+            </p>
+
+            <ul class="collapsible popout" data-collapsible="accordion">
+                <li>
+                    <div class="collapsible-header active"><i class="material-icons">filter_drama</i>Purdue University</div>
+                    <div class="collapsible-body">
+
+                        <ul class="collapsible" data-collapsible="accordion">
+                            <li>
+                                <div class="collapsible-header"><i class="material-icons">check</i>Honors and Awards</div>
+                                <div class="collapsible-body">
+                                    <ul class="collection">
+                                        <li class="collection-item">
+                                            <strong>Outstanding ECE Merit Scholarship (2016-17)</strong> <br>
+                                            Awarded the Outstanding ECE Merit Scholarship for the academic year of 2016-17
+                                            at Purdue University.
+                                        </li>
+                                        <li class="collection-item">
+                                            <strong>Dean's List & Semester Honors (Fall '13 to Present)</strong> <br>
+                                            For scoring 4.00 GPA in Fall 2013, 3.98 GPA in Spring 2014, 4.00 GPA in Fall 2014,
+                                            4.00 GPA in Spring 2015, 3.83 in Fall 2015 and 3.98 GPA in Spring 2016
+                                            at Purdue University.
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="collapsible-header"><i class="material-icons">check</i>Core Coursework</div>
+                                <div class="collapsible-body">
+                                    <ul class="collection">
+                                        <li class="collection-item">ECE 437 - Computer Design and prototyping</li>
+                                        <li class="collection-item">ECE 337 - ASIC Design Lab</li>
+                                        <li class="collection-item">ECE 362 - Microprocessor Systems and Interfacing</li>
+                                        <li class="collection-item">ECE 368 - Data structures</li>
+                                        <li class="collection-item">ECE 264 - Advanced C programming</li>
+                                        <li class="collection-item">ECE 302 - Probabilistic Methods</li>
+                                        <li class="collection-item">ECE 301 - Signals and Systems</li>
+                                        <li class="collection-item">ECE 404 - Intro to Computer Security</li>
+                                        <li class="collection-item">and more...</li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
-                <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
-                <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
+                <li>
+                    <div class="collapsible-header"><i class="material-icons">place</i>Global Indian Int'l School</div>
+                    <div class="collapsible-body">
+
+                        <ul class="collapsible" data-collapsible="accordion">
+                            <li>
+                                <div class="collapsible-header"><i class="material-icons">check</i>Honors and Awards</div>
+                                <div class="collapsible-body">
+                                    <ul class="collection">
+                                        <li class="collection-item">
+                                            <strong>Certificate of Merit in Mathematics</strong> <br>
+                                            <i>Central Board of Secondary Education, May 2013</i> <br>
+                                            CBSE awarded Abhishek Srikanth the certificate of merit in Mathematics
+                                            for being among the top 0.1% of successful candidates of the All India
+                                            Senior School Certificate Examination of 2013.
+                                        </li>
+                                        <li class="collection-item">
+                                            <strong>IGNITE'09 - Consolation Prize</strong> <br>
+                                            <i>National Innovation foundation of India, December 2009</i> <br>
+                                            This was a prestigious innovation competition held in India by the
+                                            National innovation Foundation (NIF), with a total of 1344 entries
+                                            from 21 states. I am proud to have won a prize for my innovative
+                                            design of a fire hose stand that would make it easier for the user
+                                            to control the firehose despite the high pressures involved. A total
+                                            of 18 prizes were given out by the former president of India, Dr. A.P.J.Abdul Kalam.
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="collapsible-header"><i class="material-icons">check</i>Coursework</div>
+                                <div class="collapsible-body">
+                                    <ul class="collection">
+                                        <li class="collection-item">100% - Mathematics</li>
+                                        <li class="collection-item"> 96% - Chemistry</li>
+                                        <li class="collection-item"> 95% - English</li>
+                                        <li class="collection-item"> 94% - Computer Science</li>
+                                        <li class="collection-item"> 90% - Physics</li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
             </ul>
-
-            <section class="top-bar-section">
-                <!-- Right Nav Section -->
-                <ul class="right">
-                    <li>
-                        <a href="Projects.html">Projects</a>
-
-                    </li>
-                    <li>
-                        <a href="Thoughts.html">Thoughts</a>
-                    </li>
-                    <li><a href="#contactMe">Contact Me</a></li>
-                </ul>
-
-                <!-- Left Nav Section
-                <ul class="left">
-                <li><a href="#">Left Nav Button</a></li>
-            </ul> -->
-        </section>
-    </nav>
-</div>
-<br>
-<div class = "row">
-	<div class = "column large-4" align="center">
-		<img src = "profile.jpeg" height = "400" width="400">
-	</div>
-	<div class = "column large-8" align="center">
-		<h1>Abhishek Srikanth</h1>
-		<h3>Developer, Designer, Innovator</h3>
-		Junior in Computer Engineering (BS), Purdue University.<br>
-		An avid programmer who loves creating and developing new and interesting programs. <br><br>
-	</div>
-</div>
-<br>
-<div class = "row">
-	<h1>A little about myself</h1>
-    <p style="padding-left:2%;">
-	I am currently a student at Purdue University and am working towards my Bachelors degree in Computer Engineering.
-	During the little free time I get from my busy schedule I enjoy playing games, watching movies, listening to songs
-	and so on. I also take pleasure in roaming around and visiting new scenic locations and do so as much as I can.
-
-	Born in Chennai(India), I have been lucky enough to resided in various cities like Dubai(UAE), Mumbai(India), Singapore and West lafayette(USA).
-	This has presented me with the knowledge of many cultures and various languages and dialects.
-	As of today, I am fluent in languages such as English, Hindi and Tamil.
-	In addition to this I take pride in the fact that I can understand various accents and dialects of the above easily.
-    </p>
-</div>
-<br>
-<div class = "row">
-	<h1> Education</h1>
-		<dl class="accordion" data-accordion>
-		  	<dd class="accordion-navigation">
-		    	<a href="#panel1">
-				    <div class = "row">
-				    	<div class = "columns large-9">
-				    		<img src="./projects/VidPic/plus.png" height="20" width="20"> Purdue University
-				    	</div>
-				    	<div class = "columns large-3" align="right" >
-				    		2013-2017
-				    	</div>
-				    </div>
-		    	</a>
-		    	<div id="panel1" class="content active" style="background-image:url(./projects/VidPic/Background.png)">	<!--Division for Purdue University-->
-		      		<dl class="accordion" data-accordion>
-					  	<dd class="accordion-navigation">
-					    	<a href="#panel1a">
-                                <img src="./projects/VidPic/plus.png" height="20" width="20"> Honors and Awards
-                            </a>
-					    	<div id="panel1a" class = "content" style="background-image:url(./projects/VidPic/Background.png)">
-					      		<div class = "row" style="text-align:left;">
-						      		<h5><b>Dean's List & Semester Honors (Fall '13 to Present)</b></h5>
-									<h6><i>Purdue University</i><br>
-                                        For scoring 4.00 GPA in Fall 2013, 3.98 GPA in Spring 2014,
-                                        4.00 GPA in Fall 2014, 4.00 GPA in Spring 2015 and 3.83 in Fall 2015 at Purdue University.
-                                    </h6>
-								</div>
-					    	</div>
-					  	</dd>
-					  	<dd class="accordion-navigation">
-					    	<a href="#panel1b">
-                                <img src="./projects/VidPic/plus.png" height="20" width="20"> Classes taken
-                            </a>
-					    	<div id="panel1b" class="content" style="background-image:url(./projects/VidPic/Background.png)">
-					    		<div class = "columns large-3 small-6">
-					    			<h5>Core set A</h5>
-					    			<ul>
-                                        <li>ECE 337</li>
-                                        <li>ECE 301</li>
-                                        <li>ECE 270</li>
-                                        <li>ECE 202</li>
-					    				<li>ECE 201</li>
-                                        <li>ECE 207</li>
-					    			</ul>
-					    		</div>
-					    		<div class = "columns large-3 small-6">
-					    			<h5>Core set B</h5>
-					    			<ul>
-                                        <li>ECE 362</li>
-                                        <li>ECE 404</li>
-                                        <li>ECE 364</li>
-					    				<li>ECE 368</li>
-					    				<li>ECE 264</li>
-					    				<li>CS 159</li>
-					    			</ul>
-					    		</div>
-					    		<div class = "columns large-3 small-6">
-					    			<h5>Math and Sciences</h5>
-					    			<ul>
-                                        <li>MA 266</li>
-                                        <li>MA 261</li>
-					    				<li>MA 166</li>
-					    				<li>MA 165</li>
-					    				<li>PHYS 172</li>
-					    				<li>PHYS 272</li>
-					    				<li>CHEM 115</li>
-					    			</ul>
-					    		</div>
-					    		<div class = "columns large-3 small-6">
-					    			<h5>General Edu. and Misc.</h5>
-					    			<ul>
-                                        <li>A&D 383</li>
-                                        <li>LING 201</li>
-					    				<li>ECON 251</li>
-					    				<li>ENGR 132</li>
-					    				<li>ENGR 131</li>
-					    				<li>EPCS 101</li>
-					    				<li>COM 114</li>
-					    				<li>ENGL 106</li>
-					    				<li>ENGR 104</li>
-					    			</ul>
-					    		</div>
-					    	</div>
-					  	</dd>
-					</dl>
-		    	</div>
-		  	</dd>
-		  	<dd class="accordion-navigation">
-		    	<a href="#panel2">
-			    	<div class = "row">
-				    	<div class = "columns large-9">
-                            <img src="./projects/VidPic/plus.png" height="20" width="20"> Global Indian Int'l School
-				    	</div>
-				    	<div class = "columns large-3" align="right" >
-				    		2008-2013
-				    	</div>
-				    </div>
-		    	</a>
-		    	<div id="panel2" class="content" style="background-image:url(./projects/VidPic/Background.png)">
-		      		<dl class="accordion" data-accordion>
-					  	<dd class="accordion-navigation">
-					    	<a href="#panel2a">
-                                <img src="./projects/VidPic/plus.png" height="20" width="20"> Honors and Awards
-                            </a>
-					    	<div id="panel2a" class = "content" style="background-image:url(./projects/VidPic/Background.png)">
-					      		<div class = "row" style="text-align:left;">
-						      		<h5><b>Certificate of Merit in Mathematics</b></h5>
-									<h6><i>Central Board of Secondary Education, May 2013</i><br>
-									CBSE awarded Abhishek Srikanth the certificate of merit in Mathematics for being among the top 0.1% of successful<br>
-									candidates of All India Senior School Certificate Examination of 2013. </h6>
-								</div>
-								<div class="row" style="text-align:left;">
-									<h5><b>IGNITE'09 - Consolation Prize</b></h5>
-									<h6><i>National Innovation foundation of India, December 2009</i><br>
-									This was a prestigious innovation competition held in India by the National innovation Foundation (NIF), with a total of 1344 entries from 21 states. I am proud to have won a prize for my innovative design of a fire hose stand that would
-									make it easier for the user to control the firehose despite the high pressures involved. A total of 18 prizes were given out by the former president of India, Dr. A.P.J.Abdul Kalam.</h6>
-								</div>
-					    	</div>
-					  	</dd>
-					  	<dd class="accordion-navigation">
-					    	<a href="#panel2b">
-                                <img src="./projects/VidPic/plus.png" height="20" width="20"> Classes taken
-                            </a>
-					    	<div id="panel2b" class="content" style="background-image:url(./projects/VidPic/Background.png)">
-						    	<div class = "row">
-						    		<div class = "columns large-10 small-10">
-						    			<ul>
-						    				<li>Mathematics</li>
-						    				<li>Chemistry</li>
-						    				<li>English</li>
-						    				<li>Computer Science</li>
-						    				<li>Physics</li>
-						    			</ul>
-						    		</div>
-						    		<div class = "columns large-2 small-2" style = "text-align:right;">
-						    				100%</br>
-						    				 96%</br>
-						    				 95%</br>
-						    				 94%</br>
-						    				 90%</br>
-						    		</div>
-						    	</div>
-					    	</div>
-					  	</dd>
-					</dl>
-		    	</div>
-		  	</dd>
-		</dl>
-</div>	<!-- End of Education row -->
-
-<br>
-
-<div class="row">
-    <a name="contactMe">    </a>
-        <h1>Contact Me</h1>
-        You can learn more about me at:<br>
-
-<!--    <a class="texthover" href=" ">
-        <img src="./projects/VidPic/logo_FB.png" alt="FaceBook" title="Facebook">
-    </a> -->
-
-    <a href="./projects/VidPic/resume.pdf" class="texthover">
-        <img src="./projects/VidPic/logo_resume.png" alt="Resume" title="Resume" height="128" width="128">
-    </a>
-    <a class="texthover" href="https://www.linkedin.com/pub/abhishek-srikanth/88/6a9/35a">
-        <img src="./projects/VidPic/logo_linkedIn.png" alt="LinkedIn" title="LinkedIn">
-    </a>
-    <a href="https://www.quora.com/Abhishek-Srikanth" class="texthover">
-        <img src="./projects/VidPic/logo_quora.png" alt="Quora" title="Quora" height="128" width="128">
-    </a>
-    <a href="https://www.github.com/Abhishek-Srikanth" class="texthover">
-        <img src="./projects/VidPic/logo_github.png" alt="GitHub" title="Github" height="128" width="128">
-    </a>
-
-</div>
-
-	<script src="Foundation/js/vendor/jquery.js"></script>
-  	<script src="Foundation/js/foundation/foundation.js"></script>
-  	<script src="Foundation/js/foundation/foundation.topbar.js"></script>
-	<script src="Foundation/js/foundation/foundation.accordion.js"></script>
+        </div>
+    </div>
 
 
+    <div class="parallax-container" style="height:200px">
+        <div class="parallax"><img src="projects/VidPic/parallax9.jpg"></div>
+    </div>
+
+    <div class="section white">
+        <div class="row container">
+            <h2 class="header center">Work Experience</h2>
+
+            <h5>Program manager Intern - Microsoft</h5>
+            <p class="grey-text text-darken-3 lighten-3">
+                May 2016 - July 2016 | Redmond, WA
+            </p>
 
 
-  <!-- Other JS plugins can be included here -->
+            <h5>Research and Development Intern - Bloomberg</h5>
+            <p class="grey-text text-darken-3 lighten-3">
+                May 2015 - August 2015 | New York
+            </p>
 
-  	<script>
-    	$(document).foundation();
-  	</script>
+        </div>
+    </div>
 
+    <div class="parallax-container" style="height:200px">
+        <div class="parallax"><img src="projects/VidPic/parallax9.jpg"></div>
+    </div>
+
+    <div id="footer"></div>
+
+    <script>
+        $(document).ready(function(){
+            $('.parallax').parallax();
+            $('.collapsible').collapsible({
+                accordion : false // A setting that changes the collapsible behavior to expandable instead of the default accordion style
+            });
+        });
+    </script>
 </body>
 </html>
