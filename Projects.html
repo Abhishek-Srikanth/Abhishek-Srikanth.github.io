@@ -4,115 +4,171 @@
 
 <head>
     <meta charset="utf-8">
-    <!-- If you delete this meta tag World War Z will become a reality -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Abhishek Srikanth</title>
 
-    <!-- If you are using the CSS version, only link these 2 files, you may add app.css to use for your overrides if you like -->
-    <link rel="shortcut icon" type="image/x-icon" href="./favicon.ico" />
-
-    <link rel="stylesheet" href="Foundation/css/normalize.css">
-    <link rel="stylesheet" href="Foundation/css/foundation.css">
+    <!--Import Google Icon Font-->
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="materialize/css/materialize.min.css"  media="screen,projection"/>
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="materialize/js/materialize.min.js"></script>
+    <script>
+    $(function(){
+        $("#navbar").load("navbar.html");
+        $("#footer").load("footer.html");
+    });
+    </script>
 </head>
 
-<body style="background-image:url(./projects/VidPic/Background.png)">
+<body>
+    <div id="navbar"></div>
 
-    <div class="contain-to-grid sticky">
-        <nav class="top-bar" data-topbar role="navigation" data-options = "sticky-on: large">
-            <ul class="title-area">
-                <li class="name">
-                    <h1><a href="index.html">Abhishek Srikanth</a></h1>
-                </li>
-                <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
-                <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
-            </ul>
 
-            <section class="top-bar-section">
-                <!-- Right Nav Section -->
-                <ul class="right">
-                    <li>
-                        <a href="Projects.html">Projects</a>
+    <div class="row">
+        <div class="col s12 m4 l3">
+            <div class="card-panel grey darken-4">
+                <div class="white-text">
+                    <a href="./projects/TheHungryMage.html">
+                        <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_TheHungryMage.png" height="100%" width = "100%"> </a>
+                        <center>The Hungry Mage</center>
+                </div>
+            </div>
+        </div>
 
-                    </li>
-                    <li>
-                        <a href="Thoughts.html">Thoughts</a>
-                    </li>
-                    <li><a href="./index.html#contactMe">Contact Me</a></li>
-                </ul>
+        <div class="col s12 m4 l3">
+            <div class="card-panel grey darken-4">
+                <div class="white-text">
+                    <a href="./projects/DodgeIt.html">
+                        <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_DodgeIt.png" height="100%" width="100%"></a>
+                        <center>Dodge It</center>
+                </div>
+            </div>
+        </div>
 
-                <!-- Left Nav Section
-                <ul class="left">
-                <li><a href="#">Left Nav Button</a></li>
-            </ul> -->
-        </section>
-    </nav>
-</div>
-<br>
-<div class="row">
-<ul class="small-block-grid-2 medium-block-grid-3 large-block-grid-4">
-    <li>
-        <a href="./projects/TheHungryMage.html" style="text-shadow: 0px 1px 1px #4d4d4d; color:#804505; font:18px;">
-            <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_TheHungryMage.png" ><center>The Hungry Mage</center></a>
-    </li>
-    <li>
-        <a href="./projects/DodgeIt.html" style="text-shadow: 0px 1px 1px #4d4d4d; color:#804505; font:18px;">
-            <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_DodgeIt.png" ><center>Dodge It</center></a>
-    </li>
-    <li>
-        <a href="./projects/Huffman.html" style="text-shadow: 0px 1px 1px #4d4d4d; color:#804505; font:18px;">
-            <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_Huffman.png" ><center>Huffman Coding</center></a>
-    </li>
-    <li>
-        <a href="./projects/ShortestPath.html" style="text-shadow: 0px 1px 1px #4d4d4d; color:#804505; font:18px;">
-            <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_ShortestPath.png" ><center>Shortest Path</center></a>
-    </li>
-    <li>
-        <a href="./projects/SudokuSolver.html" style="text-shadow: 0px 1px 1px #4d4d4d; color:#804505; font:18px;">
-            <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_sudoku.png" ><center>Sudoku Solver</center></a>
-    </li>
-    <li>
-        <a href="./projects/ECE264.html" style="text-shadow: 0px 1px 1px #4d4d4d; color:#804505; font:18px;">
-            <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_ECE264.png" ><center>ECE264: Advanced C</center></a>
-    </li>
+        <div class="col s12 m4 l3">
+            <div class="card-panel grey darken-4">
+                <div class="white-text">
+                    <a href="./projects/Huffman.html">
+                        <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_Huffman.png" height="100%" width="100%">
+                    </a>
+                    <center>Huffman Coding</center>
+                </div>
+            </div>
+        </div>
 
-    <li>
-        <a href="./projects/ECE337_asicDesign.html" style="text-shadow: 0px 1px 1px #4d4d4d; color:#804505; font:18px;">
-            <img style="border:5px groove #D3AC85;" src="./projects/VidPic/ece337_tiger_results.png" ><center>ECE337: ASIC design</center></a>
-    </li>
+        <div class="col s12 m4 l3">
+            <div class="card-panel grey darken-4">
+                <div class="white-text">
+                    <a href="./projects/ShortestPath.html">
+                        <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_ShortestPath.png" height="100%" width="100%">
+                    </a>
+                    <center>Shortest Path</center>
+                </div>
+            </div>
+        </div>
 
-    <li>
-        <a href="./projects/connections.html" style="text-shadow: 0px 1px 1px #4d4d4d; color:#804505; font:18px;">
-            <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_connections.png" ><center>Connections</center></a>
-    </li>
-    <li>
-        <a href="thatha.html" style="text-shadow: 0px 1px 1px #4d4d4d; color:#804505; font:18px;">
-            <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_thatha.png" ><center>Type Easy</center></a>
-    </li>
-    <li>
-        <a href="./projects/pyGUI_calculator.html" style="text-shadow: 0px 1px 1px #4d4d4d; color:#804505; font:18px;">
-            <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_calculator.png" ><center>Calculator GUI</center></a>
-    </li>
-    <li>
-        <a href="./projects/DebatingPortal/index.html" style="text-shadow: 0px 1px 1px #4d4d4d; color:#804505; font:18px;">
-            <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_debatingPortal.png" ><center>Debating Portal (Mhacks VI)</center></a>
-    </li>
+        <div class="col s12 m4 l3">
+            <div class="card-panel grey darken-4">
+                <div class="white-text">
+                    <a href="./projects/SudokuSolver.html">
+                        <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_sudoku.png" height="100%" width="100%">
+                    </a>
+                    <center>Sudoku Solver</center>
+                </div>
+            </div>
+        </div>
 
-    <li>
-        <a href="./projects/ProjectInfinity_uiucHackathon.html" style="text-shadow: 0px 1px 1px #4d4d4d; color:#804505; font:18px;">
-            <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_ProjectInfinity.png" ><center>Project Infinity (HackIllinois 2016)</center></a>
-    </li>
-</ul>
-</div>
 
-<script src="Foundation/js/vendor/jquery.js"></script>
-<script src="Foundation/js/foundation/foundation.js"></script>
-<script src="Foundation/js/foundation/foundation.topbar.js"></script>
+        <div class="col s12 m4 l3">
+            <div class="card-panel grey darken-4">
+                <div class="white-text">
+                    <a href="./projects/ECE264.html">
+                        <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_ECE264.png" height="100%" width="100%">
+                    </a>
+                    <center>ECE264: Advanced C</center>
+                </div>
+            </div>
+        </div>
 
-<!-- Other JS plugins can be included here -->
 
-<script>
-$(document).foundation();
-</script>
+        <div class="col s12 m4 l3">
+            <div class="card-panel grey darken-4">
+                <div class="white-text">
+                    <a href="./projects/ECE337_asicDesign.html">
+                        <img style="border:5px groove #D3AC85;" src="./projects/VidPic/ece337_tiger_results.png" height="100%" width="100%">
+                    </a>
+                    <center>ECE337: ASIC design</center>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col s12 m4 l3">
+            <div class="card-panel grey darken-4">
+                <div class="white-text">
+                    <a href="./projects/connections.html">
+                        <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_connections.png" height="100%" width="100%">
+                    </a>
+                    <center>Connections</center>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col s12 m4 l3">
+            <div class="card-panel grey darken-4">
+                <div class="white-text">
+                    <a href="thatha.html">
+                        <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_thatha.png" height="100%" width="100%">
+                    </a>
+                    <center>Type Easy</center>
+                </div>
+            </div>
+        </div>
+
+        <div class="col s12 m4 l3">
+            <div class="card-panel grey darken-4">
+                <div class="white-text">
+                    <a href="./projects/pyGUI_calculator.html">
+                        <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_calculator.png" height="100%" width="100%">
+                    </a>
+                    <center>Calculator GUI</center>
+                </div>
+            </div>
+        </div>
+
+        <div class="col s12 m4 l3">
+            <div class="card-panel grey darken-4">
+                <div class="white-text">
+                    <a href="./projects/DebatingPortal/index.html">
+                        <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_debatingPortal.png" height="100%" width="100%">
+                    </a>
+                    <center>Debating Portal (Mhacks VI)</center>
+                </div>
+            </div>
+        </div>
+
+        <div class="col s12 m4 l3">
+            <div class="card-panel grey darken-4">
+                <div class="white-text">
+                    <a href="./projects/ProjectInfinity_uiucHackathon.html">
+                        <img style="border:5px groove #D3AC85;" src="./projects/VidPic/icon_ProjectInfinity.png" height="100%" width="100%">
+                    </a>
+                    <center>Project Infinity (HackIllinois 2016)</center>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+
+    <div id="footer"></div>
 
 </body>
 </html>
