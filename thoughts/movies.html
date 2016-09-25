@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
+<html class="no-js" lang="en" >
+
+<head>
+    <meta charset="utf-8">
+    <title>Thoughts</title>
+
+    <!--Import Google Icon Font-->
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="../materialize/css/materialize.min.css"  media="screen,projection"/>
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="../materialize/js/materialize.min.js"></script>
+    <script>
+    $(function(){
+        $("#navbar").load("navbar.html");
+        $("#footer").load("footer.html");
+    });
+    </script>
+</head>
+
+<body style="background-image:url(../projects/VidPic/Background.png)">
+
+    <div id="navbar"></div>
+
+    <div class="row">
+        <div class="col s12">
+
+            <h2  style = "text-align:center; border-bottom:#000000 solid thin; ">
+                படங்கள்
+            </h2>
+
+            <ul class="collapsible popout" data-collapsible="accordion">
+                <li>
+                    <div class="collapsible-header"><i class="material-icons">done_all</i>Movies watched</div>
+                    <div class="collapsible-body">
+                        <div class="row">
+                            <ul class="collapsible" id="watchedList" data-collapsible="accordion">
+
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="collapsible-header"><i class="material-icons">video_library</i>Movies to watch</div>
+                    <div class="collapsible-body">
+                        <div class="row">
+                            <ul class="collapsible" id="toWatchList" data-collapsible="accordion">
+
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <script>
+    $.get('myReviews.txt', function(data)
+    {
+        var jsonData = JSON.parse(data);
+
+        var numberOfReviews = jsonData.reviews.length;
+        for(var i = 0; i < numberOfReviews; i += 1)
+        {
+            var appendString = ''
+            appendString += '<li>'
+            appendString += '    <div class="collapsible-header">'
+            appendString +=          jsonData.reviews[i].Movie + ' (' + jsonData.reviews[i].Date + ')'
+            appendString += '    </div>'
+            appendString += '    <div class="collapsible-body">'
+            appendString += '        <div class="row">'
+
+            appendString += '            <div class="col s12 m6 l3">'
+            appendString += '                <br><img src="' + jsonData.reviews[i].Poster + '" height="450px" width="300px" >'
+            appendString += '            </div>'
+            appendString += '            <div class="col s12 m6 l9">'
+            appendString += '                <center><h4><u>' + jsonData.reviews[i].Movie + '</u></h4>'
+            appendString += '                (' + jsonData.reviews[i].Date + ')<br>'
+            appendString += '                Director: ' + jsonData.reviews[i].Director + '<br>'
+            appendString += '                Script: ' + jsonData.reviews[i].Script + '<br>'
+            appendString += '                Music: ' + jsonData.reviews[i].Music + '<br>'
+            appendString += '                Cast: ' + jsonData.reviews[i].Cast + '<br>'
+            appendString += '                Stars: ' + jsonData.reviews[i].Stars + '<br>'
+            appendString += '                Plot: ' + jsonData.reviews[i].Brief + '</center>'
+            appendString += '            </div>'
+
+            appendString += '        </div>'
+            appendString += '    </div>'
+
+            appendString += '</li>'
+            $("#watchedList").append(appendString);
+        }
+
+        var numberToWatch = jsonData.toWatch.length;
+        for(var i = 0; i < numberToWatch; i += 1)
+        {
+            var appendString = ''
+            appendString += '<li>'
+            appendString += '    <div class="collapsible-header">'
+            appendString +=          jsonData.toWatch[i].Movie + ' (' + jsonData.toWatch[i].Date + ')'
+            appendString += '    </div>'
+            appendString += '    <div class="collapsible-body">'
+            appendString += '        <div class="row">'
+
+            appendString += '            <div class="col s12 m6 l3">'
+            appendString += '                <br><img src="' + jsonData.toWatch[i].Poster + '" height="450px" width="300px" >'
+            appendString += '            </div>'
+            appendString += '            <div class="col s12 m6 l9">'
+            appendString += '                <center><h4><u>' + jsonData.toWatch[i].Movie + '</u></h4>'
+            appendString += '                (' + jsonData.toWatch[i].Date + ')<br>'
+            //appendString += '                Director: ' + jsonData.reviews[i].Director + '<br>'
+            //appendString += '                Script: ' + jsonData.reviews[i].Script + '<br>'
+            //appendString += '                Music: ' + jsonData.reviews[i].Music + '<br>'
+            //appendString += '                Cast: ' + jsonData.reviews[i].Cast + '<br>'
+            appendString += '            </div>'
+
+            appendString += '        </div>'
+            appendString += '    </div>'
+
+            appendString += '</li>'
+            $("#toWatchList").append(appendString);
+        }
+
+    }, 'text');
+
+    </script>
+
+</body>
+</html>
