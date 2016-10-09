@@ -1,0 +1,133 @@
+<h1 id="horizontal-vs-vertical-scaling">Horizontal vs Vertical scaling</h1>
+<ul>
+<li>Vertical: enhance a specific node - increase node's computer power (eg. increase memory)</li>
+<li>Horizontal: increase number of servers - more units that process
+<em>Vertical generally easier, but limited</em></li>
+</ul>
+<h1 id="load-balancing">Load Balancing</h1>
+<ul>
+<li>helps system distribute load evenly so that one server does not crash and take all down</li>
+<li>done by building a network of cloned servers that have same code and access to DB</li>
+</ul>
+<h1 id="database-denormalization-and-nosql">Database denormalization and noSQL</h1>
+<ul>
+<li>joins can get costly in a relational db - very slow as syste grows bigger</li>
+<li>denormalization: using tables that are already joint<ul>
+<li>(eg. sqlTable for task and project: instead of joining, create joint table - space costly but speed efficient)</li>
+</ul>
+</li>
+<li>noSQL does not support joins but scales better<ul>
+<li>It scales better since it does not provide all functionality that sql provides</li>
+<li>eg. noSQL cannot lock tables for atomic operations, cannot enforce reference integrity, transactions, etc.</li>
+<li>Lower functionalityin noSQL allows for simpler data that can be easily partitioned</li>
+</ul>
+</li>
+</ul>
+<h1 id="database-partitioning-sharding-">Database partitioning (Sharding)</h1>
+<ul>
+<li>split data onto different machines but know which machine has what data</li>
+<li>smaller DB has faster return time</li>
+<li>Typically uses a distributed hash table (DHT) (optimized hash table).<ul>
+<li>special key technique that allows for continuous joining, leaving and falling)</li>
+</ul>
+</li>
+</ul>
+<h2 id="vertical-partitioning-row-splitting-">Vertical Partitioning (row splitting)</h2>
+<ul>
+<li>Partition based on features(columns)<ul>
+<li>If you build a social network, have one partition for profile tables, message tables, etc.</li>
+<li>problem: if table gets very large, need to repartition with different partitioning scheme</li>
+</ul>
+</li>
+<li>Frequently used columns sit on a different DBs from infrequently used columns.<ul>
+<li>splitting by columns</li>
+</ul>
+</li>
+</ul>
+<h2 id="key-based-hash-based-partitions">Key-based (Hash-based) partitions</h2>
+<ul>
+<li>take a key in the table</li>
+<li>take number of servers, say <em>n</em></li>
+<li>hash the key value to get data from specific server</li>
+<li>Problem: increase in server =&gt; redistribution of data (costy)</li>
+</ul>
+<h2 id="directory-based-partitioning">Directory based partitioning</h2>
+<ul>
+<li>A lookup table keeps track of which data is stored in which shard is maintained in the cluster</li>
+<li>makes it easy to find additional servers</li>
+<li>Problem 1: lookup table is single point of failure</li>
+<li>Problem 2: constant access of table hits performance</li>
+</ul>
+<h1 id="cache">Cache</h1>
+<ul>
+<li>in-memory caches provide very rapid results</li>
+<li>simple key value pairing that sits between application layer and data store</li>
+<li>can cache:<ul>
+<li>can cache query to result</li>
+<li>can cache objects that might be required<ul>
+<li>eg. Cached web pages, Cached links, etc.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="processing-operations-asynchronously-and-queueing">Processing operations asynchronously and queueing</h1>
+<ul>
+<li>Some processes can run really slow, these must be done async (don't want user to wait)</li>
+<li>Async essentially means that process happens later/in background and not on main thread</li>
+<li>Eg. Dealing with Stale cache data<ul>
+<li>say you cache comments that are to be displayed on a page</li>
+<li>someone else has already commented and so your cache is stale</li>
+<li>you could re-query your cache and then display data, but this is bad UX</li>
+<li>instead, show current data and async re-query cache</li>
+<li>when data is back, can update</li>
+</ul>
+</li>
+</ul>
+<h1 id="read-heavy-vs-write-heavy">Read heavy vs Write heavy</h1>
+<ul>
+<li>write heavy: queue up writes<ul>
+<li>write-back caches can be used instead of write-through logic</li>
+</ul>
+</li>
+<li>read heavy: cache reads</li>
+</ul>
+<h1 id="networking">Networking</h1>
+<h2 id="bandwidth">Bandwidth</h2>
+<ul>
+<li>Max data transferred per unit time</li>
+<li>bits/second</li>
+</ul>
+<h2 id="throughput">Throughput</h2>
+<ul>
+<li>Actual data transferred per unit time</li>
+<li>bits/second</li>
+</ul>
+<h2 id="latency">Latency</h2>
+<ul>
+<li>Time taken for data to get from sender to receiver</li>
+</ul>
+<h2 id="example">Example</h2>
+<ul>
+<li>Say got converoy belt from A to B</li>
+<li>fatter belt =&gt; more bandwith &amp; throughput</li>
+<li>shorter distance =&gt; lesser latency (good)</li>
+<li>faster belt =&gt; better for all</li>
+</ul>
+<h1 id="mapreduce">MapReduce</h1>
+<ul>
+<li>Used to process large amounts of data</li>
+<li>two parts/functions to define/write, Map and Reduce</li>
+<li>Map: takes in data and creates <key value=""> pair</key></li>
+<li>Reduce: takes Map's output and creates a new <key value=""> pair<ul>
+<li>Result may be fed back into the reduce function for more processing</li>
+</ul>
+</key></li>
+<li>Great for <strong>parallel</strong> processing of large amounts of data</li>
+</ul>
+<h1 id="other-considerations">Other considerations</h1>
+<ul>
+<li>Machine failure - dealing with machines that may fail</li>
+<li>Reliability - Probability that design will operate/last/work for certain time 't'</li>
+<li>Availability - percentage of times that the system is operational/usable</li>
+</ul>

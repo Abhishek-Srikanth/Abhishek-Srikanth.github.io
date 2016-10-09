@@ -33,6 +33,17 @@
             "Date":"June 12, 2015",
             "Brief":"Seenu (Santhanam) is a happy go lucky guy; everything goes well in his life until an astrologer predicts that he should get married within three months. By the time Seenu's parents scout a girl for him, he falls in love with Maha(Ashna Zaveri) but she keeps on ignoring him. At one point of time, Seenu says yes to an arranged marriage with Akila (Akila Kishore) due to the family circumstances and pressure mounted by his foolish uncle (Thambi Ramaiah). Later, Seenu understands that Maha actually played a prank and she is indeed in love with him. When Maha finds about his engagement, she threatens him and tells him that he is going to marry her on the day of his wedding. In the end, Maha tricks him into becoming her witness instead of her groom and Seenu couldn't marry Akhila as her parents get her married off to someone else since Seenu ran away. Thus, he is forced to marry his uncle's daughter (Vidyullekha).",
             "Stars":"6.5"
+        },
+        {
+            "Movie":"നാടോടിക്കാറ്റ് ",
+            "Poster":"http://sainavideo.com/wp-content/uploads/2014/04/cd.jpg",
+            "Director":"Sathyan Anthikad",
+            "Script":"Sreenivasan, Yusufali Kechary",
+            "Music":"Shyam",
+            "Cast":"Mohanlal, Sreenivasan, Shobana",
+            "Date":"May 6, 1987",
+            "Brief":"Two men working as peons at a government office lose their jobs and end up with a cow to feed and a bank loan to repay. As a last resort, they decide to go to Dubai for work, but land in an unknown location (Chennai) where they are mistaken for smugglers. The dealer who mistakes them for the CBI constantly tries to dodge them while they continue to deal with a politician trying to vacate them from their homes. They unkowningly catch the dealer and punish the politican and become police men. ",
+            "Stars":"7.75"
         }
     ],
     "toWatch":
