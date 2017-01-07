@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
+<html class="no-js" lang="en" >
+
+<head>
+    <meta charset="utf-8">
+
+    <!--Import Google Icon Font-->
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="../materialize/css/materialize.min.css"  media="screen,projection"/>
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="../materialize/js/materialize.min.js"></script>
+    <script>
+    $(function(){
+        $("#navbar").load("navbar.html");
+        $("#footer").load("footer.html");
+    });
+    </script>
+</head>
+
+<body style="background-image:url(./VidPic/Background.png)">
+
+<div id="navbar"></div>
+
+<div class="container">
+    <h3 align="center" style="text-decoration:underline">MIPS 32-bit Processor Design</h3>
+    <div class="row">
+        <div class="col s12">
+            <div class="card light-blue darken-1">
+                <div class="card-content white-text">
+                <span class="card-title">Description:</span>
+                    <p>
+                        Designed and implemented a 32 bit dual-core cached pipeline processor on an FPGA.
+                        Learnt and implemented a Pipelined design along with branch prediction, 
+                        set associative caching and cache-coherence using the MSI protocol. 
+                    </p>
+                </div>
+                <!--div class="card-action">
+                    <a href="#">This is a link</a>
+                    <a href="#">This is a link</a>
+                </div-->
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12">
+            <div class="card light-green darken-1">
+                <div class="card-content white-text">
+                <span class="card-title">My brief intro to computer architecture</span>
+                    <p>
+                        I wrote a brief quora answer that introduces computer architecture by 
+                        starting bottom up on how an IF condition is implemented in hardware and
+                        how that hardware has evolved into the computers we have today.
+                    </p>
+                </div>
+                <div class="card-action">
+                    <a href="https://www.quora.com/How-can-you-describe-a-programming-function-for-example-an-if-statement-at-the-hardware-level/answer/Abhishek-Srikanth">
+                        QUORA
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+  <div class="slider">
+    <ul class="slides">
+      <li>
+        <img src="VidPic/ECE437/singleCycle.png"> <!-- random image -->
+        <div class="caption black-text center-align">
+          <h3>Single Cycle</h3>
+          <h5 class="light grey-text text-darken-3">Here's our small slogan.</h5>
+        </div>
+      </li>
+      <li>
+        <img src="VidPic/ECE437/pipeline.png"> <!-- random image -->
+        <div class="caption black-text left-align">
+          <h3>Pipeline</h3>
+          <h5 class="light grey-text text-darken-3">Here's our small slogan.</h5>
+        </div>
+      </li>
+      <li>
+        <img src="VidPic/ECE437/dcache.png"> <!-- random image -->
+        <div class="caption black-text right-align">
+          <h3>data cache</h3>
+          <h5 class="light grey-text text-darken-3">Here's our small slogan.</h5>
+        </div>
+      </li>
+      <li>
+        <img src="VidPic/ECE437/dCache_stateDiagram.png"> <!-- random image -->
+        <div class="caption black-text right-align">
+          <h3>data cache</h3>
+          <h5 class="light grey-text text-darken-3">Here's our small slogan.</h5>
+        </div>
+      </li>
+      <li>
+        <img src="VidPic/ECE437/coherenceController.png"> <!-- random image -->
+        <div class="caption black-text center-align">
+          <h3>coherence controller</h3>
+          <h5 class="light grey-text text-darken-3">Here's our small slogan.</h5>
+        </div>
+      </li>
+    </ul>
+  </div>
+     
+</div>
+
+
+<div id="footer"></div>
+
+
+<script>
+    $(document).ready(function(){
+      $('.slider').slider({full_width: true});
+    });
+</script>
+
+</body>
+</html>
