@@ -70,7 +70,11 @@
     </div>
 
     <div class="row center">
-        <h2>Setting up</h2>
+        <h2>Set up</h2>
+        <img src="./res/setup/setup_0.jpg" height="500px" id="setupImage">
+        <br>
+        <a class="light-blue waves-effect waves-light btn" onclick="prevSetupStep()">prev</a>
+        <a class="light-blue waves-effect waves-light btn" onclick="nextSetupStep()">next</a>
     </div>
 
     <div class="row center">
@@ -137,5 +141,27 @@ $( document ).ready(function()
   $('.scrollspy').scrollSpy();
 })
 </script>
+
+<script>
+var currentSetupImage = 0;
+var setupImages = [     "./res/setup/setup_0.jpg", "./res/setup/setup_1.jpg", "./res/setup/setup_2.jpg", 
+                        "./res/setup/setup_3.jpg", "./res/setup/setup_4.jpg", "./res/setup/setup_5.jpg", 
+                        "./res/setup/setup_6.jpg", "./res/setup/setup_7.jpg", "./res/setup/setup_8.jpg", 
+                        "./res/setup/setup_9.jpg" ];
+function prevSetupStep()
+{
+    if(currentSetupImage == 0) return;
+    currentSetupImage -= 1;
+    document.getElementById("setupImage").src = setupImages[currentSetupImage];
+}
+
+function nextSetupStep()
+{
+    if(currentSetupImage == setupImages.length-1) return;
+    currentSetupImage += 1;
+    document.getElementById("setupImage").src = setupImages[currentSetupImage];
+}
+</script>
+
 </body>
 </html>
