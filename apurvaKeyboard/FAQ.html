@@ -10,7 +10,7 @@
     <title id="title"> Apurva Keyboard </title>
 </head>
 
-<body class = "red lighten-3" >
+<body class = "grey lighten-5" >
 <!--Import jQuery before materialize.js-->
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script type="text/javascript" src="https://www.parsecdn.com/js/parse-1.2.7.min.js"></script>
@@ -124,21 +124,24 @@
                 <span id="q_whatPermissions"> What permissions does Apurva Keyboard use, and why ? </span>
             </div>
             <div class="collapsible-body">
-                <p>
-                    Android permissions used are:
+                <div class="container">
+                    <h5>Android permissions used are:</h5>
+                    <ul class="collection">
+                        <li class="collection-item">VIBRATE (To vibrate the phone on keypress)</li>
+                        <li class="collection-item">INTERNET (To send trivial data such as language used and for how long)</li>
+                        <li class="collection-item">WAKE LOCK (To keep phone on when using internet)</li>
+                        <li class="collection-item">ACCESS NETWORK STATE (To save battery when using internet)</li>
+                    </ul>
                     <br>
-                        ->&ensp;VIBRATE (To vibrate the phone on keypress)
-
-                    <br><br>
                     Yup! That's it. Simple is better, no ?
-                </p>
-            </div>
+                </div>
+           </div>
         </li>
     </ul>
 
 </div>
 
-<footer class="page-footer">
+<footer class="page-footer light-blue">
     <div class="container">
         <div class="row center">
             <p class="grey-text text-lighten-4">
@@ -152,11 +155,11 @@
             Copyright © 2016 Abhishek Srikanth. All Rights Reserved.
             <!--a class="grey-text text-lighten-4 right" onclick="install" href="#!">Install</a-->
             <span class="right">
-                <a class="waves-effect waves-light btn text-lighten-4 grey-text red lighten-2" onclick="install()">
+                <a class="waves-effect waves-light btn text-lighten-4 grey-text red darken-2" onclick="install()">
                     Install
                 </a>
 
-                <a class="waves-effect waves-light btn text-lighten-4 grey-text red lighten-2" href="feedback.html">
+                <a class="waves-effect waves-light btn text-lighten-4 grey-text red darken-2" href="feedback.html">
                     FeedBack
                 </a>
             </span>
