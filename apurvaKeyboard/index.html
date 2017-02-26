@@ -10,10 +10,9 @@
     <title id="title"> Apurva Keyboard </title>
 </head>
 
-<body class="blue-grey lighten-5">
+<body class="yellow lighten-4">
 <!--Import jQuery before materialize.js-->
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-<script type="text/javascript" src="https://www.parsecdn.com/js/parse-1.2.7.min.js"></script>
 <script type="text/javascript" src="materialize/js/materialize.min.js"></script>
 <script type="text/javascript" src="common.js"></script>
 
@@ -37,14 +36,14 @@
                 <li><a style="cursor: pointer;" id="navbar_Demo" href = "demo.html">Demo</a></li>
                 <li><a style="cursor: pointer;" id="navbar_feedback" href = "feedback.html">Feedback</a></li>
                 <li><a style="cursor: pointer;" id="navbar_FAQ" href = "FAQ.html">F.A.Q.</a></li>
-                <li>
+                <!--li>
                     <a class="dropdown-button" href="#!" data-activates="Language">
                         <span id="link_language_drop"> Language </span>
                         <i class="material-icons right">
                             arrow_drop_down
                         </i>
                     </a>
-                </li>
+                </li--> <!-- TODO activate this to allow users to select display language -->
             </ul>
 
             <a href="#" data-activates="mobile-demo" class="button-collapse">
@@ -137,39 +136,22 @@
     
     <div class="divider"></div>
     
-    <div class="row center">
-        <div class="col s12 m12 l6">
-            <img src="./res/quick_switch.jpg" height=300px>
-        </div>
-        <div class="col s12 m12 l6">
-            <h2 id="txt_quick_change">quick switch design</h2>
-            <p>
-                With the quick-switch design, changing from one language to another
-                is effortless. You can now enjoy the pleasure of typing in upto 4
-                completely different languages at the same time.
-            </p>
-        </div>
-    </div>
-    
-    <div class="divider"></div>
-    
-    <div class="row center">
-        <div class="col s12 m12 hide-on-large-only">
-            <img src="./res/dedicated_english_keyboard.jpg" height=300px>
-        </div>
-        <div class="col s12 m12 l6">
-            <h2 id="txt_qwerty_keyboard">Dedicated qwerty Keyboard</h2>
-            <p>
-                No matter how awesome your language is, there comes a time when you
-                might need to type in English. To make sure you don't struggle with
-                this, we have recreated the ever familiar qwerty keyboard format.
-            </p>
-        </div>
-        <div class="col l6 hide-on-med-and-down">
-            <img src="./res/dedicated_english_keyboard.jpg" height=300px>
+    <div class="section">
+        <div class="row center">
+            <div class="col s12 m12 l6">
+                <img src="./res/quick_switch.jpg" height=300px>
+            </div>
+            <div class="col s12 m12 l6">
+                <h2 id="txt_quick_change">quick switch design</h2>
+                <p>
+                    With the quick-switch design, changing from one language to another
+                    is effortless. You can now enjoy the pleasure of typing in upto 4
+                    completely different languages at the same time.
+                </p>
+            </div>
         </div>
     </div>
-    
+
     <div class="divider"></div>
     
     <div class="row center">
@@ -200,11 +182,29 @@
             </p>
         </div>
     </div>
+     
+    <div class="divider"></div>
+    
+    <div class="section">
+        <div class="row center">
+            <div class="col s12 m12 l6">
+                <img src="./res/dedicated_english_keyboard.jpg" height=300px>
+            </div>
+            <div class="col s12 m12 l6">
+                <h2 id="txt_qwerty_keyboard">Dedicated qwerty Keyboard</h2>
+                <p>
+                    No matter how awesome your language is, there comes a time when you
+                    might need to type in English. To make sure you don't struggle with
+                    this, we have recreated the ever familiar qwerty keyboard format.
+                </p>
+            </div>
+        </div>
+    </div>
     
     <div class="divider"></div>
     
     <div class="row center">
-        <div class="carousel col s12 m12 l6">
+        <div class="carousel col s12 m12 hide-on-large-only">
             <a class="carousel-item" href="#one!"><img src="./res/customizability_red.jpg" height=200px></a>
             <a class="carousel-item" href="#two!"><img src="./res/customizability_white.jpg" height=200px></a>
             <a class="carousel-item" href="#three!"><img src="./res/customizability_yellow.jpg" height=200px></a>
@@ -222,7 +222,25 @@
                 preference menu.
             </p>
         </div>
+        <div class="carousel col s12 m12 l6 hide-on-med-and-down">
+            <a class="carousel-item" href="#one!"><img src="./res/customizability_red.jpg" height=200px></a>
+            <a class="carousel-item" href="#two!"><img src="./res/customizability_white.jpg" height=200px></a>
+            <a class="carousel-item" href="#three!"><img src="./res/customizability_yellow.jpg" height=200px></a>
+            <a class="carousel-item" href="#four!"><img src="./res/customizability_green.jpg" height=200px></a>
+            <a class="carousel-item" href="#five!"><img src="./res/customizability_blue.jpg" height=200px></a>
+            <a class="carousel-item" href="#six!"><img src="./res/customizability_purple.jpg" height=200px></a>
+        </div>
+     </div>
+
+    <div class="divider"></div>
+
+    <div class="row center">
+        <h2>Install it now!</h2>
+        <h5>Available for <strong>FREE</strong> on the Android play store!</h5>
+        <img src="res/PlayStoreLogo.png" height=300px onclick="install()" onmouseover="" style="cursor: pointer;"><br>
+        <a class="waves-effect waves-light btn" onclick="install()">Install</a>
     </div>
+
 
 </div>
 
