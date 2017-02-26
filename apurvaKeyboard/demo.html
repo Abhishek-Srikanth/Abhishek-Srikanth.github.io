@@ -10,7 +10,7 @@
     <title> Apurva Keyboard </title>
 </head>
 
-<body class="yellow lighten-3">
+<body class="yellow lighten-4">
 <!--Import jQuery before materialize.js-->
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script type="text/javascript" src="https://www.parsecdn.com/js/parse-1.2.7.min.js"></script>
@@ -77,24 +77,32 @@
         <a class="light-blue waves-effect waves-light btn" onclick="nextSetupStep()">next</a>
     </div>
 
+    <div class="divider"></div>
+
+    <div class="row center">
+        <h2>Settings Menu</h2>
+    </div>
+
+    <div class="divider"></div>
+
     <div class="row center">
         <h2>Basic typing</h2>
     </div>
 
-    <div class="row center">
+   <div class="divider"></div>
+
+   <div class="row center">
         <h2>Advanced typing</h2>
     </div>
 
-    <div class="row center">
+   <div class="divider"></div>
+
+   <div class="row center">
         <h2>Changing modes</h2>
     </div>
 
     <div class="row center">
         <h2>English Keyboard</h2>
-    </div>
-
-    <div class="row center">
-        <h2>Settings Menu</h2>
     </div>
 
     <div class="row center">
@@ -146,8 +154,7 @@ $( document ).ready(function()
 var currentSetupImage = 0;
 var setupImages = [     "./res/setup/setup_0.jpg", "./res/setup/setup_1.jpg", "./res/setup/setup_2.jpg", 
                         "./res/setup/setup_3.jpg", "./res/setup/setup_4.jpg", "./res/setup/setup_5.jpg", 
-                        "./res/setup/setup_6.jpg", "./res/setup/setup_7.jpg", "./res/setup/setup_8.jpg", 
-                        "./res/setup/setup_9.jpg" ];
+                        "./res/setup/setup_6.jpg", "./res/setup/setup_7.jpg" ];
 function prevSetupStep()
 {
     if(currentSetupImage == 0) return;
