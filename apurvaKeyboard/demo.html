@@ -81,6 +81,14 @@
 
     <div class="row center">
         <h2>Settings Menu</h2>
+        <img src="./res/settings/settings_0.jpg" height="500px" id="settingsImage">
+        <br>
+        <span>There are a variety of settings that you can pick from!</span>
+        <br>
+        <span>They vary from language and color to the shades of plates on the keyboard.</span>
+        <br>
+        <a class="light-blue waves-effect waves-light btn" onclick="prevSettingsStep()">prev</a>
+        <a class="light-blue waves-effect waves-light btn" onclick="nextSettingsStep()">next</a>
     </div>
 
     <div class="divider"></div>
@@ -155,18 +163,36 @@ var currentSetupImage = 0;
 var setupImages = [     "./res/setup/setup_0.jpg", "./res/setup/setup_1.jpg", "./res/setup/setup_2.jpg", 
                         "./res/setup/setup_3.jpg", "./res/setup/setup_4.jpg", "./res/setup/setup_5.jpg", 
                         "./res/setup/setup_6.jpg", "./res/setup/setup_7.jpg" ];
+
+var currentSettingsImage = 0;
+var settingsImages = [  "./res/settings/settings_0.jpg", "./res/settings/settings_1.jpg", "./res/settings/settings_2.jpg", 
+                        "./res/settings/settings_3.jpg", "./res/settings/settings_4.jpg", "./res/settings/settings_5.jpg", 
+                        "./res/settings/settings_6.jpg" ];
 function prevSetupStep()
 {
     if(currentSetupImage == 0) return;
     currentSetupImage -= 1;
     document.getElementById("setupImage").src = setupImages[currentSetupImage];
 }
-
 function nextSetupStep()
 {
     if(currentSetupImage == setupImages.length-1) return;
     currentSetupImage += 1;
     document.getElementById("setupImage").src = setupImages[currentSetupImage];
+}
+
+function prevSettingsStep()
+{
+    if(currentSettingsImage == 0) return;
+    currentSettingsImage -= 1;
+    document.getElementById("settingsImage").src = settingsImages[currentSettingsImage];
+}
+
+function nextSettingsStep()
+{
+    if(currentSettingsImage == settingsImages.length-1) return;
+    currentSettingsImage += 1;
+    document.getElementById("settingsImage").src = settingsImages[currentSettingsImage];
 }
 </script>
 
