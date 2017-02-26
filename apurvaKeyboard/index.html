@@ -277,8 +277,15 @@ $( document ).ready(function()
   $(".button-collapse").sideNav();  // to initialize top nav bar
   $('.parallax').parallax();        // to initialize parallax
   $('.carousel').carousel();        // to initialize scrollable language imgs
+
+  if( $(window).height() > $(window).width() )
+  {
+      document.getElementById('wallpaperImg').src = "./res/wallpaper_mobile.png";
+  }
+
 })
 </script>
+
 <script>
 $(window).resize(function() 
 {
