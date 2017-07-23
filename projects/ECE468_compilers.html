@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
+<html class="no-js" lang="en" >
+
+<head>
+    <meta charset="utf-8">
+
+    <!--Import Google Icon Font-->
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="../materialize/css/materialize.min.css"  media="screen,projection"/>
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="../materialize/js/materialize.min.js"></script>
+    <script>
+    $(function(){
+        $("#navbar").load("navbar.html");
+        $("#footer").load("footer.html");
+    });
+    </script>
+</head>
+
+<body style="background-image:url(./VidPic/Background.png)">
+
+<div id="navbar"></div>
+
+<div class="container">
+    <h3 align="center" style="text-decoration:underline">Compilers</h3>
+    <div class="row">
+        <div class="col s12">
+            <div class="card light-blue darken-2">
+                <div class="card-content white-text">
+                <span class="card-title">Description:</span>
+                    <p>
+                        Designed and implemented a compiler in C++ for a 'Little language'.
+                        The language is static typed, supports conditional statements, loops
+                        and functions. Basic optimizations and Register allocations are done
+                        before generating final assembly output.
+                    </p>
+                </div>
+                <!--div class="card-action">
+                    <a href="#">This is a link</a>
+                    <a href="#">This is a link</a>
+                </div-->
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12">
+            <div class="card red darken-2">
+                <div class="card-content white-text">
+                <span class="card-title">An overview of compilers</span>
+                    <p>
+                        I wrote a brief quora answer that introduces compiler structure by
+                        giving a high level overview on how modern code is converted into
+                        assembly and run on various computers.
+                    </p>
+                </div>
+                <div class="card-action">
+                    <a href="https://www.quora.com/What-does-it-take-to-make-a-compiler-for-C%2B%2B/answer/Abhishek-Srikanth?srid=3qY8">
+                        QUORA
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div id="footer"></div>
+
+
+<script src="../Foundation/js/vendor/jquery.js"></script>
+<script src="../Foundation/js/foundation/foundation.js"></script>
+<script src="../Foundation/js/foundation/foundation.topbar.js"></script>
+<!-- Other JS plugins can be included here -->
+
+<script>
+    $(document).foundation();
+</script>
+
+</body>
+</html>
