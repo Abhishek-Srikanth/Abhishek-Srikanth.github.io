@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
+<html class="no-js" lang="en" >
+
+<head>
+    <meta charset="utf-8">
+
+    <!--Import Google Icon Font-->
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="../materialize/css/materialize.min.css"  media="screen,projection"/>
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="../materialize/js/materialize.min.js"></script>
+    <script>
+    $(function(){
+        $("#navbar").load("navbar.html");
+        $("#footer").load("footer.html");
+    });
+    </script>
+</head>
+
+<body style="background-image:url(./VidPic/Background.png)">
+
+<div id="navbar"></div>
+
+<div class="container">
+    <h3 align="center" style="text-decoration:underline">Senior Design</h3>
+    <div class = "row">
+        <div class= "flex-video widescreen">
+        <center>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/BSZK9usnXms" frameborder="0" allowfullscreen></iframe><br>
+        </center>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col s12">
+            <div class="card light-blue darken-2">
+                <div class="card-content white-text">
+                <span class="card-title">Description:</span>
+                    <p>
+                        A wearable glass display to show information on a heads up display.
+                        This project was designed to display time, weather and
+                        news notifications obtained from an Android phone via
+                        a Bluetooth Low Energy module. The device was controlled by
+                        an M0 Atmel SAMD microcontroller and the output was sent
+                        to a 1' color display via SPI. The entire product
+                        was hosted on a custom designed PCB.
+                    </p>
+                </div>
+                <!--div class="card-action">
+                    <a href="#">This is a link</a>
+                    <a href="#">This is a link</a>
+                </div-->
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div id="footer"></div>
+
+
+<script src="../Foundation/js/vendor/jquery.js"></script>
+<script src="../Foundation/js/foundation/foundation.js"></script>
+<script src="../Foundation/js/foundation/foundation.topbar.js"></script>
+<!-- Other JS plugins can be included here -->
+
+<script>
+    $(document).foundation();
+</script>
+
+</body>
+</html>
