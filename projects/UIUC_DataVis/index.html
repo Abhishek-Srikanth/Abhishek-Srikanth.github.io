@@ -26,22 +26,73 @@
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="https://d3js.org/topojson.v2.min.js"></script>
 <body>
+  <p id="top_narrative"></p>
   <svg id="world_map"></svg>
-  <p id="country_name"></p>
+  <button id="back_button" onclick="backClicked()" disabled>PREV</button>
+  <button id="front_button" onclick="frontClicked()">NEXT</button>
+  <text id="country_name"></text>
 </body>
+
+<script>  // Const Text strings
+  const text_slide_0 = `
+  Trade is an essential part of the global supply chain.
+  However, every country partakes in this differently on the global stage.
+  The following graph shows us what % of each country's GDP is attributed to trade.
+  This is also known as Trade Openness Ratio (see https://en.wikipedia.org/wiki/Trade-to-GDP_ratio).
+  From this graph we observe that nations like <TODO/Singapore> and <TODO> rely heavily on international trade while 
+  larger economies like <TODO/Japan> and <TODO/USA> do not.`;
+  const text_slide_1 = `
+  While current state of affairs look this way, it is interesting to see how national priorities have changed historically.
+  This helps paint a picture of how much countries have prioritized international trade over the years. `;
+  const text_slide_2 = `
+  That said, it is important to note that while countries may place greater or lower importance on trade,
+  they may do so differently. Some might prefer to simply import goods that their nation requires,
+  while others looks to exporting various products from within their borders.
+  In this graph, we see how each country leverages trade.
+  Feel free to click into each country to dive deeper into how trade breaks down.
+  Red countries are nations with a net import, and Blue countries are nations with a net export.`;
+</script>
+
+<script>  // Slides
+class Slide {
+  constructor(text) {
+    this.top_narrative = text;
+  }
+}
+var slides = []
+slides[0] = new Slide(text_slide_0);
+slides[1] = new Slide(text_slide_1);
+slides[2] = new Slide(text_slide_2);
+</script>
+
 <script>
-var width = window.innerWidth * 90 / 100;
-var height = window.innerHeight * 90 / 100;
+var width = window.innerWidth;
+var height = window.innerHeight;
 
 var active = d3.select(null);
 var projection = d3.geoMercator()
     .scale(150)  // TODO: What is the right scale for dynamic width/height
     .translate([width / 2, height / 2]);
 
+var top_narrative = d3.select("#top_narrative")
+    .attr("width", width)
+    .attr("height", height * 10 / 100);
 var svg = d3.select("#world_map")
     .attr("width", width)
-    .attr("height", height)
+    .attr("height", height * 80 / 100)
     .on("click", stopped, true);
+var back_button = d3.select("#back_button")
+    .attr("width", width * 10 / 100)
+    .attr("height", height * 10 / 100);
+var front_button = d3.select("#front_button")
+    .attr("width", width * 10 / 100)
+    .attr("height", height * 10 / 100);
+var country_name = d3.select("#country_name")
+    .attr("width", width * 80 / 100)
+    .attr("height", height * 10 / 100);
+
+  var currentSlide = 0;
+  populateSlide(slides[currentSlide]);
 
 svg.append("rect")
     .attr("class", "world_map_border")
@@ -53,18 +104,18 @@ var g = svg.append("g");
 var zoom = d3.zoom().on("zoom", zoomed);
 svg.call(zoom);
 
+var idToAlpha = [];
 var path = d3.geoPath().projection(projection);
-d3.csv("/iso_numeric_to_alpha.csv", function(data) {
-    for (var i = 0; i < data.length; i++) {
-        console.log(data[i].Name);
-        console.log(data[i].Age);
-    }
-});
-
-d3.json(
-  "https://gist.githubusercontent.com/mbostock/4090846/raw/d534aba169207548a8a3d670c9c2cc719ff05c47/world-50m.json",
-  function(error, world) {
+d3.queue()
+.defer(d3.csv, "https://abhishek-srikanth.github.io/projects/UIUC_DataVis/iso_numeric_to_alpha.csv")
+.defer(d3.json, "https://gist.githubusercontent.com/mbostock/4090846/raw/d534aba169207548a8a3d670c9c2cc719ff05c47/world-50m.json")
+.await(function(error, iso_numeric_to_alpha, world) {
     if (error) throw error;
+
+    for (var i = 0; i < iso_numeric_to_alpha.length; i++) {
+      idToAlpha[iso_numeric_to_alpha[i].ISO3166_1_numeric] =
+          iso_numeric_to_alpha[i].ISO3166_1_Alpha_3;
+    }
 
     g.selectAll("path")
         .data(topojson.feature(world, world.objects.countries).features)
@@ -72,9 +123,9 @@ d3.json(
         .attr("d", path)
         .attr("class", "feature")
         .on("click", clicked);
-
     g.append("path")
-        .datum(topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }))
+        .datum(topojson.mesh(
+          world, world.objects.countries, function(a, b) { return a !== b; }))
         .attr("class", "mesh")
         .attr("d", path);
 });
@@ -83,22 +134,21 @@ function clicked(d) {
   if (active.node() === this) return reset();
   active.classed("active", false);
   active = d3.select(this).classed("active", true);
-  console.log("active", active);
-  console.log("id", d.id);
-  console.log("name", d.properties.name);
+  d3.select("#country_name").text(idToAlpha[d.id]);
 
   var bounds = path.bounds(d),
       dx = bounds[1][0] - bounds[0][0],
       dy = bounds[1][1] - bounds[0][1],
       x = (bounds[0][0] + bounds[1][0]) / 2,
       y = (bounds[0][1] + bounds[1][1]) / 2,
+      // TODO: in below, width and height need to be the size of the svg
+      //       and not that of the entire window.
       scale = Math.max(1, Math.min(8, 0.9 / Math.max(dx / width, dy / height))),
       translate = [width / 2 - scale * x, height / 2 - scale * y];
 
   svg.transition()
       .duration(750)
-      // .call(zoom.translate(translate).scale(scale).event); // not in d3 v4
-      .call( zoom.transform, d3.zoomIdentity.translate(translate[0],translate[1]).scale(scale) ); // updated for d3 v4
+      .call(zoom.transform, d3.zoomIdentity.translate(translate[0],translate[1]).scale(scale));
 }
 
 function reset() {
@@ -107,20 +157,59 @@ function reset() {
 
   svg.transition()
       .duration(750)
-      // .call( zoom.transform, d3.zoomIdentity.translate(0, 0).scale(1) ); // not in d3 v4
-      .call( zoom.transform, d3.zoomIdentity ); // updated for d3 v4
+      .call(zoom.transform, d3.zoomIdentity);
 }
 
 function zoomed() {
   g.style("stroke-width", 1.5 / d3.event.transform.k + "px");
-  // g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")"); // not in d3 v4
-  g.attr("transform", d3.event.transform); // updated for d3 v4
+  g.attr("transform", d3.event.transform);
 }
 
 // If the drag behavior prevents the default click,
 // also stop propagation so we don’t click-to-zoom.
 function stopped() {
   if (d3.event.defaultPrevented) d3.event.stopPropagation();
+}
+
+function populateSlide(slide) {
+  top_narrative.text(slide.top_narrative);
+}
+
+function backClicked() {
+    console.log("Back Clicked");
+  if (currentSlide <= 0) {
+    return;
+  }
+  currentSlide -= 1;
+  reset();
+  populateSlide(slides[currentSlide]);
+
+  // Now we will update button disabled state
+  if (currentSlide == 0) {
+    back_button.attr("disabled", true);
+  }
+  if (currentSlide + 1 == slides.length - 1) {
+    front_button.attr("disabled", null);
+  }
+}
+
+function frontClicked() {
+  console.log("Front Clicked");
+  if (currentSlide >= slides.length) {
+    return;
+  }
+
+  currentSlide += 1;
+  reset();
+  populateSlide(slides[currentSlide]);
+
+  // Now we will update button disabled state
+  if (currentSlide == slides.length - 1) {
+    front_button.attr("disabled", true);
+  }
+  if (currentSlide > 0) {
+    back_button.attr("disabled", null);
+  }
 }
 </script>
 </html>
