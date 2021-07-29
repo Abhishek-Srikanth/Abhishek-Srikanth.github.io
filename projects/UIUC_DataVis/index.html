@@ -26,11 +26,15 @@
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="https://d3js.org/topojson.v2.min.js"></script>
 <body>
-  <p id="top_narrative"></p>
+  <h1 style="text-align:center">
+    A Visual Narrative on the status of trade across modern global economies
+  </h1>
   <svg id="world_map"></svg>
   <button id="back_button" onclick="backClicked()" disabled>PREV</button>
   <button id="front_button" onclick="frontClicked()">NEXT</button>
   <text id="country_name"></text>
+  <p id="bottom_narrative"></p>
+
 </body>
 
 <script>  // Const Text strings
@@ -39,7 +43,7 @@
   However, every country partakes in this differently on the global stage.
   The following graph shows us what % of each country's GDP is attributed to trade.
   This is also known as Trade Openness Ratio (see https://en.wikipedia.org/wiki/Trade-to-GDP_ratio).
-  From this graph we observe that nations like <TODO/Singapore> and <TODO> rely heavily on international trade while 
+  From this graph we observe that nations like <TODO/Singapore> and <TODO> rely heavily on international trade while
   larger economies like <TODO/Japan> and <TODO/USA> do not.`;
   const text_slide_1 = `
   While current state of affairs look this way, it is interesting to see how national priorities have changed historically.
@@ -56,9 +60,108 @@
 <script>  // Slides
 class Slide {
   constructor(text) {
-    this.top_narrative = text;
+    this.bottom_narrative = text;
+    this.data = []
+  }
+
+  attachDatum(isoAlphaId, datum) {
+    if (this.data[isoAlphaId] == null) {
+      this.data[isoAlphaId] = datum;
+    } else {
+      console.log("ERROR - attachDatum has existing value");
+    }
+  }
+
+  getDatum(isoAlphaId) {
+    return this.data[isoAlphaId];
+  }
+
+  updateDatum(isoAlphaId, newDatum) {
+    if (this.data[isoAlphaId] == null) {
+      console.log("WARNING - update called on data that was non-existant");
+    }
+    this.data[isoAlphaId] = newDatum;
+  }
+
+  getSizeOfData() {
+    return Object.entries(this.data).length;
+  }
+
+  computeDomain() {
+    var smallest = null,
+        largest = null;
+    this.sortedDataValues = [];
+
+    for (const [key, value] of Object.entries(this.data)) {
+      if (value == undefined) {continue;}
+
+      var v = parseFloat(value);
+
+      if (v == undefined || v == NaN || v == null) {
+        console.log("ERROR: parseFloat is acting funny", value, v, key);
+      }
+
+      this.sortedDataValues.push(v);
+
+      if (smallest == null) {
+        smallest = v;
+      } else if (v < smallest) {
+        smallest = v;
+      }
+
+      if (largest == null) {
+        largest = v;
+      } else if (v > largest) {
+        largest = v;
+      }
+    }
+    this.domain_min = smallest;
+    this.domain_max = largest;
+
+    this.sortedDataValues.sort(function(a,b) { return a - b;});
+  }
+
+  getPctIdx(pct, length) {
+    return parseInt(pct * length / 100);
+  }
+
+  printPct() {  // purely debug function
+    [0,1,5,10,25,35,50,65,75,90,95,99,100].forEach(num => {
+      var idx = parseInt(num * length / 100);
+      console.log(this.sortedDataValues[idx]);
+    });
+  }
+
+  getDomain() {
+    var length = parseInt(this.sortedDataValues.length) - 1;
+    var lowerPct = this.getPctIdx(0, length);
+    var midPct = this.getPctIdx(50, length);
+    var upperPct = this.getPctIdx(100, length);
+
+    var r = [
+      this.sortedDataValues[lowerPct],
+      this.sortedDataValues[midPct],
+      this.sortedDataValues[upperPct]];
+    return r;
+  }
+
+  getScales() {
+    if (this.scales == undefined) {
+      var domain = this.getDomain();
+      domain[1] = 0;
+      this.scales = d3.scaleLinear()
+                      .domain(domain)
+                      .range(['red', 'pink', 'blue']);
+      var matchingScales = [];
+      domain.forEach(r => matchingScales.push(this.scales(r)));
+      console.log(
+        "In getScales() --> domain = ", domain,
+        "\nCorresponding scales: ", matchingScales);
+    }
+    return this.scales;
   }
 }
+
 var slides = []
 slides[0] = new Slide(text_slide_0);
 slides[1] = new Slide(text_slide_1);
@@ -69,17 +172,20 @@ slides[2] = new Slide(text_slide_2);
 var width = window.innerWidth;
 var height = window.innerHeight;
 
+var graphWidth = width;
+var graphHeight = 80 * height / 100;
+
 var active = d3.select(null);
 var projection = d3.geoMercator()
     .scale(150)  // TODO: What is the right scale for dynamic width/height
     .translate([width / 2, height / 2]);
 
-var top_narrative = d3.select("#top_narrative")
+var bottom_narrative = d3.select("#bottom_narrative")
     .attr("width", width)
     .attr("height", height * 10 / 100);
 var svg = d3.select("#world_map")
-    .attr("width", width)
-    .attr("height", height * 80 / 100)
+    .attr("width", graphWidth)
+    .attr("height", graphHeight)
     .on("click", stopped, true);
 var back_button = d3.select("#back_button")
     .attr("width", width * 10 / 100)
@@ -91,13 +197,12 @@ var country_name = d3.select("#country_name")
     .attr("width", width * 80 / 100)
     .attr("height", height * 10 / 100);
 
-  var currentSlide = 0;
-  populateSlide(slides[currentSlide]);
+var currentSlide = 0;
 
 svg.append("rect")
     .attr("class", "world_map_border")
-    .attr("width", width)
-    .attr("height", height)
+    .attr("width", graphWidth)
+    .attr("height", graphHeight)
     .on("click", reset);
 var g = svg.append("g");
 
@@ -105,17 +210,67 @@ var zoom = d3.zoom().on("zoom", zoomed);
 svg.call(zoom);
 
 var idToAlpha = [];
+var WDIData = [];
 var path = d3.geoPath().projection(projection);
 d3.queue()
 .defer(d3.csv, "https://abhishek-srikanth.github.io/projects/UIUC_DataVis/iso_numeric_to_alpha.csv")
+.defer(d3.csv, "https://abhishek-srikanth.github.io/projects/UIUC_DataVis/WDI_Trade_Data_2021Jun22.csv")
 .defer(d3.json, "https://gist.githubusercontent.com/mbostock/4090846/raw/d534aba169207548a8a3d670c9c2cc719ff05c47/world-50m.json")
-.await(function(error, iso_numeric_to_alpha, world) {
+.await(function(error, iso_numeric_to_alpha, wdi_trade_data, world) {
     if (error) throw error;
 
     for (var i = 0; i < iso_numeric_to_alpha.length; i++) {
       idToAlpha[iso_numeric_to_alpha[i].ISO3166_1_numeric] =
           iso_numeric_to_alpha[i].ISO3166_1_Alpha_3;
     }
+
+    for (var i = 0; i < wdi_trade_data.length; i++) {
+      var wdi_trade_datum = wdi_trade_data[i];
+      var isoAlphaId = wdi_trade_datum["Country Code"];
+      var indicatorCode = wdi_trade_datum["Indicator Code"];
+      switch(indicatorCode) {
+        case "NE.TRD.GNFS.ZS":  // Trade (% of GDP)
+          var mostRecent = getValueFromMostRecentYear(wdi_trade_datum);
+          if (mostRecent == undefined) { continue; }
+          slides[0].attachDatum(isoAlphaId, mostRecent);
+        break;
+        case "NE.RSB.GNFS.ZS": // External balance on goods and services (% of GDP)
+          var oldest = getValueFromOldestYear(wdi_trade_datum);
+          var mostRecent = getValueFromMostRecentYear(wdi_trade_datum);
+          var difference = mostRecent - oldest;
+          if (mostRecent == undefined) { continue; }
+          slides[1].attachDatum(isoAlphaId, difference);
+        break;
+        case "NE.IMP.GNFS.ZS": // Imports of goods and services (% of GDP)
+          // (-1 * ..) used since imports are considered in the negative
+          var mostRecent = getValueFromMostRecentYear(wdi_trade_datum);
+          if (mostRecent == undefined) { continue; }
+          mostRecent *= -1;
+          var currentDatum = slides[2].getDatum(isoAlphaId);
+          if (currentDatum == null) {
+            slides[2].attachDatum(isoAlphaId, mostRecent);
+          } else {
+            slides[2].updateDatum(isoAlphaId, currentDatum + mostRecent);
+          }
+        break;
+        case "NE.EXP.GNFS.ZS": // Exports of goods and services (% of GDP)
+          var mostRecent = getValueFromMostRecentYear(wdi_trade_datum);
+          if (mostRecent == undefined) { continue; }
+          var currentDatum = slides[2].getDatum(isoAlphaId);
+          if (currentDatum == null) {
+            slides[2].attachDatum(isoAlphaId, mostRecent);
+          } else {
+            slides[2].updateDatum(isoAlphaId, currentDatum + mostRecent);
+          }
+        break;
+      }
+      var key = [isoAlphaId, indicatorCode];
+      WDIData[key] = wdi_trade_data[i];
+    }
+
+    slides.forEach(slide => {  // Log some data to console for debugging
+      slide.computeDomain();
+    });
 
     g.selectAll("path")
         .data(topojson.feature(world, world.objects.countries).features)
@@ -128,13 +283,17 @@ d3.queue()
           world, world.objects.countries, function(a, b) { return a !== b; }))
         .attr("class", "mesh")
         .attr("d", path);
+
+    // Now that we have our data, and the map is created, we can populate our slides.
+    populateSlide(slides[currentSlide]);
+
 });
 
 function clicked(d) {
   if (active.node() === this) return reset();
   active.classed("active", false);
   active = d3.select(this).classed("active", true);
-  d3.select("#country_name").text(idToAlpha[d.id]);
+  d3.select("#country_name").text(d.id + " --> " + idToAlpha[d.id]);
 
   var bounds = path.bounds(d),
       dx = bounds[1][0] - bounds[0][0],
@@ -143,8 +302,8 @@ function clicked(d) {
       y = (bounds[0][1] + bounds[1][1]) / 2,
       // TODO: in below, width and height need to be the size of the svg
       //       and not that of the entire window.
-      scale = Math.max(1, Math.min(8, 0.9 / Math.max(dx / width, dy / height))),
-      translate = [width / 2 - scale * x, height / 2 - scale * y];
+      scale = Math.max(1, Math.min(8, 0.9 / Math.max(dx / graphWidth, dy / graphHeight))),
+      translate = [graphWidth / 2 - scale * x, graphHeight / 2 - scale * y];
 
   svg.transition()
       .duration(750)
@@ -172,7 +331,35 @@ function stopped() {
 }
 
 function populateSlide(slide) {
-  top_narrative.text(slide.top_narrative);
+  bottom_narrative.text(slide.bottom_narrative);
+  console.log("populate slide called");
+
+  d3.selectAll(".feature").each(function(d) {
+    d3.select(this)
+      .style("fill", function(d) {
+        isoNumericId = d.id;
+        isoAlphaId = idToAlpha[isoNumericId];
+        var slide = slides[currentSlide];
+        var datum = slide.getDatum(isoAlphaId);
+        return slide.getScales()(datum);
+      });
+  });
+}
+
+function getValueFromOldestYear(datum) {
+  for (var i = 1960; i <= 2020; i++) {
+    if (datum[i.toString()] != "") {
+      return parseFloat(datum[i.toString()]);
+    }
+  }
+}
+
+function getValueFromMostRecentYear(datum) {
+  for (var i = 2020; i >= 1960; i--) {
+    if (datum[i.toString()] != "") {
+      return parseFloat(datum[i.toString()]);
+    }
+  }
 }
 
 function backClicked() {
@@ -211,5 +398,6 @@ function frontClicked() {
     back_button.attr("disabled", null);
   }
 }
+
 </script>
 </html>
