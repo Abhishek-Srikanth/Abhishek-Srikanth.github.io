@@ -37,7 +37,7 @@
   </div>
   <p id="main_narrative"></p>
   <svg id="world_map"></svg>
-  <text id="country_specs"></text>
+  <div style="text-align:center"><br><h3 id="country_specs"></h3></div>
 </body>
 
 <script>
@@ -60,6 +60,7 @@ var country_specs = d3.select("#country_specs");
 var active = d3.select(null);
 var currentSlide = 0;
 var idToAlpha = [];
+var alphaToName = [];
 
 svg_world_map.append("rect")
     .attr("class", "world_map_border")
@@ -84,8 +85,8 @@ d3.queue()
 .await(function(error, iso_numeric_to_alpha, wdi_trade_data, world) {
     if (error) throw error;
 
-    idToAlpha = populate_idToAlpha(iso_numeric_to_alpha);
-    populate_WDIData(wdi_trade_data);
+    populate_idToAlpha(iso_numeric_to_alpha, idToAlpha);
+    populate_WDIData(wdi_trade_data, alphaToName);
 
     slides.forEach(slide => {  // Log some data to console for debugging
       slide.computeDomain();
@@ -104,20 +105,32 @@ d3.queue()
         .attr("d", path);
 
     // Now that we have our data, and the map is created, we can populate our slides.
+    updateCountrySpecs(null);
     populateSlide(slides[currentSlide]);
 
 });
 
 function updateCountrySpecs(d) {
+  var descriptor = slides[currentSlide].country_spec_descriptor;
   if (d == undefined || d == null) {
-    country_specs.text("");
+    country_specs.text("Click on a country to look at \"" + descriptor + "\"");
     return;
   }
   var alpha = idToAlpha[d.id];
-  var text = slides[currentSlide].country_spec_descriptor + " for ";
-  text += alpha + "(" + d.id + ") is ";
-  text += slides[currentSlide].getDatum(alpha);
-  country_specs.text(text);
+  var countryName = alphaToName[alpha];
+  console.log("updateCountrySpecs for ", countryName, ", code: ", alpha, "/", d.id);
+  var datum = slides[currentSlide].getDatum(alpha);
+  var text = "";
+  if (countryName == undefined) {
+    text = "data unavailable";
+  } else if (datum == undefined) {
+    text = "data unavailable for " + countryName;
+  } else {
+    text = descriptor + "<br/>";
+    text += alphaToName[alpha] + " is ";
+    text += datum.toFixed(2) + "%";
+  }
+  country_specs.html(text);
 }
 
 function clicked(d) {

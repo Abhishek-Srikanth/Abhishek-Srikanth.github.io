@@ -110,4 +110,4 @@ slides[1] = new Slide(
     "Difference in Trade as % of GDP between most recent and oldest years");
 slides[2] = new Slide(
     text_slide_2,
-    "Difference between exports (%GDP) and imports (%GDP)");
+    "Difference between exports (%GDP) and imports (%GDP) of goods & services");
