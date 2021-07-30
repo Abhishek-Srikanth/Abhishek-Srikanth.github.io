@@ -18,10 +18,11 @@ Feel free to click into each country to dive deeper into how trade breaks down.
 Red countries are nations with a net import, and Blue countries are nations with a net export.`;
 
 class Slide {
-  constructor(text, descriptor) {
+  constructor(text, descriptor, middleDomains) {
     this.main_narrative = text;
     this.country_spec_descriptor = descriptor;
     this.data = []
+    this.middleDomains = middleDomains;
   }
 
   attachDatum(isoAlphaId, datum) {
@@ -79,7 +80,8 @@ class Slide {
 
     var r = [
       this.sortedDataValues[lowerPct],
-      this.sortedDataValues[midPct],
+      this.middleDomains[0],
+      this.middleDomains[1],
       this.sortedDataValues[upperPct]];
     return r;
   }
@@ -87,10 +89,9 @@ class Slide {
   getScales() {
     if (this.scales == undefined) {
       var domain = this.getDomain();
-      domain[1] = 0;
       this.scales = d3.scaleLinear()
                       .domain(domain)
-                      .range(['red', 'pink', 'blue']);
+                      .range(['red', 'pink', 'lightblue', 'blue']);
       var matchingScales = [];
       domain.forEach(r => matchingScales.push(this.scales(r)));
       console.log(
@@ -104,10 +105,13 @@ class Slide {
 var slides = []
 slides[0] = new Slide(
     text_slide_0,
-    "Total Trade (Import+Export) as % of national GDP");
+    "Total Trade (Import+Export) as % of national GDP",
+    [25,50]);
 slides[1] = new Slide(
     text_slide_1,
-    "Difference in Trade as % of GDP between most recent and oldest years");
+    "Difference in Trade as % of GDP between most recent and oldest years",
+    [0,1]);
 slides[2] = new Slide(
     text_slide_2,
-    "Difference between exports (%GDP) and imports (%GDP) of goods & services");
+    "Difference between exports (%GDP) and imports (%GDP) of goods & services",
+    [0,0]);
