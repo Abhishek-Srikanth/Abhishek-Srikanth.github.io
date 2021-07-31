@@ -1,15 +1,16 @@
 class Annotation {
-  constructor(svg, text_x, text_y) {
+  constructor(svg, note_x, note_y, fill_color) {
     this.g = svg.append("g");
-    this.line = this.g.append("line");
-    this.text = this.g.append("text");
-    this.x = text_x;
-    this.y = text_y;
+    this.lineObj = this.g.append("line");
+    this.textObj = this.g.append("text").style("fill", fill_color);
+
+    this.x = note_x;
+    this.y = note_y;
   }
 
-  drawAnnotation(source_xy, text) {
-    this.line
-      .style("stroke-width", 1)
+  drawAnnotation(source_xy, text, value) {
+    this.lineObj
+      .style("stroke-width", 0.5)
       .style("stroke", "black")
       .attr("x1", source_xy.x)
       .attr("y1", source_xy.y)
@@ -17,10 +18,10 @@ class Annotation {
       .attr("y2", this.y)
       .style("visibility", "visible");
 
-    this.text
+    this.textObj
       .attr("x", this.x)
       .attr("y", this.y)
-      .text(text);
+      .text(text + " (" + value.toFixed(2) + "%)");
   }
 
   zoomed() {

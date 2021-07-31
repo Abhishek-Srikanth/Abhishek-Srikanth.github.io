@@ -38,7 +38,7 @@
   </div>
   <p id="main_narrative"></p>
   <svg id="world_map"></svg>
-  <div style="text-align:center"><br><h3 id="country_specs"></h3></div>
+  <div style="text-align:center"><br><p id="country_specs"></p></div>
 </body>
 
 <script>
@@ -71,9 +71,9 @@ svg_world_map.append("rect")
 var g_world_map = svg_world_map.append("g");
 
 var max_annotation = new Annotation(
-  svg_world_map, graphWidth * 30 / 100, graphHeight * 80 / 100);
+  svg_world_map, graphWidth * 30 / 100, graphHeight * 80 / 100, "blue");
 var min_annotation = new Annotation(
-  svg_world_map, graphWidth * 70 / 100, graphHeight * 80 / 100);
+  svg_world_map, graphWidth * 70 / 100, graphHeight * 80 / 100, "red");
 
 var zoom = d3.zoom().on("zoom", zoomed);
 svg_world_map.call(zoom);
@@ -118,7 +118,7 @@ d3.queue()
 function updateCountrySpecs(d) {
   var descriptor = slides[currentSlide].country_spec_descriptor;
   if (d == undefined || d == null) {
-    country_specs.text("Click on a country to look at \"" + descriptor + "\"");
+    country_specs.html("<b>Click on a country</b> to look at <u>\"" + descriptor + "\"</u>");
     return;
   }
   var alpha = idToAlpha[d.id];
@@ -131,9 +131,9 @@ function updateCountrySpecs(d) {
   } else if (datum == undefined) {
     text = "data unavailable for " + countryName;
   } else {
-    text = descriptor + "<br/>";
-    text += alphaToName[alpha] + " is ";
-    text += datum.toFixed(2) + "%";
+    text = "<u>" + descriptor + "</u><br/>";
+    text += "<b>" + alphaToName[alpha] + "</b>" + " is ";
+    text += "<b>" + datum.toFixed(2) + "%" + "</b>";
   }
   country_specs.html(text);
 }
@@ -216,8 +216,8 @@ function populateSlide(slide) {
       });
   });
 
-  max_annotation.drawAnnotation(max.XY, max.datumCountry);
-  min_annotation.drawAnnotation(min.XY, min.datumCountry);
+  max_annotation.drawAnnotation(max.XY, max.datumCountry, max.datum);
+  min_annotation.drawAnnotation(min.XY, min.datumCountry, min.datum);
 
   console.log("min", min.datum, min.datumCountry, min.XY);
   console.log("max", max.datum, max.datumCountry, max.XY);

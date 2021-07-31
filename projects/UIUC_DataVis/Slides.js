@@ -110,7 +110,7 @@ slides[0] = new Slide(
     [25,50]);
 slides[1] = new Slide(
     text_slide_1,
-    "Difference in Trade as % of GDP between most recent and oldest years",
+    "Difference in Trade (Import+Export) as % of GDP between most recent and oldest years",
     [0,1]);
 slides[2] = new Slide(
     text_slide_2,
