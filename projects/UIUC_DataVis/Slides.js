@@ -23,6 +23,7 @@ class Slide {
     this.country_spec_descriptor = descriptor;
     this.data = []
     this.middleDomains = middleDomains;
+    this.range = ['red', 'pink', 'lightblue', 'blue'];
   }
 
   attachDatum(isoAlphaId, datum) {
@@ -91,7 +92,7 @@ class Slide {
       var domain = this.getDomain();
       this.scales = d3.scaleLinear()
                       .domain(domain)
-                      .range(['red', 'pink', 'lightblue', 'blue']);
+                      .range(this.range);
       var matchingScales = [];
       domain.forEach(r => matchingScales.push(this.scales(r)));
       console.log(

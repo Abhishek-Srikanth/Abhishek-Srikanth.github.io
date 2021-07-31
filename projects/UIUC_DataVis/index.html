@@ -26,6 +26,7 @@
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="https://d3js.org/topojson.v2.min.js"></script>
 <script type="text/javascript" src="Slides.js"></script>
+<script type="text/javascript" src="Annotations.js"></script>
 <script type="text/javascript" src="csvProcessors.js"></script>
 <body>
   <h1 style="text-align:center">
@@ -69,9 +70,13 @@ svg_world_map.append("rect")
     .on("click", reset);
 var g_world_map = svg_world_map.append("g");
 
+var max_annotation = new Annotation(
+  svg_world_map, graphWidth * 30 / 100, graphHeight * 80 / 100);
+var min_annotation = new Annotation(
+  svg_world_map, graphWidth * 70 / 100, graphHeight * 80 / 100);
+
 var zoom = d3.zoom().on("zoom", zoomed);
 svg_world_map.call(zoom);
-
 
 
 var projection = d3.geoMercator()
@@ -88,7 +93,7 @@ d3.queue()
     populate_idToAlpha(iso_numeric_to_alpha, idToAlpha);
     populate_WDIData(wdi_trade_data, alphaToName);
 
-    slides.forEach(slide => {  // Log some data to console for debugging
+    slides.forEach(slide => {
       slide.computeDomain();
     });
 
@@ -133,22 +138,25 @@ function updateCountrySpecs(d) {
   country_specs.html(text);
 }
 
+function getXYFromBounds(bounds) {
+  var x = (bounds[0][0] + bounds[1][0]) / 2;
+  var y = (bounds[0][1] + bounds[1][1]) / 2;
+  return {x, y};
+}
+
 function clicked(d) {
   if (active.node() === this) return reset();
   active.classed("active", false);
   active = d3.select(this).classed("active", true);
   updateCountrySpecs(d);
 
-  var bounds = path.bounds(d),
-      dx = bounds[1][0] - bounds[0][0],
+  var bounds = path.bounds(d);
+  var dx = bounds[1][0] - bounds[0][0],
       dy = bounds[1][1] - bounds[0][1],
       x = (bounds[0][0] + bounds[1][0]) / 2,
       y = (bounds[0][1] + bounds[1][1]) / 2,
-      // TODO: in below, width and height need to be the size of the svg_world_map
-      //       and not that of the entire window.
       scale = Math.max(1, Math.min(8, 0.9 / Math.max(dx / graphWidth, dy / graphHeight))),
       translate = [graphWidth / 2 - scale * x, graphHeight / 2 - scale * y];
-
   svg_world_map.transition()
       .duration(750)
       .call(zoom.transform, d3.zoomIdentity.translate(translate[0],translate[1]).scale(scale));
@@ -158,6 +166,7 @@ function reset() {
   active.classed("active", false);
   active = d3.select(null);
   updateCountrySpecs(null);
+  populateSlide(slides[currentSlide]);
 
   svg_world_map.transition()
       .duration(750)
@@ -167,6 +176,8 @@ function reset() {
 function zoomed() {
   g_world_map.style("stroke-width", 1.5 / d3.event.transform.k + "px");
   g_world_map.attr("transform", d3.event.transform);
+  max_annotation.zoomed();
+  min_annotation.zoomed();
 }
 
 // If the drag behavior prevents the default click,
@@ -178,17 +189,38 @@ function stopped() {
 function populateSlide(slide) {
   main_narrative.text(slide.main_narrative);
   console.log("populate slide called");
+  var max = {};
+  var min = {};
 
+  // Change colour of every country in the graph
   d3.selectAll(".feature").each(function(d) {
+    var isoNumericId = d.id;
+    var isoAlphaId = idToAlpha[isoNumericId];
+    var slide = slides[currentSlide];
+    var datum = slide.getDatum(isoAlphaId);
+
+    if (max.datum == null || datum > max.datum) {
+      max.datum = datum;
+      max.datumCountry = alphaToName[isoAlphaId];
+      max.XY = getXYFromBounds(path.bounds(d));
+    }
+    if (min.datum == null || datum < min.datum) {
+      min.datum = datum;
+      min.datumCountry = alphaToName[isoAlphaId];
+      min.XY = getXYFromBounds(path.bounds(d));
+    }
+
     d3.select(this)
       .style("fill", function(d) {
-        isoNumericId = d.id;
-        isoAlphaId = idToAlpha[isoNumericId];
-        var slide = slides[currentSlide];
-        var datum = slide.getDatum(isoAlphaId);
         return slide.getScales()(datum);
       });
   });
+
+  max_annotation.drawAnnotation(max.XY, max.datumCountry);
+  min_annotation.drawAnnotation(min.XY, min.datumCountry);
+
+  console.log("min", min.datum, min.datumCountry, min.XY);
+  console.log("max", max.datum, max.datumCountry, max.XY);
 }
 
 function backClicked() {
@@ -198,7 +230,6 @@ function backClicked() {
   }
   currentSlide -= 1;
   reset();
-  populateSlide(slides[currentSlide]);
 
   // Now we will update button disabled state
   if (currentSlide == 0) {
@@ -217,7 +248,6 @@ function frontClicked() {
 
   currentSlide += 1;
   reset();
-  populateSlide(slides[currentSlide]);
 
   // Now we will update button disabled state
   if (currentSlide == slides.length - 1) {
