@@ -8,7 +8,8 @@ class Annotation {
     this.y = note_y;
   }
 
-  drawAnnotation(source_xy, text, value) {
+  drawAnnotation(source_xy, name, value) {
+    console.log("annotation for: ", value, name, source_xy);
     this.lineObj
       .style("stroke-width", 0.5)
       .style("stroke", "black")
@@ -21,7 +22,7 @@ class Annotation {
     this.textObj
       .attr("x", this.x)
       .attr("y", this.y)
-      .text(text + " (" + value.toFixed(2) + "%)");
+      .text(name + " (" + value.toFixed(2) + "%)");
   }
 
   zoomed() {

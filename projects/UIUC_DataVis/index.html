@@ -62,6 +62,7 @@ var active = d3.select(null);
 var currentSlide = 0;
 var idToAlpha = [];
 var alphaToName = [];
+var selectedCountry = null;
 
 svg_world_map.append("rect")
     .attr("class", "world_map_border")
@@ -115,15 +116,15 @@ d3.queue()
 
 });
 
-function updateCountrySpecs(d) {
+function updateCountrySpecs(id) {
   var descriptor = slides[currentSlide].country_spec_descriptor;
-  if (d == undefined || d == null) {
+  if (id == undefined || id == null) {
     country_specs.html("<b>Click on a country</b> to look at <u>\"" + descriptor + "\"</u>");
     return;
   }
-  var alpha = idToAlpha[d.id];
+  var alpha = idToAlpha[id];
   var countryName = alphaToName[alpha];
-  console.log("updateCountrySpecs for ", countryName, ", code: ", alpha, "/", d.id);
+  console.log("updateCountrySpecs for ", countryName, ", code: ", alpha, "/", id);
   var datum = slides[currentSlide].getDatum(alpha);
   var text = "";
   if (countryName == undefined) {
@@ -144,13 +145,10 @@ function getXYFromBounds(bounds) {
   return {x, y};
 }
 
-function clicked(d) {
-  if (active.node() === this) return reset();
-  active.classed("active", false);
-  active = d3.select(this).classed("active", true);
-  updateCountrySpecs(d);
-
-  var bounds = path.bounds(d);
+function transitionTo(bounds, duration) {
+  if (bounds == null) {
+    return;
+  }
   var dx = bounds[1][0] - bounds[0][0],
       dy = bounds[1][1] - bounds[0][1],
       x = (bounds[0][0] + bounds[1][0]) / 2,
@@ -158,19 +156,31 @@ function clicked(d) {
       scale = Math.max(1, Math.min(8, 0.9 / Math.max(dx / graphWidth, dy / graphHeight))),
       translate = [graphWidth / 2 - scale * x, graphHeight / 2 - scale * y];
   svg_world_map.transition()
-      .duration(750)
+      .duration(duration)
       .call(zoom.transform, d3.zoomIdentity.translate(translate[0],translate[1]).scale(scale));
 }
 
-function reset() {
+function clicked(d) {
+  if (active.node() === this) return reset();
   active.classed("active", false);
-  active = d3.select(null);
-  updateCountrySpecs(null);
-  populateSlide(slides[currentSlide]);
+  active = d3.select(this).classed("active", true);
+  updateCountrySpecs(d.id);
+  selectedCountry = d.id;
+  console.log("clicked: ", selectedCountry);
 
-  svg_world_map.transition()
-      .duration(750)
-      .call(zoom.transform, d3.zoomIdentity);
+  var bounds = path.bounds(d);
+  transitionTo(bounds, 750);
+}
+
+function reset() {
+  if (active != null) {
+    active.classed("active", false);
+    active = d3.select(null);
+    svg_world_map.transition()
+        .duration(750)
+        .call(zoom.transform, d3.zoomIdentity);
+    updateCountrySpecs(null);
+  }
 }
 
 function zoomed() {
@@ -191,7 +201,7 @@ function populateSlide(slide) {
   console.log("populate slide called");
   var max = {};
   var min = {};
-
+  var boundsOfSelectedCountry = null;
   // Change colour of every country in the graph
   d3.selectAll(".feature").each(function(d) {
     var isoNumericId = d.id;
@@ -199,6 +209,9 @@ function populateSlide(slide) {
     var slide = slides[currentSlide];
     var datum = slide.getDatum(isoAlphaId);
 
+    if (selectedCountry == isoNumericId) {
+      boundsOfSelectedCountry = path.bounds(d);
+    }
     if (max.datum == null || datum > max.datum) {
       max.datum = datum;
       max.datumCountry = alphaToName[isoAlphaId];
@@ -218,9 +231,9 @@ function populateSlide(slide) {
 
   max_annotation.drawAnnotation(max.XY, max.datumCountry, max.datum);
   min_annotation.drawAnnotation(min.XY, min.datumCountry, min.datum);
-
-  console.log("min", min.datum, min.datumCountry, min.XY);
-  console.log("max", max.datum, max.datumCountry, max.XY);
+  
+  transitionTo(boundsOfSelectedCountry, 750);
+  updateCountrySpecs(selectedCountry);
 }
 
 function backClicked() {
@@ -229,7 +242,7 @@ function backClicked() {
     return;
   }
   currentSlide -= 1;
-  reset();
+  populateSlide(slides[currentSlide]);
 
   // Now we will update button disabled state
   if (currentSlide == 0) {
@@ -247,7 +260,7 @@ function frontClicked() {
   }
 
   currentSlide += 1;
-  reset();
+  populateSlide(slides[currentSlide]);
 
   // Now we will update button disabled state
   if (currentSlide == slides.length - 1) {
