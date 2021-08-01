@@ -72,12 +72,9 @@ var idToAlpha = [];
 var alphaToName = [];
 var selectedCountry = null;
 
-svg_world_map.append("rect")
-    .attr("class", "world_map_border")
-    .attr("width", graphWidth)
-    .attr("height", graphHeight)
-    .on("click", reset);
+addWorldMapBorder(svg_world_map);
 var g_world_map = svg_world_map.append("g");
+addResetMapButton(svg_world_map);
 
 var max_annotation = new Annotation(
   svg_world_map, graphWidth * 30 / 100, graphHeight * 80 / 100, "blue");
@@ -123,6 +120,34 @@ d3.queue()
     populateSlide(slides[currentSlide]);
 
 });
+
+function addWorldMapBorder(svg_world_map) {
+  svg_world_map.append("rect")
+      .attr("class", "world_map_border")
+      .attr("width", graphWidth)
+      .attr("height", graphHeight)
+      .on("click", reset);
+}
+
+function addResetMapButton(svg_world_map) {
+  var g_reset = svg_world_map.append("g")
+    .on("mouseover", function(d) {
+      d3.select(this).style("cursor", "pointer");})
+    .on("mouseout", function(d) {
+      d3.select(this).style("cursor", "default"); })
+    .on("click", reset);
+
+  g_reset.append("rect")
+      .attr("transform",
+            "translate(" + (graphWidth/2) + "," + (graphHeight-40) + ")")
+      .attr("width", 100).attr("height", 30).attr("rx", 10)
+      .attr("fill","orange");
+
+  g_reset.append("text")
+      .attr("transform",
+            "translate(" + (graphWidth/2 + 15) + "," + (graphHeight-20) + ")")
+      .text("Reset Map");
+}
 
 function updateCountrySpecs(id) {
   var descriptor = slides[currentSlide].country_spec_descriptor;
