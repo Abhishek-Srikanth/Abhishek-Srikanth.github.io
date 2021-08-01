@@ -32,13 +32,20 @@
   <h1 style="text-align:center">
     A Visual Narrative on the status of trade across modern global economies
   </h1>
+  <p style="text-align:center">
+    Trade is an essential part of the global supply chain.
+    However, every country partakes in this differently on the global stage.<br/>
+    This visualization aims to anaylse how various countries approach global trade
+    by looking at a few key indicators.
+  </p>
   <div style="text-align:center">
     <button id="back_button" onclick="backClicked()" disabled>PREV SLIDE</button>
     <button id="front_button" onclick="frontClicked()">NEXT SLIDE</button>
   </div>
-  <p id="main_narrative"></p>
+  <p id="main_narrative" style="text-align:center"></p>
   <svg id="world_map"></svg>
   <div style="text-align:center"><br><p id="country_specs"></p></div>
+  <p id="data_explanation"></p>
 </body>
 
 <script>
@@ -49,6 +56,7 @@ var graphWidth = width;
 var graphHeight = 60 * height / 100;
 
 var main_narrative = d3.select("#main_narrative");
+var data_explanation = d3.select("#data_explanation");
 var svg_world_map = d3.select("#world_map")
     .attr("width", graphWidth)
     .attr("height", graphHeight)
@@ -176,6 +184,7 @@ function reset() {
   if (active != null) {
     active.classed("active", false);
     active = d3.select(null);
+    selectedCountry = null;
     svg_world_map.transition()
         .duration(750)
         .call(zoom.transform, d3.zoomIdentity);
@@ -197,7 +206,8 @@ function stopped() {
 }
 
 function populateSlide(slide) {
-  main_narrative.text(slide.main_narrative);
+  main_narrative.html(slide.main_narrative);
+  data_explanation.html(slide.data_explanation);
   console.log("populate slide called");
   var max = {};
   var min = {};
@@ -231,7 +241,7 @@ function populateSlide(slide) {
 
   max_annotation.drawAnnotation(max.XY, max.datumCountry, max.datum);
   min_annotation.drawAnnotation(min.XY, min.datumCountry, min.datum);
-  
+
   transitionTo(boundsOfSelectedCountry, 750);
   updateCountrySpecs(selectedCountry);
 }

@@ -1,26 +1,31 @@
 
 const text_slide_0 = `
-Trade is an essential part of the global supply chain.
-However, every country partakes in this differently on the global stage.
-The following graph shows us what % of each country's GDP is attributed to trade.
-This is also known as Trade Openness Ratio (see https://en.wikipedia.org/wiki/Trade-to-GDP_ratio).
-From this graph we observe that nations like <TODO/Singapore> and <TODO> rely heavily on international trade while
-larger economies like <TODO/Japan> and <TODO/USA> do not.`;
+This slide shows the Total Trade (Import+Export) of each nation as % of national GDP. <br/>
+This is also known as Trade Openness Ratio (see https://en.wikipedia.org/wiki/Trade-to-GDP_ratio).`;
+const data_explanation_0 = `
+<i>* Since GDP is only the value added domestically, it may happen that small
+countries export more than is produced in the country and/or import more
+than is consumed in the country and the external trade rate is thus over 100%.</i>`;
+const data_explanation_1 = `
+* <i>Red countries are nations that have reduced international trade, while blue
+countries have increased international trade. </i>`;
+const data_explanation_2 = `
+* <i>Red countries are nations with a net import, and Blue countries are nations
+ with a net export. </i>`;
 const text_slide_1 = `
-While current state of affairs look this way, it is interesting to see how national priorities have changed historically.
-This helps paint a picture of how much countries have prioritized international trade over the years. `;
+This slide shows the difference in total trade (as % of GDP) between now and the first recorded year.<br/>
+This helps paint a picture of how much countries have prioritized international trade over the years.`;
 const text_slide_2 = `
-That said, it is important to note that while countries may place greater or lower importance on trade,
-they may do so differently. Some might prefer to simply import goods that their nation requires,
-while others looks to exporting various products from within their borders.
-In this graph, we see how each country leverages trade.
-Feel free to click into each country to dive deeper into how trade breaks down.
-Red countries are nations with a net import, and Blue countries are nations with a net export.`;
+This slide shows the difference between exports (%GDP) and imports (%GDP) of goods & services <br/>
+While a country might trade a lot internationally, it is important to see whether a majority of it
+is driven by imports or exports.`;
+
 
 class Slide {
-  constructor(text, descriptor, middleDomains) {
+  constructor(text, descriptor, data_explanation, middleDomains) {
     this.main_narrative = text;
     this.country_spec_descriptor = descriptor;
+    this.data_explanation = data_explanation;
     this.data = []
     this.middleDomains = middleDomains;
     this.range = ['red', 'pink', 'lightblue', 'blue'];
@@ -107,12 +112,15 @@ var slides = []
 slides[0] = new Slide(
     text_slide_0,
     "Total Trade (Import+Export) as % of national GDP",
+    data_explanation_0,
     [25,50]);
 slides[1] = new Slide(
     text_slide_1,
     "Difference in Trade (Import+Export) as % of GDP between most recent and oldest years",
+    data_explanation_1,
     [0,1]);
 slides[2] = new Slide(
     text_slide_2,
     "Difference between exports (%GDP) and imports (%GDP) of goods & services",
+    data_explanation_2,
     [0,0]);
