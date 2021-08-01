@@ -1,7 +1,10 @@
 
 const text_slide_0 = `
-This slide shows the Total Trade (Import+Export) of each nation as % of national GDP. <br/>
-This is also known as Trade Openness Ratio (see https://en.wikipedia.org/wiki/Trade-to-GDP_ratio).`;
+This slide shows the Total Trade (Import+Export) of each nation as % of national GDP.
+<br/>This is also known as Trade Openness Ratio (see https://en.wikipedia.org/wiki/Trade-to-GDP_ratio).
+<br/><br/>
+It is interesting to note that large economies like Japan and USA tend to rely less
+on trade while <br/> smaller economies like Singapore or Djibouti tend to rely heavily on trade.`;
 const data_explanation_0 = `
 <i>* Since GDP is only the value added domestically, it may happen that small
 countries export more than is produced in the country and/or import more
@@ -14,11 +17,18 @@ const data_explanation_2 = `
  with a net export. </i>`;
 const text_slide_1 = `
 This slide shows the difference in total trade (as % of GDP) between now and the first recorded year.<br/>
-This helps paint a picture of how much countries have prioritized international trade over the years.`;
+This helps paint a picture of how much countries have prioritized international trade over the years.
+<br/><br/>
+It is interesting to note that since 1960, most countries have increased their dependency on trade.<br/>
+Very few nations, mostly in Africa, are coloured red (ie: have reduced their reliance on trade)`;
 const text_slide_2 = `
 This slide shows the difference between exports (%GDP) and imports (%GDP) of goods & services <br/>
 While a country might trade a lot internationally, it is important to see whether a majority of it
-is driven by imports or exports.`;
+is driven by imports or exports.
+<br/><br/>
+It is important to remember that while having mode imports than exports might eventually
+lead to a trade deficit, <br/> it can be an efficacious way for the importing nation to
+develop itself further and faster so long as they manage the deficit well.`;
 
 
 class Slide {
