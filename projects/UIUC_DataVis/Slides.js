@@ -9,18 +9,15 @@ const data_explanation_0 = `
 <i>* Since GDP is only the value added domestically, it may happen that small
 countries export more than is produced in the country and/or import more
 than is consumed in the country and the external trade rate is thus over 100%.</i>`;
-const data_explanation_1 = `
-* <i>Red countries are nations that have reduced international trade, while blue
-countries have increased international trade. </i>`;
-const data_explanation_2 = `
-* <i>Red countries are nations with a net import, and Blue countries are nations
- with a net export. </i>`;
 const text_slide_1 = `
-This slide shows the difference in total trade (as % of GDP) between now and the first recorded year.<br/>
+This slide shows the difference in total trade (as % of GDP) between now and ~60 years since now.<br/>
 This helps paint a picture of how much countries have prioritized international trade over the years.
 <br/><br/>
 It is interesting to note that since 1960, most countries have increased their dependency on trade.<br/>
 Very few nations, mostly in Africa, are coloured red (ie: have reduced their reliance on trade)`;
+const data_explanation_1 = `
+* <i>Red countries are nations that have reduced international trade, while blue
+countries have increased international trade. </i>`;
 const text_slide_2 = `
 This slide shows the difference between exports (%GDP) and imports (%GDP) of goods & services <br/>
 While a country might trade a lot internationally, it is important to see whether a majority of it
@@ -29,6 +26,9 @@ is driven by imports or exports.
 It is important to remember that while having mode imports than exports might eventually
 lead to a trade deficit, <br/> it can be an efficacious way for the importing nation to
 develop itself further and faster so long as they manage the deficit well.`;
+const data_explanation_2 = `
+* <i>Red countries are nations with a net import, and Blue countries are nations
+ with a net export. </i>`;
 
 
 class Slide {
