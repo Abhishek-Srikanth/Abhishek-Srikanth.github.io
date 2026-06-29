@@ -1,4 +1,4 @@
-var BASE_COINS = { r32: 16, r16: 8, qf: 4, sf: 2, third: 2, final: 2 };
+
 var ROUND_ORDER = ['r32', 'r16', 'qf', 'sf', 'third', 'final'];
 
 function doGet(e) {
@@ -178,8 +178,7 @@ function readPredictions(sheet, sections) {
       predictionId: Number(row[1]),
       userId: Number(row[2]),
       gameId: String(row[3]),
-      predictedTeamId: String(row[4]),
-      coinBet: Number(row[5]) || 0
+      predictedTeamId: String(row[4])
     });
   }
   return predictions;
@@ -258,9 +257,8 @@ function handleSubmitPrediction(data) {
   var userId = Number(data.userId);
   var gameId = String(data.gameId);
   var predictedTeamId = String(data.predictedTeamId);
-  var coinBet = Number(data.coinBet);
 
-  if (!userId || !gameId || !predictedTeamId || coinBet < 1) {
+  if (!userId || !gameId || !predictedTeamId) {
     return { success: false, error: 'Invalid prediction data' };
   }
 
@@ -281,44 +279,15 @@ function handleSubmitPrediction(data) {
     if (!allDone) return { success: false, error: 'Previous round not complete' };
   }
 
-  var budget = BASE_COINS[round] || 0;
-  if (round !== 'r32') {
-    var prv = getPrevRound(round);
-    var allPicks = readPredictions(sheet, sections);
-    var myPrev = allPicks.filter(function(p) { return p.userId === userId; });
-    var prevGames = games.filter(function(g) { return g.type === prv && g.finished; });
-    var earned = 0;
-    for (var pi = 0; pi < myPrev.length; pi++) {
-      var pg = games.find(function(g) { return g.id === myPrev[pi].gameId; });
-      if (pg && pg.finished && pg.type === prv) {
-        var w = getWinner(pg);
-        if (w && String(w) === myPrev[pi].predictedTeamId) {
-          earned += myPrev[pi].coinBet;
-        }
-      }
-    }
-    budget += earned;
-  }
-
   var allPicks = readPredictions(sheet, sections);
-  var myCurrent = allPicks.filter(function(p) {
-    var g = games.find(function(gg) { return gg.id === p.gameId; });
-    return p.userId === userId && g && g.type === round;
-  });
-  var existing = myCurrent.find(function(p) { return p.gameId === gameId; });
-
-  var spent = myCurrent.reduce(function(s, p) { return s + p.coinBet; }, 0);
-  var newTotal = existing ? spent - existing.coinBet + coinBet : spent + coinBet;
-  if (newTotal > budget) {
-    return { success: false, error: 'Insufficient coins' };
-  }
+  var existing = allPicks.find(function(p) { return p.userId === userId && p.gameId === gameId; });
 
   var vals = sheet.getDataRange().getValues();
 
   if (existing) {
     for (var ri = sections.predictions + 1; ri < vals.length; ri++) {
       if (Number(vals[ri][1]) === existing.predictionId) {
-        sheet.getRange(ri + 1, 5, 1, 2).setValues([[predictedTeamId, coinBet]]);
+        sheet.getRange(ri + 1, 5).setValue(predictedTeamId);
         return { success: true, updated: true };
       }
     }
@@ -327,7 +296,7 @@ function handleSubmitPrediction(data) {
   var maxId = allPicks.reduce(function(m, p) { return Math.max(m, p.predictionId); }, 0);
   var insertRow = getNextRowInSection(sheet, sections.predictions, ['HIGHLIGHTS', 'MASTER_PASS']);
   sheet.getRange(insertRow, 1, 1, 6).setValues([
-    ['', maxId + 1, userId, gameId, predictedTeamId, coinBet]
+    ['', maxId + 1, userId, gameId, predictedTeamId, 1]
   ]);
 
   return { success: true, updated: false };
@@ -395,7 +364,7 @@ function handleGetLeaderboard() {
     if (!game || !game.finished) continue;
     var w = getWinner(game);
     if (w && String(w) === pred.predictedTeamId) {
-      scores[pred.userId].totalScore += pred.coinBet;
+      scores[pred.userId].totalScore++;
       scores[pred.userId].correctCount++;
     }
   }

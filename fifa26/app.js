@@ -37,7 +37,9 @@ function init() {
   preloadRankings();
 
   if (state.masterPasswordVerified) {
+    showLoading('Loading data...');
     loadAllData().then(function() {
+      hideLoading();
       var valid = validateSession();
       if (valid && state.currentUser) {
         enterMainApp();
@@ -66,6 +68,15 @@ function toast(msg, type) {
   el.className = 'toast show' + (type ? ' ' + type : '');
   clearTimeout(el._timer);
   el._timer = setTimeout(function() { el.classList.remove('show'); }, 3000);
+}
+
+function showLoading(msg) {
+  document.getElementById('loading-text').textContent = msg || 'Loading...';
+  document.getElementById('loading-overlay').classList.remove('hidden');
+}
+
+function hideLoading() {
+  document.getElementById('loading-overlay').classList.add('hidden');
 }
 
 function preloadRankings() {
@@ -152,36 +163,73 @@ function fetchGames() {
 
 function loadUsersFromSheet() {
   return apiGet({ action: 'getUsers' }).then(function(res) {
-    if (res.success) state.users = res.data;
+    if (res.success) {
+      state.users = res.data;
+      console.log('loadUsersFromSheet: loaded', state.users.length, 'users');
+      if (state.users.length === 0) {
+        console.warn('loadUsersFromSheet: users array is empty — check sheet structure (USERS section headers, column positions)');
+      }
+    } else {
+      console.warn('loadUsersFromSheet failed:', JSON.stringify(res));
+      toast('Failed to load users: ' + (res.error || 'unknown error'), 'error');
+    }
   });
 }
 
-function apiGet(params) {
+function apiGet(params, retries) {
+  if (retries === undefined) retries = 2;
   var url = CONFIG.APPS_SCRIPT_URL + '?' + Object.keys(params).map(function(k) {
     return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
   }).join('&');
-  return fetch(url).then(function(r) { return r.json(); }).catch(function() {
-    return { success: false, error: 'Network error' };
-  });
+  function attempt(n) {
+    return fetch(url).then(function(r) {
+      console.log('apiGet[' + params.action + '] status:', r.status, r.statusText);
+      var ct = (r.headers.get('content-type') || '').toLowerCase();
+      if (ct.indexOf('json') === -1) {
+        return r.text().then(function(text) {
+          console.warn('apiGet[' + params.action + '] non-JSON (status ' + r.status + '):', text.slice(0, 500));
+          throw new Error('Expected JSON, got ' + ct);
+        });
+      }
+      return r.json();
+    }).catch(function(err) {
+      console.warn('apiGet[' + params.action + '] failed:', err && err.message, 'retries left:', n);
+      if (n > 0) {
+        return new Promise(function(resolve) { setTimeout(resolve, 1000 * (3 - n)); }).then(function() { return attempt(n - 1); });
+      }
+      return { success: false, error: 'Network error' };
+    });
+  }
+  return attempt(retries);
 }
 
-function apiPost(data) {
-  return fetch(CONFIG.APPS_SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify(data)
-  }).then(function(r) { return r.json(); }).catch(function() {
-    return { success: false, error: 'Network error' };
-  });
+function apiPost(data, retries) {
+  if (retries === undefined) retries = 2;
+  function attempt(n) {
+    return fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }).then(function(r) { return r.json(); }).catch(function() {
+      if (n > 0) {
+        return new Promise(function(resolve) { setTimeout(resolve, 1000 * (3 - n)); }).then(function() { return attempt(n - 1); });
+      }
+      return { success: false, error: 'Network error' };
+    });
+  }
+  return attempt(retries);
 }
 
 function checkMasterPassword() {
   var pw = document.getElementById('pw-input').value;
   document.getElementById('pw-error').textContent = '';
+  showLoading('Verifying password...');
   apiPost({ action: 'checkMasterPassword', password: pw }).then(function(res) {
     if (res.success) {
       state.masterPasswordVerified = true;
       localStorage.setItem('pw_verified', 'true');
+      showLoading('Loading data...');
       loadAllData().then(function() {
+        hideLoading();
         validateSession();
         if (state.currentUser) {
           enterMainApp();
@@ -190,6 +238,7 @@ function checkMasterPassword() {
         }
       });
     } else {
+      hideLoading();
       document.getElementById('pw-error').textContent = res.error || 'Incorrect password';
     }
   });
@@ -200,28 +249,46 @@ function showUserGrid() {
   var grid = document.getElementById('user-grid');
   grid.innerHTML = '';
 
-  state.users.forEach(function(u) {
-    var team = state.teams[u.teamId];
-    var flagUrl = team ? TEAM_FLAG_MAP[u.teamId] : '';
-    var initial = u.name.charAt(0).toUpperCase();
+  if (state.users.length === 0) {
+    var msg = document.createElement('div');
+    msg.style.cssText = 'text-align:center;padding:30px;color:var(--text2);width:100%';
+    msg.innerHTML =
+      '<p style="color:var(--accent2);margin-bottom:12px;font-size:1.1rem">\u26A0\uFE0F Failed to load players</p>' +
+      '<p style="margin-bottom:16px;font-size:0.9rem">Could not reach the spreadsheet. Check your connection.</p>' +
+      '<button class="btn" onclick="retryLoadUsers()">Retry</button>';
+    grid.appendChild(msg);
+  } else {
+    state.users.forEach(function(u) {
+      var team = state.teams[u.teamId];
+      var flagUrl = team ? TEAM_FLAG_MAP[u.teamId] : '';
+      var initial = u.name.charAt(0).toUpperCase();
 
-    var card = document.createElement('div');
-    card.className = 'user-card';
-    card.innerHTML =
-      '<div class="avatar">' +
-        (flagUrl ? '<img src="' + flagUrl + '" alt="" loading="lazy">' : '') +
-        '<span class="initial">' + initial + '</span>' +
-      '</div>' +
-      '<div class="name">' + escapeHtml(u.name) + '</div>';
-    card.addEventListener('click', function() { openAuth(u); });
-    grid.appendChild(card);
-  });
+      var card = document.createElement('div');
+      card.className = 'user-card';
+      card.innerHTML =
+        '<div class="avatar">' +
+          (flagUrl ? '<img src="' + flagUrl + '" alt="" loading="lazy">' : '') +
+          '<span class="initial">' + initial + '</span>' +
+        '</div>' +
+        '<div class="name">' + escapeHtml(u.name) + '</div>';
+      card.addEventListener('click', function() { openAuth(u); });
+      grid.appendChild(card);
+    });
+  }
 
   var addCard = document.createElement('div');
   addCard.className = 'user-card add-card';
   addCard.innerHTML = '<span style="font-size:2.5rem">+</span><div class="name">Add me</div>';
   addCard.addEventListener('click', openRegistration);
   grid.appendChild(addCard);
+}
+
+function retryLoadUsers() {
+  showLoading('Loading users...');
+  loadUsersFromSheet().then(function() {
+    hideLoading();
+    showUserGrid();
+  });
 }
 
 function openRegistration() {
@@ -249,14 +316,21 @@ function registerUser() {
   if (!teamId) { error.textContent = 'Pick a team'; return; }
   if (!jersey || jersey < 1 || jersey > 99) { error.textContent = 'Jersey number (1-99)'; return; }
 
+  showLoading('Registering...');
   apiPost({ action: 'registerUser', name: name, teamId: Number(teamId), jerseyNumber: Number(jersey) })
     .then(function(res) {
       if (res.success) {
         closeModal('modal-register');
         state.currentUser = { userId: res.userId, name: name, teamId: Number(teamId), jerseyNumber: Number(jersey) };
         localStorage.setItem('fifa_user', JSON.stringify(state.currentUser));
-        loadAllData().then(function() { enterMainApp(); });
+        state.users.push(state.currentUser);
+        showLoading('Loading data...');
+        loadAllData().then(function() {
+          hideLoading();
+          enterMainApp();
+        });
       } else {
+        hideLoading();
         error.textContent = res.error || 'Registration failed';
       }
     });
@@ -281,6 +355,7 @@ function authenticateUser() {
 
   if (!jersey) { error.textContent = 'Enter your jersey number'; return; }
 
+  showLoading('Authenticating...');
   apiGet({ action: 'authenticate', name: userName, jerseyNumber: jersey }).then(function(res) {
     if (res.success) {
       closeModal('modal-auth');
@@ -288,8 +363,10 @@ function authenticateUser() {
       var u = state.users.find(function(x) { return x.userId === res.userId; });
       if (u) state.currentUser.teamId = u.teamId;
       localStorage.setItem('fifa_user', JSON.stringify(state.currentUser));
+      hideLoading();
       enterMainApp();
     } else {
+      hideLoading();
       error.textContent = res.error || 'Wrong number';
     }
   });
@@ -298,8 +375,12 @@ function authenticateUser() {
 function logout() {
   state.currentUser = null;
   state.predictions = [];
+  state.masterPasswordVerified = false;
   localStorage.removeItem('fifa_user');
-  showScreen('screen-users');
+  localStorage.removeItem('pw_verified');
+  document.getElementById('pw-input').value = '';
+  document.getElementById('pw-error').textContent = '';
+  showScreen('screen-password');
 }
 
 function enterMainApp() {
@@ -342,30 +423,6 @@ function getPrevRound(round) {
   return CONFIG.ROUND_ORDER[idx - 1];
 }
 
-function computeBudget(round) {
-  var base = CONFIG.BASE_COINS[round] || 0;
-  if (round === 'r32') return base;
-  var prv = getPrevRound(round);
-  if (!prv) return base;
-  var earned = 0;
-  state.predictions.forEach(function(p) {
-    var g = state.games.find(function(gg) { return gg.id === p.gameId; });
-    if (g && g.type === prv && g.finished && g.winner && String(g.winner) === String(p.predictedTeamId)) {
-      earned += p.coinBet;
-    }
-  });
-  return base + earned;
-}
-
-function computeSpent(round) {
-  return state.predictions
-    .filter(function(p) {
-      var g = state.games.find(function(gg) { return gg.id === p.gameId; });
-      return g && g.type === round;
-    })
-    .reduce(function(sum, p) { return sum + p.coinBet; }, 0);
-}
-
 function renderBracketHTML(container) {
   var knockout = state.games.filter(function(g) { return CONFIG.ROUND_ORDER.indexOf(g.type) !== -1; });
   knockout.sort(function(a, b) { return parseInt(a.id) - parseInt(b.id); });
@@ -391,12 +448,6 @@ function renderBracketHTML(container) {
 
     html += '<div class="round-section">';
     html += '<div class="round-header">' + (ROUND_LABELS[type] || type) + ' ' + badge + '</div>';
-
-    if (isCurrent && state.currentUser) {
-      var budget = computeBudget(type);
-      var spent = computeSpent(type);
-      html += '<div class="budget-info">Budget: ' + budget + ' coins | Spent: ' + spent + ' | Remaining: <strong>' + (budget - spent) + '</strong></div>';
-    }
 
     games.forEach(function(game) {
       html += renderGameCard(game, isCurrent, allDone, type === currentRound);
@@ -428,6 +479,7 @@ function renderGameCard(game, isCurrent, allDone, isInteractiveRound) {
   var team1Known = game.team1Id && game.team1Id !== '0';
   var team2Known = game.team2Id && game.team2Id !== '0';
   var canPredict = isCurrent && team1Known && team2Known && !game.finished;
+  var existingPred = state.predictions.find(function(p) { return p.gameId === game.id; });
 
   var cardClass = 'game-card';
   if (game.finished) cardClass += ' completed';
@@ -437,9 +489,9 @@ function renderGameCard(game, isCurrent, allDone, isInteractiveRound) {
   var html = '<div class="' + cardClass + '" data-game-id="' + game.id + '">';
 
   html += '<div class="game-teams">';
-  html += renderTeamSlot(game, 'team1', team1Known, canPredict);
+  html += renderTeamSlot(game, 'team1', team1Known, canPredict, existingPred ? existingPred.predictedTeamId : null);
   html += '<span class="vs">vs</span>';
-  html += renderTeamSlot(game, 'team2', team2Known, canPredict);
+  html += renderTeamSlot(game, 'team2', team2Known, canPredict, existingPred ? existingPred.predictedTeamId : null);
   html += '</div>';
 
   if (game.finished) {
@@ -449,9 +501,13 @@ function renderGameCard(game, isCurrent, allDone, isInteractiveRound) {
       '</div>';
   }
 
-  if (canPredict) {
-    var pred = state.predictions.find(function(p) { return p.gameId === game.id; });
-    html += renderPredictionControls(game, pred);
+  if (canPredict && existingPred) {
+    var pickName = existingPred.predictedTeamId === game.team1Id
+      ? (state.teams[game.team1Id] ? state.teams[game.team1Id].name_en : 'Team 1')
+      : (state.teams[game.team2Id] ? state.teams[game.team2Id].name_en : 'Team 2');
+    html += '<div class="game-info">Your pick: ' + escapeHtml(pickName) + '</div>';
+  } else if (canPredict) {
+    html += renderPredictionControls(game);
   }
 
   if (game.finished) {
@@ -470,7 +526,7 @@ function renderGameCard(game, isCurrent, allDone, isInteractiveRound) {
   return html;
 }
 
-function renderTeamSlot(game, side, known, canPredict) {
+function renderTeamSlot(game, side, known, canPredict, predictedTeamId) {
   var id = side === 'team1' ? game.team1Id : game.team2Id;
   var label = side === 'team1' ? game.team1Label : game.team2Label;
   var name = side === 'team1' ? game.team1Name : game.team2Name;
@@ -487,13 +543,11 @@ function renderTeamSlot(game, side, known, canPredict) {
     var cls = 'team';
     if (game.finished && isWinner) cls += ' winner';
     if (game.finished && isLoser) cls += ' loser';
+    if (predictedTeamId && String(id) === String(predictedTeamId)) cls += ' predicted';
 
-    var selAttr = '';
-    if (canPredict) selAttr = ' data-team="' + id + '" onclick="selectTeam(this, \'' + game.id + '\')"';
-
-    return '<div class="' + cls + '"' + selAttr + ' title="Click for team info" ondblclick="showTeamPopup(' + id + ')">' +
+    return '<div class="' + cls + '" title="Tap for team info" onclick="showTeamPopup(' + id + ')">' +
       (flagUrl ? '<img src="' + flagUrl + '" alt="" loading="lazy">' : '<span class="flag-placeholder"></span>') +
-      '<span>' + escapeHtml(teamName) + '</span>' +
+      '<span>' + escapeHtml(teamName) + (predictedTeamId && String(id) === String(predictedTeamId) ? ' \u2713' : '') + '</span>' +
       (game.finished ? '<span class="score">' + (score || '') + '</span>' : '') +
       '</div>';
   } else if (label) {
@@ -504,9 +558,8 @@ function renderTeamSlot(game, side, known, canPredict) {
   }
 }
 
-function renderPredictionControls(game, existingPred) {
-  var selectedId = existingPred ? existingPred.predictedTeamId : (state.selectedTeams[game.id] || '');
-  var coinVal = existingPred ? existingPred.coinBet : (state.selectedTeams[game.id + '_coins'] || 1);
+function renderPredictionControls(game) {
+  var selectedId = state.selectedTeams[game.id] || '';
 
   var html = '<div class="game-pick">';
 
@@ -522,14 +575,7 @@ function renderPredictionControls(game, existingPred) {
   var t2 = state.teams[game.team2Id];
   html += (t2 ? t2.name_en : 'Team 2') + '</button>';
 
-  html += '<input type="number" class="coin-input" data-game="' + game.id + '" value="' + coinVal + '" min="1" max="99">';
-  html += '<button class="btn btn-sm pred-submit" data-game="' + game.id + '" onclick="submitPrediction(this)">';
-  html += (existingPred ? 'Update' : 'Predict');
-  html += '</button>';
-
-  if (existingPred) {
-    html += '<button class="btn btn-sm btn-ghost pred-delete" data-game="' + game.id + '" onclick="deletePrediction(this)">Delete</button>';
-  }
+  html += '<button class="btn btn-sm pred-submit" data-game="' + game.id + '" onclick="submitPrediction(this)">Predict</button>';
 
   html += '</div>';
   return html;
@@ -545,19 +591,9 @@ function renderUserPredictionResult(game) {
   var cls = correct ? 'win' : 'loss';
 
   return '<div class="game-info">' +
-    '<span class="' + cls + '">' + icon + ' You predicted: ' + (state.teams[pred.predictedTeamId] ? state.teams[pred.predictedTeamId].name_en : 'Team ' + pred.predictedTeamId) + ' (' + pred.coinBet + ' coin' + (pred.coinBet > 1 ? 's' : '') + ') ' + label + '</span>' +
+    '<span class="' + cls + '">' + icon + ' You predicted: ' + (state.teams[pred.predictedTeamId] ? state.teams[pred.predictedTeamId].name_en : 'Team ' + pred.predictedTeamId) + ' ' + label + '</span>' +
     '</div>';
 }
-
-window.selectTeam = function(el, gameId) {
-  var teamId = el.dataset.team;
-  state.selectedTeams[gameId] = teamId;
-  var card = el.closest('.game-card');
-  var picks = card.querySelectorAll('.team[data-team]');
-  picks.forEach(function(p) {
-    p.style.outline = String(p.dataset.team) === String(teamId) ? '2px solid var(--accent)' : '';
-  });
-};
 
 window.selectTeamById = function(el, gameId, teamId) {
   state.selectedTeams[gameId] = teamId;
@@ -590,10 +626,6 @@ window.submitPrediction = function(btn) {
   }
   if (!predictedTeamId) { toast('Pick a team first', 'error'); return; }
 
-  var coinInput = card.querySelector('.coin-input[data-game="' + gameId + '"]');
-  var coinBet = coinInput ? parseInt(coinInput.value) : 1;
-  if (!coinBet || coinBet < 1) { toast('Min 1 coin', 'error'); return; }
-
   btn.disabled = true;
   btn.textContent = 'Saving...';
 
@@ -601,16 +633,15 @@ window.submitPrediction = function(btn) {
     action: 'submitPrediction',
     userId: state.currentUser.userId,
     gameId: gameId,
-    predictedTeamId: predictedTeamId,
-    coinBet: coinBet
+    predictedTeamId: predictedTeamId
   }).then(function(res) {
     if (res.success) {
-      toast(res.updated ? 'Prediction updated!' : 'Prediction saved!', 'success');
+      toast('Prediction saved!', 'success');
       renderBracket();
     } else {
       toast(res.error || 'Failed to save', 'error');
       btn.disabled = false;
-      btn.textContent = 'Retry';
+      btn.textContent = 'Predict';
     }
   });
 };
@@ -676,7 +707,7 @@ function renderLeaderboard() {
     }
 
     var html = '<table class="leaderboard-table"><thead><tr>' +
-      '<th>Rank</th><th>Player</th><th style="text-align:right">Score</th><th style="text-align:right">Correct</th>' +
+      '<th>Rank</th><th>Player</th><th style="text-align:right">Score</th>' +
       '</tr></thead><tbody>';
 
     data.forEach(function(row) {
@@ -690,8 +721,7 @@ function renderLeaderboard() {
       html += '<tr' + (isMe ? ' class="me"' : '') + '>' +
         '<td class="' + rankClass + '">' + row.rank + '</td>' +
         '<td>' + escapeHtml(row.name) + '</td>' +
-        '<td class="score">' + row.totalScore + '</td>' +
-        '<td style="text-align:right;color:var(--text2)">' + row.correctCount + '</td>' +
+        '<td class="score">' + row.correctCount + '</td>' +
         '</tr>';
     });
 
@@ -713,7 +743,7 @@ function showTeamPopup(teamId) {
     return g.finished && (String(g.team1Id) === String(teamId) || String(g.team2Id) === String(teamId));
   }).slice(-6);
 
-  var html =
+  var html = '<button class="tp-close" onclick="closeModal(\'modal-team-popup\')">&times;</button>' +
     '<div class="tp-header">' +
     (flagUrl ? '<img src="' + flagUrl + '" alt="">' : '') +
     '<h2>' + escapeHtml(team.name_en) + '</h2>' +

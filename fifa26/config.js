@@ -5,15 +5,6 @@ const CONFIG = {
   GAMES_API: 'https://worldcup26.ir/get/games',
   RANKINGS_URL: 'https://raw.githubusercontent.com/salah23222/worldcup2026/main/data/rankings.json',
 
-  BASE_COINS: {
-    r32: 16,
-    r16: 8,
-    qf: 4,
-    sf: 2,
-    third: 2,
-    final: 2
-  },
-
   ROUND_ORDER: ['r32', 'r16', 'qf', 'sf', 'third', 'final'],
 
   FLAG_BASE: 'https://flagcdn.com/w80',
