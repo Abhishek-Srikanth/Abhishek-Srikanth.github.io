@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FIFA 2026 Cup Predictor</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="config.js"></script>
+</head>
+<body>
+
+<div id="screen-password" class="screen active">
+  <h1>&#9917; FIFA 2026 Predictor</h1>
+  <p>Enter the group password to access the prediction game.</p>
+  <div class="card">
+    <input type="password" id="pw-input" placeholder="Group password" autocomplete="off">
+    <div class="error" id="pw-error"></div>
+    <button class="btn" id="pw-submit">Enter</button>
+  </div>
+</div>
+
+<div id="screen-users" class="screen">
+  <h1>&#9917; Choose or Join</h1>
+  <p>Pick your name or add yourself to the game.</p>
+  <div class="user-grid" id="user-grid"></div>
+</div>
+
+<div id="screen-main" class="screen">
+  <div class="main-header">
+    <h1>&#9917; FIFA 2026</h1>
+    <div class="user-info">
+      <span id="main-user-name"></span>
+      <button class="logout-btn" id="logout-btn">Logout</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" data-tab="bracket">Bracket</div>
+    <div class="tab" data-tab="leaderboard">Leaderboard</div>
+  </div>
+  <div class="tab-content active" id="tab-bracket">
+    <div id="bracket-view"></div>
+  </div>
+  <div class="tab-content" id="tab-leaderboard">
+    <div id="leaderboard-view"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-register">
+  <div class="modal">
+    <h2>Join the Game</h2>
+    <label>Your Name</label>
+    <input type="text" id="reg-name" placeholder="Enter your name">
+    <label>Pick Your Team</label>
+    <select id="reg-team"></select>
+    <label>Jersey Number</label>
+    <input type="number" id="reg-jersey" placeholder="Used to login later" min="1" max="99">
+    <div class="error" id="reg-error"></div>
+    <div class="btn-group">
+      <button class="btn btn-ghost" onclick="closeModal('modal-register')">Cancel</button>
+      <button class="btn" id="reg-submit">Join</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-auth">
+  <div class="modal">
+    <h2 id="auth-title">Enter Your Number</h2>
+    <label>Jersey Number</label>
+    <input type="number" id="auth-jersey" placeholder="Your jersey number" min="1" max="99">
+    <div class="error" id="auth-error"></div>
+    <div class="btn-group">
+      <button class="btn btn-ghost" onclick="closeModal('modal-auth')">Cancel</button>
+      <button class="btn" id="auth-submit">Login</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-team-popup">
+  <div class="modal team-popup-content" id="team-popup-body"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,796 @@
+var state = {
+  masterPasswordVerified: localStorage.getItem('pw_verified') === 'true',
+  currentUser: JSON.parse(localStorage.getItem('fifa_user') || 'null'),
+  teams: {},
+  teamsArr: [],
+  games: [],
+  rankings: {},
+  predictions: [],
+  users: [],
+  highlights: {},
+  selectedTeams: {},
+};
+
+var TEAM_FLAG_MAP = {};
+
+function init() {
+  document.getElementById('pw-submit').addEventListener('click', checkMasterPassword);
+  document.getElementById('pw-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') checkMasterPassword();
+  });
+  document.getElementById('reg-submit').addEventListener('click', registerUser);
+  document.getElementById('auth-submit').addEventListener('click', authenticateUser);
+  document.getElementById('logout-btn').addEventListener('click', logout);
+
+  document.querySelectorAll('.tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+      this.classList.add('active');
+      var target = document.getElementById('tab-' + this.dataset.tab);
+      target.classList.add('active');
+      if (this.dataset.tab === 'bracket') renderBracket();
+      if (this.dataset.tab === 'leaderboard') renderLeaderboard();
+    });
+  });
+
+  preloadRankings();
+
+  if (state.masterPasswordVerified) {
+    loadAllData().then(function() {
+      var valid = validateSession();
+      if (valid && state.currentUser) {
+        enterMainApp();
+      } else if (valid) {
+        showUserGrid();
+      } else {
+        showScreen('screen-password');
+      }
+    });
+  } else {
+    showScreen('screen-password');
+  }
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+}
+
+function showModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+function toast(msg, type) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(el._timer);
+  el._timer = setTimeout(function() { el.classList.remove('show'); }, 3000);
+}
+
+function preloadRankings() {
+  fetch(CONFIG.RANKINGS_URL).then(function(r) { return r.json(); })
+    .then(function(data) {
+      var clean = {};
+      Object.keys(data).forEach(function(k) {
+        if (k === '_note') return;
+        var lookup = k.replace(/['\u2019]/g, "'").replace(/&/g, ' and ');
+        clean[lookup] = data[k];
+        clean[k] = data[k];
+      });
+      clean['Bosnia and Herzegovina'] = clean['Bosnia and Herzegovina'] || clean['Bosnia & Herzegovina'];
+      state.rankings = clean;
+    }).catch(function() {});
+}
+
+function loadAllData() {
+  return Promise.all([fetchTeams(), fetchGames(), loadUsersFromSheet()]);
+}
+
+function validateSession() {
+  var cached = JSON.parse(localStorage.getItem('fifa_user') || 'null');
+  if (!cached) return true;
+  var found = state.users.find(function(u) { return u.userId === cached.userId; });
+  if (found) {
+    state.currentUser = cached;
+    state.currentUser.teamId = found.teamId;
+    return true;
+  }
+  state.currentUser = null;
+  state.masterPasswordVerified = false;
+  localStorage.removeItem('fifa_user');
+  localStorage.removeItem('pw_verified');
+  return false;
+}
+
+function fetchTeams() {
+  return fetch(CONFIG.TEAMS_API).then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data && data.teams) {
+        state.teams = {};
+        state.teamsArr = data.teams;
+        data.teams.forEach(function(t) {
+          state.teams[t.id] = t;
+          TEAM_FLAG_MAP[t.id] = t.flag || (CONFIG.FLAG_BASE + '/' + (t.iso2 || '').toLowerCase() + '.png');
+        });
+      }
+    }).catch(function(e) { console.error('Teams fetch failed', e); });
+}
+
+function fetchGames() {
+  return fetch(CONFIG.GAMES_API).then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data && data.games) {
+        state.games = data.games.map(function(g) {
+          var winner = null;
+          if (g.finished === 'TRUE') {
+            var hs = parseInt(g.home_score);
+            var as = parseInt(g.away_score);
+            if (hs > as) winner = g.home_team_id;
+            else if (as > hs) winner = g.away_team_id;
+          }
+          return {
+            id: String(g.id),
+            type: g.type,
+            team1Id: g.home_team_id,
+            team2Id: g.away_team_id,
+            team1Label: g.home_team_label || null,
+            team2Label: g.away_team_label || null,
+            team1Name: g.home_team_name_en || null,
+            team2Name: g.away_team_name_en || null,
+            score1: g.finished === 'TRUE' ? g.home_score : null,
+            score2: g.finished === 'TRUE' ? g.away_score : null,
+            finished: g.finished === 'TRUE',
+            winner: winner,
+            date: g.local_date || null,
+            scorers: g.home_scorers || g.away_scorers ? { home: g.home_scorers, away: g.away_scorers } : null,
+          };
+        });
+      }
+    }).catch(function(e) { console.error('Games fetch failed', e); });
+}
+
+function loadUsersFromSheet() {
+  return apiGet({ action: 'getUsers' }).then(function(res) {
+    if (res.success) state.users = res.data;
+  });
+}
+
+function apiGet(params) {
+  var url = CONFIG.APPS_SCRIPT_URL + '?' + Object.keys(params).map(function(k) {
+    return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+  }).join('&');
+  return fetch(url).then(function(r) { return r.json(); }).catch(function() {
+    return { success: false, error: 'Network error' };
+  });
+}
+
+function apiPost(data) {
+  return fetch(CONFIG.APPS_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }).then(function(r) { return r.json(); }).catch(function() {
+    return { success: false, error: 'Network error' };
+  });
+}
+
+function checkMasterPassword() {
+  var pw = document.getElementById('pw-input').value;
+  document.getElementById('pw-error').textContent = '';
+  apiPost({ action: 'checkMasterPassword', password: pw }).then(function(res) {
+    if (res.success) {
+      state.masterPasswordVerified = true;
+      localStorage.setItem('pw_verified', 'true');
+      loadAllData().then(function() {
+        validateSession();
+        if (state.currentUser) {
+          enterMainApp();
+        } else {
+          showUserGrid();
+        }
+      });
+    } else {
+      document.getElementById('pw-error').textContent = res.error || 'Incorrect password';
+    }
+  });
+}
+
+function showUserGrid() {
+  showScreen('screen-users');
+  var grid = document.getElementById('user-grid');
+  grid.innerHTML = '';
+
+  state.users.forEach(function(u) {
+    var team = state.teams[u.teamId];
+    var flagUrl = team ? TEAM_FLAG_MAP[u.teamId] : '';
+    var initial = u.name.charAt(0).toUpperCase();
+
+    var card = document.createElement('div');
+    card.className = 'user-card';
+    card.innerHTML =
+      '<div class="avatar">' +
+        (flagUrl ? '<img src="' + flagUrl + '" alt="" loading="lazy">' : '') +
+        '<span class="initial">' + initial + '</span>' +
+      '</div>' +
+      '<div class="name">' + escapeHtml(u.name) + '</div>';
+    card.addEventListener('click', function() { openAuth(u); });
+    grid.appendChild(card);
+  });
+
+  var addCard = document.createElement('div');
+  addCard.className = 'user-card add-card';
+  addCard.innerHTML = '<span style="font-size:2.5rem">+</span><div class="name">Add me</div>';
+  addCard.addEventListener('click', openRegistration);
+  grid.appendChild(addCard);
+}
+
+function openRegistration() {
+  var select = document.getElementById('reg-team');
+  select.innerHTML = '<option value="">-- Pick your team --</option>';
+  state.teamsArr.sort(function(a, b) { return a.name_en.localeCompare(b.name_en); }).forEach(function(t) {
+    var opt = document.createElement('option');
+    opt.value = t.id;
+    opt.textContent = t.name_en;
+    select.appendChild(opt);
+  });
+  document.getElementById('reg-name').value = '';
+  document.getElementById('reg-jersey').value = '';
+  document.getElementById('reg-error').textContent = '';
+  showModal('modal-register');
+}
+
+function registerUser() {
+  var name = document.getElementById('reg-name').value.trim();
+  var teamId = document.getElementById('reg-team').value;
+  var jersey = document.getElementById('reg-jersey').value;
+  var error = document.getElementById('reg-error');
+
+  if (!name) { error.textContent = 'Enter your name'; return; }
+  if (!teamId) { error.textContent = 'Pick a team'; return; }
+  if (!jersey || jersey < 1 || jersey > 99) { error.textContent = 'Jersey number (1-99)'; return; }
+
+  apiPost({ action: 'registerUser', name: name, teamId: Number(teamId), jerseyNumber: Number(jersey) })
+    .then(function(res) {
+      if (res.success) {
+        closeModal('modal-register');
+        state.currentUser = { userId: res.userId, name: name, teamId: Number(teamId), jerseyNumber: Number(jersey) };
+        localStorage.setItem('fifa_user', JSON.stringify(state.currentUser));
+        loadAllData().then(function() { enterMainApp(); });
+      } else {
+        error.textContent = res.error || 'Registration failed';
+      }
+    });
+}
+
+function openAuth(user) {
+  document.getElementById('auth-title').textContent = 'Welcome back, ' + escapeHtml(user.name);
+  document.getElementById('auth-jersey').value = '';
+  document.getElementById('auth-error').textContent = '';
+  document.getElementById('auth-submit').dataset.userId = user.userId;
+  document.getElementById('auth-submit').dataset.userName = user.name;
+  document.getElementById('auth-jersey').dataset.userId = user.userId;
+  document.getElementById('auth-jersey').dataset.userName = user.name;
+  showModal('modal-auth');
+}
+
+function authenticateUser() {
+  var userId = Number(this.dataset.userId);
+  var userName = this.dataset.userName;
+  var jersey = document.getElementById('auth-jersey').value;
+  var error = document.getElementById('auth-error');
+
+  if (!jersey) { error.textContent = 'Enter your jersey number'; return; }
+
+  apiGet({ action: 'authenticate', name: userName, jerseyNumber: jersey }).then(function(res) {
+    if (res.success) {
+      closeModal('modal-auth');
+      state.currentUser = { userId: res.userId, name: userName, teamId: null, jerseyNumber: Number(jersey) };
+      var u = state.users.find(function(x) { return x.userId === res.userId; });
+      if (u) state.currentUser.teamId = u.teamId;
+      localStorage.setItem('fifa_user', JSON.stringify(state.currentUser));
+      enterMainApp();
+    } else {
+      error.textContent = res.error || 'Wrong number';
+    }
+  });
+}
+
+function logout() {
+  state.currentUser = null;
+  state.predictions = [];
+  localStorage.removeItem('fifa_user');
+  showScreen('screen-users');
+}
+
+function enterMainApp() {
+  showScreen('screen-main');
+  document.getElementById('main-user-name').textContent = state.currentUser.name;
+  var team = state.teams[state.currentUser.teamId];
+  if (team) document.getElementById('main-user-name').textContent += ' (' + team.name_en + ')';
+  renderBracket();
+}
+
+function renderBracket() {
+  var container = document.getElementById('bracket-view');
+
+  if (!state.games.length || !state.teamsArr.length) {
+    container.innerHTML = '<div class="loading">Loading bracket</div>';
+    return;
+  }
+
+  if (state.currentUser) {
+    apiGet({ action: 'getPredictions', userId: state.currentUser.userId }).then(function(res) {
+      if (res.success) state.predictions = res.data;
+      else state.predictions = [];
+      renderBracketHTML(container);
+    });
+  } else {
+    state.predictions = [];
+    renderBracketHTML(container);
+  }
+}
+
+var ROUND_LABELS = {
+  r32: 'Round of 32', r16: 'Round of 16', qf: 'Quarter-finals',
+  sf: 'Semi-finals', third: '3rd Place', final: 'Final'
+};
+
+function getPrevRound(round) {
+  if (round === 'final' || round === 'third') return 'sf';
+  var idx = CONFIG.ROUND_ORDER.indexOf(round);
+  if (idx <= 0) return null;
+  return CONFIG.ROUND_ORDER[idx - 1];
+}
+
+function computeBudget(round) {
+  var base = CONFIG.BASE_COINS[round] || 0;
+  if (round === 'r32') return base;
+  var prv = getPrevRound(round);
+  if (!prv) return base;
+  var earned = 0;
+  state.predictions.forEach(function(p) {
+    var g = state.games.find(function(gg) { return gg.id === p.gameId; });
+    if (g && g.type === prv && g.finished && g.winner && String(g.winner) === String(p.predictedTeamId)) {
+      earned += p.coinBet;
+    }
+  });
+  return base + earned;
+}
+
+function computeSpent(round) {
+  return state.predictions
+    .filter(function(p) {
+      var g = state.games.find(function(gg) { return gg.id === p.gameId; });
+      return g && g.type === round;
+    })
+    .reduce(function(sum, p) { return sum + p.coinBet; }, 0);
+}
+
+function renderBracketHTML(container) {
+  var knockout = state.games.filter(function(g) { return CONFIG.ROUND_ORDER.indexOf(g.type) !== -1; });
+  knockout.sort(function(a, b) { return parseInt(a.id) - parseInt(b.id); });
+
+  var rounds = {};
+  knockout.forEach(function(g) {
+    if (!rounds[g.type]) rounds[g.type] = [];
+    rounds[g.type].push(g);
+  });
+
+  var currentRound = determineCurrentRound(rounds);
+  var html = '';
+
+  CONFIG.ROUND_ORDER.forEach(function(type) {
+    if (!rounds[type]) return;
+    var games = rounds[type];
+    var allDone = games.every(function(g) { return g.finished; });
+    var isCurrent = type === currentRound;
+
+    var badge = allDone ? '<span class="status-badge badge-done">Done</span>'
+      : isCurrent ? '<span class="status-badge badge-active">Active</span>'
+      : '<span class="status-badge badge-locked">Locked</span>';
+
+    html += '<div class="round-section">';
+    html += '<div class="round-header">' + (ROUND_LABELS[type] || type) + ' ' + badge + '</div>';
+
+    if (isCurrent && state.currentUser) {
+      var budget = computeBudget(type);
+      var spent = computeSpent(type);
+      html += '<div class="budget-info">Budget: ' + budget + ' coins | Spent: ' + spent + ' | Remaining: <strong>' + (budget - spent) + '</strong></div>';
+    }
+
+    games.forEach(function(game) {
+      html += renderGameCard(game, isCurrent, allDone, type === currentRound);
+    });
+
+    html += '</div>';
+  });
+
+  container.innerHTML = html;
+  attachBracketListeners();
+}
+
+function determineCurrentRound(rounds) {
+  var roundKeys = CONFIG.ROUND_ORDER.filter(function(r) { return rounds[r]; });
+  for (var i = 0; i < roundKeys.length; i++) {
+    var games = rounds[roundKeys[i]];
+    var allDone = games.every(function(g) { return g.finished; });
+    if (!allDone) {
+      if (i === 0) return roundKeys[0];
+      var prevDone = rounds[roundKeys[i - 1]].every(function(g) { return g.finished; });
+      if (prevDone) return roundKeys[i];
+      return roundKeys[i - 1];
+    }
+  }
+  return roundKeys[roundKeys.length - 1];
+}
+
+function renderGameCard(game, isCurrent, allDone, isInteractiveRound) {
+  var team1Known = game.team1Id && game.team1Id !== '0';
+  var team2Known = game.team2Id && game.team2Id !== '0';
+  var canPredict = isCurrent && team1Known && team2Known && !game.finished;
+
+  var cardClass = 'game-card';
+  if (game.finished) cardClass += ' completed';
+  else if (canPredict) cardClass += ' current';
+  else if (!game.finished) cardClass += ' locked';
+
+  var html = '<div class="' + cardClass + '" data-game-id="' + game.id + '">';
+
+  html += '<div class="game-teams">';
+  html += renderTeamSlot(game, 'team1', team1Known, canPredict);
+  html += '<span class="vs">vs</span>';
+  html += renderTeamSlot(game, 'team2', team2Known, canPredict);
+  html += '</div>';
+
+  if (game.finished) {
+    html += '<div class="game-info">' +
+      '<span>' + (game.score1 || 0) + ' - ' + (game.score2 || 0) + '</span>' +
+      (game.date ? '<span>' + game.date + '</span>' : '') +
+      '</div>';
+  }
+
+  if (canPredict) {
+    var pred = state.predictions.find(function(p) { return p.gameId === game.id; });
+    html += renderPredictionControls(game, pred);
+  }
+
+  if (game.finished) {
+    html += renderUserPredictionResult(game);
+  }
+
+  var hlUrl = state.highlights[game.id];
+  if (game.finished) {
+    html += '<div class="game-info">';
+    if (hlUrl) html += '<a href="' + escapeHtml(hlUrl) + '" target="_blank">&#9654; Highlights</a>';
+    else if (state.currentUser) html += '<a href="#" class="add-hl" data-game="' + game.id + '">+ Add highlights link</a>';
+    html += '</div>';
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function renderTeamSlot(game, side, known, canPredict) {
+  var id = side === 'team1' ? game.team1Id : game.team2Id;
+  var label = side === 'team1' ? game.team1Label : game.team2Label;
+  var name = side === 'team1' ? game.team1Name : game.team2Name;
+  var score = side === 'team1' ? game.score1 : game.score2;
+  var winId = game.winner;
+
+  if (known) {
+    var team = state.teams[id];
+    var flagUrl = team ? TEAM_FLAG_MAP[id] : '';
+    var teamName = team ? team.name_en : (name || 'Team ' + id);
+    var isWinner = game.finished && String(id) === String(winId);
+    var isLoser = game.finished && String(id) !== String(winId) && winId !== null;
+
+    var cls = 'team';
+    if (game.finished && isWinner) cls += ' winner';
+    if (game.finished && isLoser) cls += ' loser';
+
+    var selAttr = '';
+    if (canPredict) selAttr = ' data-team="' + id + '" onclick="selectTeam(this, \'' + game.id + '\')"';
+
+    return '<div class="' + cls + '"' + selAttr + ' title="Click for team info" ondblclick="showTeamPopup(' + id + ')">' +
+      (flagUrl ? '<img src="' + flagUrl + '" alt="" loading="lazy">' : '<span class="flag-placeholder"></span>') +
+      '<span>' + escapeHtml(teamName) + '</span>' +
+      (game.finished ? '<span class="score">' + (score || '') + '</span>' : '') +
+      '</div>';
+  } else if (label) {
+    var matchNum = label.replace(/[^0-9]/g, '');
+    return '<div class="team" title="' + escapeHtml(label) + '"><span class="flag-placeholder"></span><span>TBD (' + matchNum + ')</span></div>';
+  } else {
+    return '<div class="team"><span class="flag-placeholder"></span><span>?</span></div>';
+  }
+}
+
+function renderPredictionControls(game, existingPred) {
+  var selectedId = existingPred ? existingPred.predictedTeamId : (state.selectedTeams[game.id] || '');
+  var coinVal = existingPred ? existingPred.coinBet : (state.selectedTeams[game.id + '_coins'] || 1);
+
+  var html = '<div class="game-pick">';
+
+  html += '<button class="btn btn-sm btn-ghost team1-pick" data-game="' + game.id + '" data-team="' + game.team1Id + '"';
+  if (selectedId === game.team1Id) html += ' style="background:rgba(232,184,48,0.2);border-color:var(--accent);color:var(--accent)"';
+  html += ' onclick="selectTeamById(this, \'' + game.id + '\', \'' + game.team1Id + '\')">';
+  var t1 = state.teams[game.team1Id];
+  html += (t1 ? t1.name_en : 'Team 1') + '</button>';
+
+  html += '<button class="btn btn-sm btn-ghost team2-pick" data-game="' + game.id + '" data-team="' + game.team2Id + '"';
+  if (selectedId === game.team2Id) html += ' style="background:rgba(232,184,48,0.2);border-color:var(--accent);color:var(--accent)"';
+  html += ' onclick="selectTeamById(this, \'' + game.id + '\', \'' + game.team2Id + '\')">';
+  var t2 = state.teams[game.team2Id];
+  html += (t2 ? t2.name_en : 'Team 2') + '</button>';
+
+  html += '<input type="number" class="coin-input" data-game="' + game.id + '" value="' + coinVal + '" min="1" max="99">';
+  html += '<button class="btn btn-sm pred-submit" data-game="' + game.id + '" onclick="submitPrediction(this)">';
+  html += (existingPred ? 'Update' : 'Predict');
+  html += '</button>';
+
+  if (existingPred) {
+    html += '<button class="btn btn-sm btn-ghost pred-delete" data-game="' + game.id + '" onclick="deletePrediction(this)">Delete</button>';
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function renderUserPredictionResult(game) {
+  var pred = state.predictions.find(function(p) { return p.gameId === game.id; });
+  if (!pred) return '';
+
+  var correct = pred.predictedTeamId === game.winner;
+  var icon = correct ? '\u2705' : '\u274c';
+  var label = correct ? 'Correct!' : 'Wrong';
+  var cls = correct ? 'win' : 'loss';
+
+  return '<div class="game-info">' +
+    '<span class="' + cls + '">' + icon + ' You predicted: ' + (state.teams[pred.predictedTeamId] ? state.teams[pred.predictedTeamId].name_en : 'Team ' + pred.predictedTeamId) + ' (' + pred.coinBet + ' coin' + (pred.coinBet > 1 ? 's' : '') + ') ' + label + '</span>' +
+    '</div>';
+}
+
+window.selectTeam = function(el, gameId) {
+  var teamId = el.dataset.team;
+  state.selectedTeams[gameId] = teamId;
+  var card = el.closest('.game-card');
+  var picks = card.querySelectorAll('.team[data-team]');
+  picks.forEach(function(p) {
+    p.style.outline = String(p.dataset.team) === String(teamId) ? '2px solid var(--accent)' : '';
+  });
+};
+
+window.selectTeamById = function(el, gameId, teamId) {
+  state.selectedTeams[gameId] = teamId;
+  var card = el.closest('.game-pick');
+  var btns = card.querySelectorAll('button[data-team]');
+  btns.forEach(function(b) {
+    b.style.background = '';
+    b.style.borderColor = '';
+    b.style.color = '';
+    if (String(b.dataset.team) === String(teamId)) {
+      b.style.background = 'rgba(232,184,48,0.2)';
+      b.style.borderColor = 'var(--accent)';
+      b.style.color = 'var(--accent)';
+    }
+  });
+};
+
+window.submitPrediction = function(btn) {
+  var gameId = btn.dataset.game;
+  var card = btn.closest('.game-pick') || btn.closest('.game-card');
+  var pickBtns = (card.querySelectorAll ? card.querySelectorAll('button[data-team]') : []);
+
+  var predictedTeamId = state.selectedTeams[gameId];
+  if (!predictedTeamId) {
+    pickBtns.forEach(function(b) {
+      if (b.style.background && b.style.background.includes('rgba(232,184,48')) {
+        predictedTeamId = b.dataset.team;
+      }
+    });
+  }
+  if (!predictedTeamId) { toast('Pick a team first', 'error'); return; }
+
+  var coinInput = card.querySelector('.coin-input[data-game="' + gameId + '"]');
+  var coinBet = coinInput ? parseInt(coinInput.value) : 1;
+  if (!coinBet || coinBet < 1) { toast('Min 1 coin', 'error'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  apiPost({
+    action: 'submitPrediction',
+    userId: state.currentUser.userId,
+    gameId: gameId,
+    predictedTeamId: predictedTeamId,
+    coinBet: coinBet
+  }).then(function(res) {
+    if (res.success) {
+      toast(res.updated ? 'Prediction updated!' : 'Prediction saved!', 'success');
+      renderBracket();
+    } else {
+      toast(res.error || 'Failed to save', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Retry';
+    }
+  });
+};
+
+window.deletePrediction = function(btn) {
+  var gameId = btn.dataset.game;
+  if (!confirm('Remove your prediction for this game?')) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Deleting...';
+
+  apiPost({
+    action: 'deletePrediction',
+    userId: state.currentUser.userId,
+    gameId: gameId
+  }).then(function(res) {
+    if (res.success) {
+      toast('Prediction removed', 'success');
+      renderBracket();
+    } else {
+      toast(res.error || 'Failed to delete', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Delete';
+    }
+  });
+};
+
+function attachBracketListeners() {
+  document.querySelectorAll('.add-hl').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      e.preventDefault();
+      var gameId = this.dataset.game;
+      var url = prompt('Enter highlights URL for this game:');
+      if (url && url.trim()) {
+        apiPost({ action: 'saveHighlight', gameId: gameId, url: url.trim() }).then(function(res) {
+          if (res.success) {
+            state.highlights[gameId] = url.trim();
+            renderBracket();
+            toast('Highlights link saved!', 'success');
+          } else {
+            toast(res.error || 'Failed to save', 'error');
+          }
+        });
+      }
+    });
+  });
+}
+
+function renderLeaderboard() {
+  var container = document.getElementById('leaderboard-view');
+  container.innerHTML = '<div class="loading">Loading leaderboard</div>';
+
+  apiGet({ action: 'getLeaderboard' }).then(function(res) {
+    if (!res.success || !res.data) {
+      container.innerHTML = '<p style="text-align:center;color:var(--text2)">Failed to load leaderboard</p>';
+      return;
+    }
+
+    var data = res.data;
+    if (!data.length) {
+      container.innerHTML = '<p style="text-align:center;color:var(--text2)">No predictions yet</p>';
+      return;
+    }
+
+    var html = '<table class="leaderboard-table"><thead><tr>' +
+      '<th>Rank</th><th>Player</th><th style="text-align:right">Score</th><th style="text-align:right">Correct</th>' +
+      '</tr></thead><tbody>';
+
+    data.forEach(function(row) {
+      var rankClass = 'rank';
+      if (row.rank === 1) rankClass += ' gold';
+      else if (row.rank === 2) rankClass += ' silver';
+      else if (row.rank === 3) rankClass += ' bronze';
+
+      var isMe = state.currentUser && row.userId === state.currentUser.userId;
+
+      html += '<tr' + (isMe ? ' class="me"' : '') + '>' +
+        '<td class="' + rankClass + '">' + row.rank + '</td>' +
+        '<td>' + escapeHtml(row.name) + '</td>' +
+        '<td class="score">' + row.totalScore + '</td>' +
+        '<td style="text-align:right;color:var(--text2)">' + row.correctCount + '</td>' +
+        '</tr>';
+    });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  });
+}
+
+function showTeamPopup(teamId) {
+  var team = state.teams[teamId];
+  if (!team) return;
+
+  var rank = state.rankings[team.name_en] || state.rankings[team.name_en.replace(/['\u2019]/g, "'")] || 'N/A';
+  var region = CONFIG.REGION_MAP[team.name_en] || '';
+  var flagUrl = TEAM_FLAG_MAP[teamId];
+  var kitUrl = CONFIG.KIT_IMAGES[teamId] || '';
+
+  var pastGames = state.games.filter(function(g) {
+    return g.finished && (String(g.team1Id) === String(teamId) || String(g.team2Id) === String(teamId));
+  }).slice(-6);
+
+  var html =
+    '<div class="tp-header">' +
+    (flagUrl ? '<img src="' + flagUrl + '" alt="">' : '') +
+    '<h2>' + escapeHtml(team.name_en) + '</h2>' +
+    '</div>' +
+    '<div class="tp-info">' +
+    '<div class="item"><div class="label">FIFA Ranking</div><div class="value">' + rank + '</div></div>' +
+    '<div class="item"><div class="label">Region</div><div class="value">' + region + '</div></div>' +
+    '</div>' +
+    '<div class="tp-map"><div id="team-map" style="height:200px;border-radius:6px;background:var(--bg3)"></div></div>';
+
+  if (kitUrl) {
+    html += '<div class="tp-kit"><h3>Kit</h3><img src="' + escapeHtml(kitUrl) + '" alt="Kit"></div>';
+  }
+
+  if (pastGames.length) {
+    html += '<div class="tp-results"><h3>Recent Results</h3>';
+    pastGames.sort(function(a, b) { return parseInt(b.id) - parseInt(a.id); });
+    pastGames.forEach(function(g) {
+      var opponentId = String(g.team1Id) === String(teamId) ? g.team2Id : g.team1Id;
+      var opponent = state.teams[opponentId];
+      var oppName = opponent ? opponent.name_en : 'Unknown';
+      var ourScore = String(g.team1Id) === String(teamId) ? g.score1 : g.score2;
+      var oppScore = String(g.team1Id) === String(teamId) ? g.score2 : g.score1;
+      var resultClass = parseInt(ourScore) > parseInt(oppScore) ? 'win' : (parseInt(ourScore) < parseInt(oppScore) ? 'loss' : 'draw');
+      var resultLabel = parseInt(ourScore) > parseInt(oppScore) ? 'W' : (parseInt(ourScore) < parseInt(oppScore) ? 'L' : 'D');
+      html += '<div class="result-item"><span class="' + resultClass + '">[' + resultLabel + ']</span> ' +
+        escapeHtml(oppName) + ' ' + ourScore + '-' + oppScore + '</div>';
+    });
+    html += '</div>';
+  }
+
+  document.getElementById('team-popup-body').innerHTML = html;
+  showModal('modal-team-popup');
+
+  setTimeout(function() {
+    var mapDiv = document.getElementById('team-map');
+    if (mapDiv) {
+      initTeamMap(team, mapDiv);
+    }
+  }, 200);
+}
+
+function initTeamMap(team, mapDiv) {
+  fetch('https://nominatim.openstreetmap.org/search?country=' + encodeURIComponent(team.name_en) + '&format=json&limit=1')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data && data[0]) {
+        var loc = data[0];
+        mapDiv.innerHTML = '';
+        var map = L.map(mapDiv, { zoomControl: true, attributionControl: false });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 18
+        }).addTo(map);
+        map.setView([parseFloat(loc.lat), parseFloat(loc.lon)], 5);
+        var bounds = loc.boundingbox;
+        if (bounds) {
+          try {
+            map.fitBounds([
+              [parseFloat(bounds[0]), parseFloat(bounds[2])],
+              [parseFloat(bounds[1]), parseFloat(bounds[3])]
+            ]);
+          } catch(e) {}
+        }
+      } else {
+        mapDiv.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text2)">Map unavailable</div>';
+      }
+    })
+    .catch(function() {
+      mapDiv.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text2)">Map unavailable</div>';
+    });
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+document.addEventListener('DOMContentLoaded', init);
