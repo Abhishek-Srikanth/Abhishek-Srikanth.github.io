@@ -207,6 +207,10 @@ input, select, button {
 }
 .game-info a { color: var(--accent); text-decoration: none; }
 .game-info a:hover { text-decoration: underline; }
+.stadium-name { font-weight: 600; }
+.stadium-name.mexico { color: var(--accent3); }
+.stadium-name.canada { color: var(--accent2); }
+.stadium-name.usa { color: #5890ff; }
 
 /* Leaderboard */
 .leaderboard-table {
@@ -270,10 +274,9 @@ input, select, button {
 .toast.success { border-color: var(--accent3); }
 
 .loading {
-  text-align: center; padding: 40px; color: var(--text2);
+  text-align: center; padding: 80px 40px; font-size: 5rem;
+  animation: spin 1s linear infinite; line-height: 1;
 }
-.loading::after { content: '...'; animation: dots 1.5s steps(4, end) infinite; }
-@keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
 
 /* Loading overlay */
 .loading-overlay {

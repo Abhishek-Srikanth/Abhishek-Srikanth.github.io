@@ -8,10 +8,30 @@ var state = {
   predictions: [],
   users: [],
   highlights: {},
+  stadiums: {},
   selectedTeams: {},
 };
 
 var TEAM_FLAG_MAP = {};
+
+var STADIUM_TZ = {
+  '1': 'America/Mexico_City',
+  '2': 'America/Mexico_City',
+  '3': 'America/Mexico_City',
+  '4': 'America/Chicago',
+  '5': 'America/Chicago',
+  '6': 'America/Chicago',
+  '7': 'America/New_York',
+  '8': 'America/New_York',
+  '9': 'America/New_York',
+  '10': 'America/New_York',
+  '11': 'America/New_York',
+  '12': 'America/Toronto',
+  '13': 'America/Vancouver',
+  '14': 'America/Los_Angeles',
+  '15': 'America/Los_Angeles',
+  '16': 'America/Los_Angeles'
+};
 
 function init() {
   document.getElementById('pw-submit').addEventListener('click', checkMasterPassword);
@@ -95,7 +115,7 @@ function preloadRankings() {
 }
 
 function loadAllData() {
-  return Promise.all([fetchTeams(), fetchGames(), loadUsersFromSheet()]);
+  return Promise.all([fetchTeams(), fetchGames(), loadUsersFromSheet(), fetchStadiums()]);
 }
 
 function validateSession() {
@@ -128,6 +148,72 @@ function fetchTeams() {
     }).catch(function(e) { console.error('Teams fetch failed', e); });
 }
 
+function fetchStadiums() {
+  return fetch('https://worldcup26.ir/get/stadiums').then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data && data.stadiums) {
+        state.stadiums = {};
+        data.stadiums.forEach(function(s) {
+          state.stadiums[s.id] = s;
+        });
+      }
+    }).catch(function(e) { console.error('Stadiums fetch failed', e); });
+}
+
+function parseVenueDate(dateStr, timezone) {
+  if (!dateStr || !timezone) return null;
+  var parts = dateStr.split(' ');
+  if (parts.length !== 2) return null;
+  var dp = parts[0].split('/');
+  var tp = parts[1].split(':');
+  if (dp.length !== 3 || tp.length !== 2) return null;
+
+  var y = +dp[2], m = +dp[0] - 1, d = +dp[1], h = +tp[0], min = +tp[1];
+
+  var utcDate = new Date(Date.UTC(y, m, d, h, min));
+
+  var formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: timezone,
+    hour12: false,
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  });
+  var fmtParts = formatter.formatToParts(utcDate);
+
+  var getP = function(type) {
+    var found = fmtParts.find(function(p) { return p.type === type; });
+    return found ? parseInt(found.value, 10) : 0;
+  };
+
+  var venueMs = Date.UTC(getP('year'), getP('month') - 1, getP('day'), getP('hour'), getP('minute'), getP('second'));
+  var offsetMs = venueMs - utcDate.getTime();
+
+  var desiredVenueMs = Date.UTC(y, m, d, h, min);
+  return new Date(desiredVenueMs - offsetMs);
+}
+
+function formatGameDate(game) {
+  if (!game.date) return '';
+
+  var tz = STADIUM_TZ[game.stadiumId];
+  var dateObj = tz ? parseVenueDate(game.date, tz) : null;
+
+  var localStr = dateObj ? dateObj.toLocaleString(undefined, {
+    weekday: 'short', month: 'short', day: 'numeric',
+    year: 'numeric', hour: '2-digit', minute: '2-digit'
+  }) : game.date;
+
+  var stadium = game.stadiumId ? state.stadiums[game.stadiumId] : null;
+  if (!stadium) return localStr;
+
+  var countryClass = '';
+  if (stadium.country_en === 'Mexico') countryClass = 'mexico';
+  else if (stadium.country_en === 'Canada') countryClass = 'canada';
+  else countryClass = 'usa';
+
+  return '<span class="stadium-name ' + countryClass + '">' + escapeHtml(stadium.name_en) + '</span> \u2014 ' + localStr;
+}
+
 function fetchGames() {
   return fetch(CONFIG.GAMES_API).then(function(r) { return r.json(); })
     .then(function(data) {
@@ -154,6 +240,7 @@ function fetchGames() {
             finished: g.finished === 'TRUE',
             winner: winner,
             date: g.local_date || null,
+            stadiumId: g.stadium_id || null,
             scorers: g.home_scorers || g.away_scorers ? { home: g.home_scorers, away: g.away_scorers } : null,
           };
         });
@@ -393,9 +480,9 @@ function enterMainApp() {
 
 function renderBracket() {
   var container = document.getElementById('bracket-view');
+  container.innerHTML = '<div class="loading">&#9917;</div>';
 
   if (!state.games.length || !state.teamsArr.length) {
-    container.innerHTML = '<div class="loading">Loading bracket</div>';
     return;
   }
 
@@ -494,10 +581,12 @@ function renderGameCard(game, isCurrent, allDone, isInteractiveRound) {
   html += renderTeamSlot(game, 'team2', team2Known, canPredict, existingPred ? existingPred.predictedTeamId : null);
   html += '</div>';
 
+  if (game.date) {
+    html += '<div class="game-info">' + formatGameDate(game) + '</div>';
+  }
   if (game.finished) {
     html += '<div class="game-info">' +
       '<span>' + (game.score1 || 0) + ' - ' + (game.score2 || 0) + '</span>' +
-      (game.date ? '<span>' + game.date + '</span>' : '') +
       '</div>';
   }
 
