@@ -40,6 +40,7 @@ function init() {
   });
   document.getElementById('reg-submit').addEventListener('click', registerUser);
   document.getElementById('auth-submit').addEventListener('click', authenticateUser);
+  document.getElementById('confirm-submit').addEventListener('click', confirmRegistration);
   document.getElementById('logout-btn').addEventListener('click', logout);
 
   document.querySelectorAll('.tab').forEach(function(tab) {
@@ -403,12 +404,48 @@ function registerUser() {
   if (!teamId) { error.textContent = 'Pick a team'; return; }
   if (!jersey || jersey < 1 || jersey > 99) { error.textContent = 'Jersey number (1-99)'; return; }
 
+  var team = state.teams[Number(teamId)];
+  var teamName = team ? team.name_en : 'Unknown';
+  var flagUrl = team ? TEAM_FLAG_MAP[teamId] : '';
+  var initial = name.charAt(0).toUpperCase();
+
+  document.getElementById('confirm-name').textContent = name;
+  document.getElementById('confirm-team').textContent = teamName;
+  document.getElementById('confirm-jersey-number').textContent = jersey;
+  document.getElementById('jb-team-name').textContent = teamName;
+  document.getElementById('jb-initial').textContent = initial;
+
+  var flagImg = document.getElementById('jb-flag-img');
+  if (flagUrl) {
+    flagImg.src = flagUrl;
+    flagImg.style.display = '';
+  } else {
+    flagImg.style.display = 'none';
+  }
+
+  document.getElementById('confirm-error').textContent = '';
+
+  var btn = document.getElementById('confirm-submit');
+  btn.dataset.name = name;
+  btn.dataset.teamId = teamId;
+  btn.dataset.jersey = jersey;
+
+  showModal('modal-confirm-jersey');
+}
+
+function confirmRegistration() {
+  var name = this.dataset.name;
+  var teamId = Number(this.dataset.teamId);
+  var jersey = Number(this.dataset.jersey);
+  var error = document.getElementById('confirm-error');
+
   showLoading('Registering...');
-  apiPost({ action: 'registerUser', name: name, teamId: Number(teamId), jerseyNumber: Number(jersey) })
+  apiPost({ action: 'registerUser', name: name, teamId: teamId, jerseyNumber: jersey })
     .then(function(res) {
       if (res.success) {
+        closeModal('modal-confirm-jersey');
         closeModal('modal-register');
-        state.currentUser = { userId: res.userId, name: name, teamId: Number(teamId), jerseyNumber: Number(jersey) };
+        state.currentUser = { userId: res.userId, name: name, teamId: teamId, jerseyNumber: jersey };
         localStorage.setItem('fifa_user', JSON.stringify(state.currentUser));
         state.users.push(state.currentUser);
         showLoading('Loading data...');

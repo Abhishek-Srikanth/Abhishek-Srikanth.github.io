@@ -55,11 +55,42 @@
     <label>Pick Your Team</label>
     <select id="reg-team"></select>
     <label>Jersey Number</label>
-    <input type="number" id="reg-jersey" placeholder="Used to login later" min="1" max="99">
+    <input type="number" id="reg-jersey" placeholder="e.g. 7" min="1" max="99">
+    <p class="field-hint">&#9432; This is how you'll log back in — pick one you'll remember!</p>
     <div class="error" id="reg-error"></div>
     <div class="btn-group">
       <button class="btn btn-ghost" onclick="closeModal('modal-register')">Cancel</button>
       <button class="btn" id="reg-submit">Join</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-confirm-jersey">
+  <div class="modal">
+    <h2>Confirm Your Details</h2>
+    <div class="confirm-summary">
+      <div class="confirm-field">
+        <span class="confirm-label">Name</span>
+        <strong id="confirm-name"></strong>
+      </div>
+      <div class="confirm-field">
+        <span class="confirm-label">Team</span>
+        <strong id="confirm-team"></strong>
+      </div>
+    </div>
+    <div class="jersey-badge">
+      <div class="jb-avatar">
+        <img id="jb-flag-img" src="" alt="" style="display:none">
+        <span class="initial" id="jb-initial"></span>
+      </div>
+      <div class="jb-number" id="confirm-jersey-number">7</div>
+      <div class="jb-team" id="jb-team-name"></div>
+    </div>
+    <p class="confirm-reminder">&#9432; You'll use this number to log back in. <strong>It is your password.</strong> Make sure it's one you'll remember!</p>
+    <div class="error" id="confirm-error"></div>
+    <div class="btn-group">
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm-jersey')">Change</button>
+      <button class="btn" id="confirm-submit">Yes, I'm sure</button>
     </div>
   </div>
 </div>
