@@ -13,8 +13,6 @@ function doGet(e) {
     result = handleAuthenticate(e);
   } else if (action === 'getPredictions') {
     result = handleGetPredictions(e);
-  } else if (action === 'getLeaderboard') {
-    result = handleGetLeaderboard();
   } else {
     result = { success: false, error: 'Unknown action' };
   }
@@ -233,15 +231,6 @@ function fetchGames() {
   return null;
 }
 
-function getWinner(game) {
-  if (!game.finished) return null;
-  var s1 = parseInt(game.score1);
-  var s2 = parseInt(game.score2);
-  if (s1 > s2) return game.team1Id;
-  if (s2 > s1) return game.team2Id;
-  return null;
-}
-
 function getPrevRound(round) {
   if (round === 'final' || round === 'third') return 'sf';
   var idx = ROUND_ORDER.indexOf(round);
@@ -344,41 +333,4 @@ function handleSaveHighlight(data) {
   var insertRow = getNextRowInSection(sheet, sections.highlights, ['MASTER_PASS']);
   sheet.getRange(insertRow, 1, 1, 3).setValues([['', gameId, url]]);
   return { success: true };
-}
-
-function handleGetLeaderboard() {
-  var users = handleGetUsers().data || [];
-  var sheet = getSheet();
-  var sections = findSections(sheet);
-  var predictions = readPredictions(sheet, sections);
-  var games = fetchGames();
-  if (!games) return { success: false, error: 'Failed to fetch game data' };
-
-  var scores = {};
-  users.forEach(function(u) { scores[u.userId] = { name: u.name, totalScore: 0, correctCount: 0 }; });
-
-  for (var pi = 0; pi < predictions.length; pi++) {
-    var pred = predictions[pi];
-    if (!scores[pred.userId]) continue;
-    var game = games.find(function(g) { return g.id === pred.gameId; });
-    if (!game || !game.finished) continue;
-    var w = getWinner(game);
-    if (w && String(w) === pred.predictedTeamId) {
-      scores[pred.userId].totalScore++;
-      scores[pred.userId].correctCount++;
-    }
-  }
-
-  var result = Object.keys(scores).map(function(uid) {
-    return {
-      userId: Number(uid),
-      name: scores[uid].name,
-      totalScore: scores[uid].totalScore,
-      correctCount: scores[uid].correctCount
-    };
-  });
-  result.sort(function(a, b) { return b.totalScore - a.totalScore || a.name.localeCompare(b.name); });
-  result.forEach(function(r, i) { r.rank = i + 1; });
-
-  return { success: true, data: result };
 }

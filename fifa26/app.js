@@ -226,6 +226,12 @@ function fetchGames() {
             var as = parseInt(g.away_score);
             if (hs > as) winner = g.home_team_id;
             else if (as > hs) winner = g.away_team_id;
+            else if (g.home_penalty_score && g.away_penalty_score) {
+              var hps = parseInt(g.home_penalty_score);
+              var aps = parseInt(g.away_penalty_score);
+              if (hps > aps) winner = g.home_team_id;
+              else if (aps > hps) winner = g.away_team_id;
+            }
           }
           return {
             id: String(g.id),
@@ -820,14 +826,43 @@ function renderLeaderboard() {
   var container = document.getElementById('leaderboard-view');
   container.innerHTML = '<div class="loading">Loading leaderboard</div>';
 
-  apiGet({ action: 'getLeaderboard' }).then(function(res) {
+  apiGet({ action: 'getPredictions' }).then(function(res) {
     if (!res.success || !res.data) {
       container.innerHTML = '<p style="text-align:center;color:var(--text2)">Failed to load leaderboard</p>';
       return;
     }
 
-    var data = res.data;
-    if (!data.length) {
+    var allPredictions = res.data;
+
+    var scores = {};
+    state.users.forEach(function(u) {
+      scores[u.userId] = { name: u.name, totalScore: 0, correctCount: 0 };
+    });
+
+    allPredictions.forEach(function(pred) {
+      if (!scores[pred.userId]) return;
+      var game = state.games.find(function(g) { return g.id === pred.gameId; });
+      if (!game || !game.finished) return;
+      if (game.winner && String(game.winner) === pred.predictedTeamId) {
+        scores[pred.userId].totalScore++;
+        scores[pred.userId].correctCount++;
+      }
+    });
+
+    var result = Object.keys(scores).map(function(uid) {
+      return {
+        userId: Number(uid),
+        name: scores[uid].name,
+        totalScore: scores[uid].totalScore,
+        correctCount: scores[uid].correctCount
+      };
+    });
+    result.sort(function(a, b) {
+      return b.totalScore - a.totalScore || a.name.localeCompare(b.name);
+    });
+    result.forEach(function(r, i) { r.rank = i + 1; });
+
+    if (!result.length) {
       container.innerHTML = '<p style="text-align:center;color:var(--text2)">No predictions yet</p>';
       return;
     }
@@ -836,7 +871,7 @@ function renderLeaderboard() {
       '<th>Rank</th><th>Player</th><th style="text-align:right">Score</th>' +
       '</tr></thead><tbody>';
 
-    data.forEach(function(row) {
+    result.forEach(function(row) {
       var rankClass = 'rank';
       if (row.rank === 1) rankClass += ' gold';
       else if (row.rank === 2) rankClass += ' silver';
