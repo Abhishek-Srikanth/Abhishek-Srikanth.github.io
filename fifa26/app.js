@@ -824,7 +824,7 @@ function attachBracketListeners() {
 
 function renderLeaderboard() {
   var container = document.getElementById('leaderboard-view');
-  container.innerHTML = '<div class="loading">Loading leaderboard</div>';
+  container.innerHTML = '<div class="loading">&#9917;</div>';
 
   apiGet({ action: 'getPredictions' }).then(function(res) {
     if (!res.success || !res.data) {
@@ -833,6 +833,7 @@ function renderLeaderboard() {
     }
 
     var allPredictions = res.data;
+    state._allPredictions = allPredictions;
 
     var scores = {};
     state.users.forEach(function(u) {
@@ -867,28 +868,163 @@ function renderLeaderboard() {
       return;
     }
 
-    var html = '<table class="leaderboard-table"><thead><tr>' +
-      '<th>Rank</th><th>Player</th><th style="text-align:right">Score</th>' +
-      '</tr></thead><tbody>';
+    var maxScore = result[0].totalScore;
+
+    var html = '<div class="lb-cards">';
 
     result.forEach(function(row) {
-      var rankClass = 'rank';
+      var rankStr = '#' + row.rank;
+      var rankClass = 'lb-rank';
       if (row.rank === 1) rankClass += ' gold';
       else if (row.rank === 2) rankClass += ' silver';
       else if (row.rank === 3) rankClass += ' bronze';
 
       var isMe = state.currentUser && row.userId === state.currentUser.userId;
+      var user = state.users.find(function(u) { return u.userId === row.userId; });
+      var team = user ? state.teams[user.teamId] : null;
+      var flagUrl = team ? TEAM_FLAG_MAP[user.teamId] : '';
 
-      html += '<tr' + (isMe ? ' class="me"' : '') + '>' +
-        '<td class="' + rankClass + '">' + row.rank + '</td>' +
-        '<td>' + escapeHtml(row.name) + '</td>' +
-        '<td class="score">' + row.correctCount + '</td>' +
-        '</tr>';
+      var barPct = maxScore > 0 ? (row.totalScore / maxScore * 100) : 0;
+
+      html += '<div class="lb-card' + (isMe ? ' me' : '') + '" data-user-id="' + row.userId + '">' +
+        '<div class="lb-main">' +
+        '<span class="' + rankClass + '">' + rankStr + '</span>' +
+        (flagUrl ? '<img class="lb-flag" src="' + flagUrl + '" alt="" loading="lazy">' : '') +
+        '<span class="lb-name">' + escapeHtml(row.name) + '</span>' +
+        '<span class="lb-score">' + row.correctCount + '</span>' +
+        '</div>' +
+        '<div class="lb-bar"><div class="lb-bar-fill" style="width:' + barPct + '%"></div></div>' +
+        '</div>';
     });
 
-    html += '</tbody></table>';
+    html += '</div>';
     container.innerHTML = html;
+
+    container.querySelectorAll('.lb-card').forEach(function(card) {
+      card.addEventListener('click', function() {
+        openPlayerPredictions(Number(this.dataset.userId));
+      });
+    });
   });
+}
+
+function openPlayerPredictions(userId) {
+  var user = state.users.find(function(u) { return u.userId === userId; });
+  if (!user) return;
+
+  var preds = (state._allPredictions || []).filter(function(p) {
+    return Number(p.userId) === userId && p.gameId;
+  });
+
+  if (!preds.length) {
+    toast('No predictions yet for ' + user.name, 'error');
+    return;
+  }
+
+  var correct = 0, wrong = 0, pending = 0;
+  var gamesByRound = {};
+
+  preds.forEach(function(pred) {
+    var game = state.games.find(function(g) { return g.id === pred.gameId; });
+    if (!game) return;
+
+    if (!gamesByRound[game.type]) gamesByRound[game.type] = [];
+    gamesByRound[game.type].push({ game: game, predictedTeamId: pred.predictedTeamId });
+
+    if (game.finished) {
+      if (String(pred.predictedTeamId) === String(game.winner)) correct++;
+      else wrong++;
+    } else {
+      pending++;
+    }
+  });
+
+  var html = '';
+
+  html += '<div class="pp-header">' +
+    '<h2>' + escapeHtml(user.name) + '\'s Predictions</h2>' +
+    '<span class="pp-tally">' +
+    (correct ? '&#9989;' + correct : '') +
+    (wrong ? ' &#10060;' + wrong : '') +
+    (pending ? ' &#9203;' + pending : '') +
+    '</span>' +
+    '<button class="pp-close" onclick="closeModal(\'modal-player-predictions\')">&times;</button>' +
+    '</div>';
+
+  html += '<div class="pp-body">';
+
+  var hasAny = false;
+  CONFIG.ROUND_ORDER.forEach(function(type) {
+    var items = gamesByRound[type];
+    if (!items || !items.length) return;
+    hasAny = true;
+
+    items.sort(function(a, b) { return parseInt(a.game.id) - parseInt(b.game.id); });
+
+    html += '<div class="pp-round">';
+    html += '<div class="pp-round-title">' + (ROUND_LABELS[type] || type) + '</div>';
+
+    items.forEach(function(item) {
+      html += renderPlayerGameRow(item.game, item.predictedTeamId);
+    });
+
+    html += '</div>';
+  });
+
+  if (!hasAny) {
+    html += '<div class="pp-empty">No finished games with predictions yet</div>';
+  }
+
+  html += '</div>';
+
+  document.getElementById('pp-sheet').innerHTML = html;
+  showModal('modal-player-predictions');
+}
+
+function renderPlayerGameRow(game, predictedTeamId) {
+  var statusIcon;
+  if (game.finished && predictedTeamId) {
+    statusIcon = String(predictedTeamId) === String(game.winner) ? '&#9989;' : '&#10060;';
+  } else {
+    statusIcon = '&#9203;';
+  }
+
+  return '<div class="pp-game">' +
+    '<span class="pp-status">' + statusIcon + '</span>' +
+    '<div class="pp-game-teams">' +
+    renderCompactTeam(game, 'team1', predictedTeamId) +
+    '<span class="pp-vs">' + (game.finished ? '-' : 'vs') + '</span>' +
+    renderCompactTeam(game, 'team2', predictedTeamId) +
+    '</div></div>';
+}
+
+function renderCompactTeam(game, side, predictedTeamId) {
+  var id = side === 'team1' ? game.team1Id : game.team2Id;
+  var name = side === 'team1' ? game.team1Name : game.team2Name;
+  var score = side === 'team1' ? game.score1 : game.score2;
+  var winId = game.winner;
+
+  if (!id || id === '0') {
+    return '<div class="pp-team"><span>' + (name || 'TBD') + '</span></div>';
+  }
+
+  var team = state.teams[id];
+  var flagUrl = team ? TEAM_FLAG_MAP[id] : '';
+  var teamName = team ? team.name_en : (name || 'Team ' + id);
+  var isWinner = game.finished && String(id) === String(winId);
+  var isLoser = game.finished && String(id) !== String(winId) && winId !== null;
+  var isPredicted = predictedTeamId && String(id) === String(predictedTeamId);
+
+  var cls = 'pp-team';
+  if (game.finished && isWinner) cls += ' winner';
+  if (game.finished && isLoser) cls += ' loser';
+  if (isPredicted) cls += ' predicted';
+
+  return '<div class="' + cls + '">' +
+    (flagUrl ? '<img src="' + flagUrl + '" alt="" loading="lazy">' : '') +
+    '<span>' + escapeHtml(teamName) + (isPredicted ? ' \u2713' : '') + '</span>' +
+    (game.finished ? '<span class="pp-score">' + (score || '0') + '</span>' : '') +
+    '</div>';
 }
 
 function showTeamPopup(teamId) {
