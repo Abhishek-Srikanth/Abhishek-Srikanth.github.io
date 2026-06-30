@@ -553,9 +553,24 @@ function getPrevRound(round) {
   return CONFIG.ROUND_ORDER[idx - 1];
 }
 
+function getDateSortKey(dateStr) {
+  if (!dateStr) return '99999999999999';
+  var parts = dateStr.split(' ');
+  var dateParts = parts[0].split('/');
+  var month = dateParts[0].length === 1 ? '0' + dateParts[0] : dateParts[0];
+  var day = dateParts[1].length === 1 ? '0' + dateParts[1] : dateParts[1];
+  var time = parts[1] || '00:00';
+  return dateParts[2] + month + day + time;
+}
+
 function renderBracketHTML(container) {
   var knockout = state.games.filter(function(g) { return CONFIG.ROUND_ORDER.indexOf(g.type) !== -1; });
-  knockout.sort(function(a, b) { return parseInt(a.id) - parseInt(b.id); });
+  knockout.sort(function(a, b) {
+    var ka = getDateSortKey(a.date);
+    var kb = getDateSortKey(b.date);
+    if (ka === kb) return parseInt(a.id) - parseInt(b.id);
+    return ka < kb ? -1 : 1;
+  });
 
   var rounds = {};
   knockout.forEach(function(g) {
