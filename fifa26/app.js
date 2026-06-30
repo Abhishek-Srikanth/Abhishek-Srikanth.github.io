@@ -644,7 +644,7 @@ function renderGameCard(game, isCurrent, allDone, isInteractiveRound) {
   html += '</div>';
 
   if (game.date) {
-    html += '<div class="game-info">' + formatGameDate(game) + '</div>';
+    html += '<div class="game-info game-info-dt">' + formatGameDate(game) + '</div>';
   }
   if (canPredict && existingPred) {
     var pickName = existingPred.predictedTeamId === game.team1Id
