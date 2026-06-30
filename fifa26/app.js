@@ -626,8 +626,13 @@ function renderGameCard(game, isCurrent, allDone, isInteractiveRound) {
   var existingPred = state.predictions.find(function(p) { return p.gameId === game.id; });
 
   var cardClass = 'game-card';
-  if (game.finished) cardClass += ' completed';
-  else if (canPredict) cardClass += ' current';
+  if (game.finished) {
+    cardClass += ' completed';
+    var pred = state.predictions.find(function(p) { return p.gameId === game.id; });
+    if (!pred) cardClass += ' no-pick';
+    else if (pred.predictedTeamId === game.winner) cardClass += ' correct';
+    else cardClass += ' wrong';
+  } else if (canPredict) cardClass += ' current';
   else if (!game.finished) cardClass += ' locked';
 
   var html = '<div class="' + cardClass + '" data-game-id="' + game.id + '">';

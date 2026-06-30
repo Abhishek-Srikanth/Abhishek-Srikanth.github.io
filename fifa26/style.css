@@ -177,7 +177,10 @@ input, select, button {
   border-radius: 8px; padding: 12px 16px; margin-bottom: 8px;
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
 }
-.game-card.completed { opacity: 0.85; border-left: 3px solid var(--accent3); }
+.game-card.completed { opacity: 0.85; }
+.game-card.completed.correct { border-left: 3px solid var(--accent3); }
+.game-card.completed.wrong { border-left: 3px solid var(--accent2); }
+.game-card.completed.no-pick { border-left: 3px solid var(--text2); }
 .game-card.locked { opacity: 0.5; }
 .game-card.current { border-left: 3px solid var(--accent); }
 
