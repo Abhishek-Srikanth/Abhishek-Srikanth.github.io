@@ -602,7 +602,6 @@ function renderBracketHTML(container) {
   });
 
   container.innerHTML = html;
-  attachBracketListeners();
 }
 
 function determineCurrentRound(rounds) {
@@ -642,12 +641,6 @@ function renderGameCard(game, isCurrent, allDone, isInteractiveRound) {
   if (game.date) {
     html += '<div class="game-info">' + formatGameDate(game) + '</div>';
   }
-  if (game.finished) {
-    html += '<div class="game-info">' +
-      '<span>' + (game.score1 || 0) + ' - ' + (game.score2 || 0) + '</span>' +
-      '</div>';
-  }
-
   if (canPredict && existingPred) {
     var pickName = existingPred.predictedTeamId === game.team1Id
       ? (state.teams[game.team1Id] ? state.teams[game.team1Id].name_en : 'Team 1')
@@ -659,14 +652,6 @@ function renderGameCard(game, isCurrent, allDone, isInteractiveRound) {
 
   if (game.finished) {
     html += renderUserPredictionResult(game);
-  }
-
-  var hlUrl = state.highlights[game.id];
-  if (game.finished) {
-    html += '<div class="game-info">';
-    if (hlUrl) html += '<a href="' + escapeHtml(hlUrl) + '" target="_blank">&#9654; Highlights</a>';
-    else if (state.currentUser) html += '<a href="#" class="add-hl" data-game="' + game.id + '">+ Add highlights link</a>';
-    html += '</div>';
   }
 
   html += '</div>';
@@ -815,27 +800,6 @@ window.deletePrediction = function(btn) {
     }
   });
 };
-
-function attachBracketListeners() {
-  document.querySelectorAll('.add-hl').forEach(function(el) {
-    el.addEventListener('click', function(e) {
-      e.preventDefault();
-      var gameId = this.dataset.game;
-      var url = prompt('Enter highlights URL for this game:');
-      if (url && url.trim()) {
-        apiPost({ action: 'saveHighlight', gameId: gameId, url: url.trim() }).then(function(res) {
-          if (res.success) {
-            state.highlights[gameId] = url.trim();
-            renderBracket();
-            toast('Highlights link saved!', 'success');
-          } else {
-            toast(res.error || 'Failed to save', 'error');
-          }
-        });
-      }
-    });
-  });
-}
 
 function renderLeaderboard() {
   var container = document.getElementById('leaderboard-view');
