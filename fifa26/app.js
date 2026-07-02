@@ -1034,7 +1034,12 @@ function openPlayerPredictions(userId) {
     if (!items || !items.length) return;
     hasAny = true;
 
-    items.sort(function(a, b) { return parseInt(a.game.id) - parseInt(b.game.id); });
+    items.sort(function(a, b) {
+      var ka = getDateSortKey(a.game.date);
+      var kb = getDateSortKey(b.game.date);
+      if (ka === kb) return parseInt(a.game.id) - parseInt(b.game.id);
+      return ka < kb ? -1 : 1;
+    });
 
     html += '<div class="pp-round">';
     html += '<div class="pp-round-title">' + (ROUND_LABELS[type] || type) + '</div>';
