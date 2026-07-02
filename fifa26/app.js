@@ -936,7 +936,9 @@ function renderLeaderboard() {
     result.sort(function(a, b) {
       return b.totalScore - a.totalScore || a.name.localeCompare(b.name);
     });
-    result.forEach(function(r, i) { r.rank = i + 1; });
+    result.forEach(function(r, i) {
+      r.rank = i > 0 && r.totalScore === result[i-1].totalScore ? result[i-1].rank : i + 1;
+    });
 
     if (!result.length) {
       container.innerHTML = '<p style="text-align:center;color:var(--text2)">No predictions yet</p>';
@@ -965,7 +967,7 @@ function renderLeaderboard() {
         '<div class="lb-main">' +
         '<span class="' + rankClass + '">' + rankStr + '</span>' +
         (flagUrl ? '<img class="lb-flag" src="' + flagUrl + '" alt="" loading="lazy">' : '') +
-        '<span class="lb-name">' + escapeHtml(row.name) + '</span>' +
+        '<span class="lb-name' + (row.rank <= 3 ? ' ' + ['gold','silver','bronze'][row.rank - 1] : '') + '">' + escapeHtml(row.name) + '</span>' +
         '<span class="lb-score">' + row.correctCount + '</span>' +
         '</div>' +
         '<div class="lb-bar"><div class="lb-bar-fill" style="width:' + barPct + '%"></div></div>' +
