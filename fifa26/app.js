@@ -530,13 +530,19 @@ function renderBracket() {
   }
 
   if (state.currentUser) {
-    apiGet({ action: 'getPredictions', userId: state.currentUser.userId }).then(function(res) {
-      if (res.success) state.predictions = res.data;
-      else state.predictions = [];
+    apiGet({ action: 'getPredictions' }).then(function(res) {
+      if (res.success) {
+        state._allPredictions = res.data || [];
+        state.predictions = (res.data || []).filter(function(p) { return Number(p.userId) === state.currentUser.userId; });
+      } else {
+        state._allPredictions = [];
+        state.predictions = [];
+      }
       renderBracketHTML(container);
     });
   } else {
     state.predictions = [];
+    state._allPredictions = [];
     renderBracketHTML(container);
   }
 }
@@ -720,16 +726,101 @@ function renderPredictionControls(game) {
 
 function renderUserPredictionResult(game) {
   var pred = state.predictions.find(function(p) { return p.gameId === game.id; });
-  if (!pred) return '';
+  var pill = renderVotePill(game);
 
-  var correct = pred.predictedTeamId === game.winner;
-  var icon = correct ? '\u2705' : '\u274c';
-  var label = correct ? 'Correct!' : 'Wrong';
-  var cls = correct ? 'win' : 'loss';
+  var html = '<div class="game-info">';
 
-  return '<div class="game-info">' +
-    '<span class="' + cls + '">' + icon + ' You predicted: ' + (state.teams[pred.predictedTeamId] ? state.teams[pred.predictedTeamId].name_en : 'Team ' + pred.predictedTeamId) + ' ' + label + '</span>' +
+  if (pred) {
+    var correct = pred.predictedTeamId === game.winner;
+    var icon = correct ? '\u2705' : '\u274c';
+    var label = correct ? 'Correct!' : 'Wrong';
+    var cls = correct ? 'win' : 'loss';
+    html += '<span class="' + cls + '">' + icon + ' You predicted: ' + (state.teams[pred.predictedTeamId] ? state.teams[pred.predictedTeamId].name_en : 'Team ' + pred.predictedTeamId) + ' ' + label + '</span>';
+  }
+
+  if (pill) html += pill;
+
+  html += '</div>';
+  return html;
+}
+
+function renderVotePill(game) {
+  var predictions = (state._allPredictions || []).filter(function(p) { return p.gameId === game.id; });
+  var count = predictions.length;
+  if (!count) return '';
+  return '<span class="vote-pill" onclick="showVoteBreakdown(\'' + game.id + '\')">' + count + ' vote' + (count !== 1 ? 's' : '') + '</span>';
+}
+
+function showVoteBreakdown(gameId) {
+  var game = state.games.find(function(g) { return g.id === gameId; });
+  if (!game) return;
+
+  var team1Id = game.team1Id;
+  var team2Id = game.team2Id;
+  var t1 = state.teams[team1Id];
+  var t2 = state.teams[team2Id];
+  var team1Name = t1 ? t1.name_en : ('Team ' + team1Id);
+  var team2Name = t2 ? t2.name_en : ('Team ' + team2Id);
+  var winnerId = game.winner;
+
+  var predictions = (state._allPredictions || []).filter(function(p) { return p.gameId === gameId; });
+
+  var team1Votes = [], team2Votes = [];
+  predictions.forEach(function(p) {
+    var user = state.users.find(function(u) { return u.userId === Number(p.userId); });
+    var userName = user ? user.name : 'Unknown';
+    var isYou = state.currentUser && Number(p.userId) === state.currentUser.userId;
+    if (String(p.predictedTeamId) === String(team1Id)) {
+      team1Votes.push({ name: userName, isYou: isYou, teamId: user ? user.teamId : null });
+    } else if (String(p.predictedTeamId) === String(team2Id)) {
+      team2Votes.push({ name: userName, isYou: isYou, teamId: user ? user.teamId : null });
+    }
+  });
+
+  var html = '<div class="pp-header">' +
+    '<h2>Vote Breakdown</h2>' +
+    '<span class="pp-tally">' + predictions.length + ' vote' + (predictions.length !== 1 ? 's' : '') + '</span>' +
+    '<button class="pp-close" onclick="closeModal(\'modal-vote-breakdown\')">&times;</button>' +
+    '</div>' +
+    '<div class="pp-body">' +
+    renderVoteGroup(team1Name, team1Votes, winnerId, team1Id) +
+    renderVoteGroup(team2Name, team2Votes, winnerId, team2Id) +
     '</div>';
+
+  document.getElementById('vb-sheet').innerHTML = html;
+  showModal('modal-vote-breakdown');
+}
+
+function renderVoteGroup(teamName, voters, winnerId, teamId) {
+  var team = state.teams[teamId];
+  var flagUrl = team ? TEAM_FLAG_MAP[teamId] : '';
+  var isWinner = String(teamId) === String(winnerId);
+
+  var cls = 'vb-group';
+  if (isWinner) cls += ' vb-group-winner';
+  else cls += ' vb-group-loser';
+
+  var html = '<div class="' + cls + '">' +
+    '<div class="vb-group-header">' +
+    (flagUrl ? '<img src="' + flagUrl + '" alt="" class="vb-flag">' : '') +
+    '<span class="vb-team-name">' + escapeHtml(teamName) + '</span>' +
+    (isWinner ? '<span class="vb-badge">Winner</span>' : '') +
+    '<span class="vb-count">' + voters.length + '</span>' +
+    '</div>' +
+    '<div class="vb-voters">';
+
+  voters.forEach(function(v) {
+    var voterFlagUrl = v.teamId ? TEAM_FLAG_MAP[v.teamId] : '';
+    var bgStyle = voterFlagUrl
+      ? 'background:linear-gradient(rgba(30,30,52,0.8),rgba(30,30,52,0.8)),url(' + voterFlagUrl + ') center/auto no-repeat var(--bg3)'
+      : '';
+    var vCls = 'vb-voter';
+    if (v.isYou) vCls += ' vb-you';
+    html += '<span class="' + vCls + '" style="' + bgStyle + '">' + escapeHtml(v.name) + '</span>';
+  });
+
+  html += '</div></div>';
+  return html;
 }
 
 window.selectTeamById = function(el, gameId, teamId) {

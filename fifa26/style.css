@@ -210,6 +210,12 @@ input, select, button {
 }
 .game-info a { color: var(--accent); text-decoration: none; }
 .game-info a:hover { text-decoration: underline; }
+.vote-pill {
+  font-size: 0.72rem; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; padding: 1px 8px; cursor: pointer; white-space: nowrap;
+  user-select: none; transition: border-color 0.2s; line-height: 1.6;
+}
+.vote-pill:hover { border-color: var(--accent); }
 .stadium-name { font-weight: 600; }
 .stadium-name.mexico { color: var(--accent3); }
 .stadium-name.canada { color: var(--accent2); }
@@ -286,6 +292,35 @@ input, select, button {
 .pp-team.predicted { background: rgba(232,184,48,0.15); outline: 1px solid var(--accent); }
 .pp-vs { color: var(--text2); font-size: 0.78rem; flex-shrink: 0; padding: 0 2px; }
 .pp-empty { text-align: center; color: var(--text2); font-size: 0.9rem; padding: 40px 20px; }
+
+.vb-group { margin-bottom: 16px; }
+.vb-group:last-child { margin-bottom: 0; }
+.vb-group-winner { background: rgba(48,184,112,0.05); border-radius: 8px; padding: 12px; margin: 0 -4px 16px; }
+.vb-group-winner:last-child { margin-bottom: 0; }
+.vb-group-loser { background: rgba(240,72,80,0.05); border-radius: 8px; padding: 12px; margin: 0 -4px 16px; }
+.vb-group-loser:last-child { margin-bottom: 0; }
+.vb-group-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+}
+.vb-flag { width: 24px; height: 16px; border-radius: 2px; object-fit: cover; }
+.vb-team-name { font-weight: 600; font-size: 0.9rem; flex: 1; }
+.vb-badge {
+  font-size: 0.65rem; background: var(--accent3); color: #111;
+  padding: 1px 8px; border-radius: 8px; font-weight: 600; text-transform: uppercase;
+}
+.vb-count {
+  font-size: 0.82rem; color: var(--text2); font-weight: 600; white-space: nowrap;
+}
+.vb-voters {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.vb-voter {
+  background: var(--bg3); border-radius: 4px; padding: 3px 8px;
+  font-size: 0.82rem; line-height: 1.4;
+}
+.vb-voter.vb-you {
+  outline: 1px solid var(--accent);
+}
 
 /* Team Popup */
 .team-popup-content { max-width: 500px; position: relative; }
