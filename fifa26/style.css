@@ -253,6 +253,51 @@ input, select, button {
 .lb-bar { height: 3px; background: var(--bg3); border-radius: 2px; margin-top: 8px; overflow: hidden; }
 .lb-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.5s ease; }
 
+/* Form Guide */
+.fg {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0 6px;
+  flex-shrink: 0;
+}
+.fg-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  vertical-align: middle;
+  font-size: 10px;
+  line-height: 1;
+  position: relative;
+}
+.fg-slot.fg-latest::after {
+  content: '\25b4';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: var(--text2);
+  line-height: 1;
+  pointer-events: none;
+}
+.fg-slot:empty {
+  visibility: hidden;
+}
+.fg-correct {
+  background: transparent;
+  border: 1.5px solid #cd7f32;
+}
+.fg-s-2 {
+  border-color: #c0c0c0;
+}
+.fg-s-3 {
+  border-color: #d4af37;
+}
+
 /* Player Predictions Panel (bottom sheet) */
 .pp-overlay { align-items: flex-end !important; padding: 0 !important; }
 .pp-overlay.active .pp-sheet { transform: translateY(0); }
@@ -292,6 +337,7 @@ input, select, button {
 .pp-team.predicted { background: rgba(232,184,48,0.15); outline: 1px solid var(--accent); }
 .pp-vs { color: var(--text2); font-size: 0.78rem; flex-shrink: 0; padding: 0 2px; }
 .pp-empty { text-align: center; color: var(--text2); font-size: 0.9rem; padding: 40px 20px; }
+.pp-divider { height: 1px; background: var(--border); margin: 10px 0 8px 28px; }
 
 .vb-group { margin-bottom: 16px; }
 .vb-group:last-child { margin-bottom: 0; }

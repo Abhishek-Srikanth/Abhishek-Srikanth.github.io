@@ -947,6 +947,32 @@ function renderLeaderboard() {
 
     var maxScore = result[0].totalScore;
 
+    // form guide: 3 most recent finished games
+    var fgGames = state.games.filter(function(g) { return g.finished; });
+    fgGames.sort(function(a, b) {
+      var ka = getDateSortKey(a.date), kb = getDateSortKey(b.date);
+      return ka > kb ? -1 : (ka < kb ? 1 : 0);
+    });
+    fgGames = fgGames.slice(0, 3).reverse();
+
+    var allPreds = state._allPredictions || [];
+    var fgData = {};
+    state.users.forEach(function(u) {
+      var slots = [], streak = 0;
+      fgGames.forEach(function(game) {
+        var pred = null;
+        for (var p = 0; p < allPreds.length; p++) {
+          if (Number(allPreds[p].userId) === u.userId && allPreds[p].gameId === game.id) {
+            pred = allPreds[p]; break;
+          }
+        }
+        if (!pred) { slots.push(null); streak = 0; }
+        else if (String(pred.predictedTeamId) === String(game.winner)) { streak++; slots.push({ r: 1, s: Math.min(streak, 3) }); }
+        else { slots.push({ r: 0 }); streak = 0; }
+      });
+      fgData[u.userId] = slots;
+    });
+
     var html = '<div class="lb-cards">';
 
     result.forEach(function(row) {
@@ -968,6 +994,7 @@ function renderLeaderboard() {
         '<span class="' + rankClass + '">' + rankStr + '</span>' +
         (flagUrl ? '<img class="lb-flag" src="' + flagUrl + '" alt="" loading="lazy">' : '') +
         '<span class="lb-name' + (row.rank <= 3 ? ' ' + ['gold','silver','bronze'][row.rank - 1] : '') + '">' + escapeHtml(row.name) + '</span>' +
+        renderFormGuide(fgData[row.userId]) +
         '<span class="lb-score">' + row.correctCount + '</span>' +
         '</div>' +
         '<div class="lb-bar"><div class="lb-bar-fill" style="width:' + barPct + '%"></div></div>' +
@@ -983,6 +1010,23 @@ function renderLeaderboard() {
       });
     });
   });
+}
+
+function renderFormGuide(slots) {
+  if (!slots || !slots.length) return '';
+  var html = '<span class="fg">';
+  for (var i = 0; i < slots.length; i++) {
+    var s = slots[i];
+    var cls = 'fg-slot' + (i === slots.length - 1 ? ' fg-latest' : '');
+    if (!s) {
+      html += '<span class="' + cls + '"></span>';
+    } else if (s.r === 0) {
+      html += '<span class="' + cls + ' fg-wrong"><svg viewBox="0 0 20 20" width="16" height="16"><rect x="4" y="3" width="12" height="14" rx="1.5" fill="#f04850"/></svg></span>';
+    } else {
+      html += '<span class="' + cls + ' fg-correct fg-s-' + s.s + '">&#9917;</span>';
+    }
+  }
+  return html + '</span>';
 }
 
 function openPlayerPredictions(userId) {
@@ -1046,7 +1090,12 @@ function openPlayerPredictions(userId) {
     html += '<div class="pp-round">';
     html += '<div class="pp-round-title">' + (ROUND_LABELS[type] || type) + '</div>';
 
+    var addedDivider = false;
     items.forEach(function(item) {
+      if (!addedDivider && !item.game.finished) {
+        html += '<div class="pp-divider"></div>';
+        addedDivider = true;
+      }
       html += renderPlayerGameRow(item.game, item.predictedTeamId);
     });
 
