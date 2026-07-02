@@ -208,11 +208,13 @@ function formatGameDate(game) {
   if (!stadium) return localStr;
 
   var countryClass = '';
-  if (stadium.country_en === 'Mexico') countryClass = 'mexico';
-  else if (stadium.country_en === 'Canada') countryClass = 'canada';
-  else countryClass = 'usa';
+  var countryAbbr = '';
+  if (stadium.country_en === 'Mexico') { countryClass = 'mexico'; countryAbbr = 'MX'; }
+  else if (stadium.country_en === 'Canada') { countryClass = 'canada'; countryAbbr = 'CA'; }
+  else { countryClass = 'usa'; countryAbbr = 'US'; }
 
-  return '<span class="stadium-name ' + countryClass + '">' + escapeHtml(stadium.name_en) + '</span> \u2014 ' + localStr;
+  var cityPart = stadium.city_en ? ' (' + escapeHtml(stadium.city_en) + ', ' + countryAbbr + ')' : '';
+  return '<span class="stadium-name ' + countryClass + '">' + escapeHtml(stadium.name_en) + cityPart + '</span> \u2014 ' + localStr;
 }
 
 function fetchGames() {
@@ -647,10 +649,21 @@ function renderGameCard(game, isCurrent, allDone, isInteractiveRound) {
   html += renderTeamSlot(game, 'team1', team1Known, canPredict, existingPred ? existingPred.predictedTeamId : null);
   html += '<span class="vs">vs</span>';
   html += renderTeamSlot(game, 'team2', team2Known, canPredict, existingPred ? existingPred.predictedTeamId : null);
+  if (game.finished) {
+    html += renderVotePill(game);
+  }
   html += '</div>';
 
   if (game.date) {
-    html += '<div class="game-info game-info-dt">' + formatGameDate(game) + '</div>';
+    var dateLine = formatGameDate(game);
+    if (game.finished) {
+      var pred = state.predictions.find(function(p) { return p.gameId === game.id; });
+      if (pred) {
+        var correct = pred.predictedTeamId === game.winner;
+        dateLine = (correct ? '\u2705' : '\u274c') + ' ' + dateLine;
+      }
+    }
+    html += '<div class="game-info game-info-dt">' + dateLine + '</div>';
   }
   if (canPredict && existingPred) {
     var pickName = existingPred.predictedTeamId === game.team1Id
@@ -659,10 +672,6 @@ function renderGameCard(game, isCurrent, allDone, isInteractiveRound) {
     html += '<div class="game-info">Your pick: ' + escapeHtml(pickName) + '</div>';
   } else if (canPredict) {
     html += renderPredictionControls(game);
-  }
-
-  if (game.finished) {
-    html += renderUserPredictionResult(game);
   }
 
   html += '</div>';
@@ -719,26 +728,6 @@ function renderPredictionControls(game) {
   html += (t2 ? t2.name_en : 'Team 2') + '</button>';
 
   html += '<button class="btn btn-sm pred-submit" data-game="' + game.id + '" onclick="submitPrediction(this)">Predict</button>';
-
-  html += '</div>';
-  return html;
-}
-
-function renderUserPredictionResult(game) {
-  var pred = state.predictions.find(function(p) { return p.gameId === game.id; });
-  var pill = renderVotePill(game);
-
-  var html = '<div class="game-info">';
-
-  if (pred) {
-    var correct = pred.predictedTeamId === game.winner;
-    var icon = correct ? '\u2705' : '\u274c';
-    var label = correct ? 'Correct!' : 'Wrong';
-    var cls = correct ? 'win' : 'loss';
-    html += '<span class="' + cls + '">' + icon + ' You predicted: ' + (state.teams[pred.predictedTeamId] ? state.teams[pred.predictedTeamId].name_en : 'Team ' + pred.predictedTeamId) + ' ' + label + '</span>';
-  }
-
-  if (pill) html += pill;
 
   html += '</div>';
   return html;
