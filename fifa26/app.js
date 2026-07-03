@@ -50,7 +50,7 @@ function init() {
       this.classList.add('active');
       var target = document.getElementById('tab-' + this.dataset.tab);
       target.classList.add('active');
-      if (this.dataset.tab === 'bracket') renderBracket();
+      if (this.dataset.tab === 'games') renderGames();
       if (this.dataset.tab === 'leaderboard') renderLeaderboard();
     });
   });
@@ -201,20 +201,21 @@ function formatGameDate(game) {
 
   var localStr = dateObj ? dateObj.toLocaleString(undefined, {
     weekday: 'short', month: 'short', day: 'numeric',
-    year: 'numeric', hour: '2-digit', minute: '2-digit'
+    hour: '2-digit', minute: '2-digit'
   }) : game.date;
 
   var stadium = game.stadiumId ? state.stadiums[game.stadiumId] : null;
   if (!stadium) return localStr;
 
   var countryClass = '';
-  var countryAbbr = '';
-  if (stadium.country_en === 'Mexico') { countryClass = 'mexico'; countryAbbr = 'MX'; }
-  else if (stadium.country_en === 'Canada') { countryClass = 'canada'; countryAbbr = 'CA'; }
-  else { countryClass = 'usa'; countryAbbr = 'US'; }
+  if (stadium.country_en === 'Mexico') { countryClass = 'mexico'; }
+  else if (stadium.country_en === 'Canada') { countryClass = 'canada'; }
+  else { countryClass = 'usa'; }
 
-  var cityPart = stadium.city_en ? ' (' + escapeHtml(stadium.city_en) + ', ' + countryAbbr + ')' : '';
-  return '<span class="stadium-name ' + countryClass + '">' + escapeHtml(stadium.name_en) + cityPart + '</span> \u2014 ' + localStr;
+  var cityName = stadium.city_en || '';
+  cityName = cityName.replace(/\s*\([^)]*\)/g, '').trim();
+  if (!cityName) return '<span class="stadium-name ' + countryClass + '">' + escapeHtml(stadium.name_en) + '</span> \u2014 ' + localStr;
+  return '<span class="stadium-name ' + countryClass + '">' + escapeHtml(cityName) + '</span> \u2014 ' + localStr;
 }
 
 function fetchGames() {
@@ -520,11 +521,11 @@ function enterMainApp() {
   document.getElementById('main-user-name').textContent = state.currentUser.name;
   var team = state.teams[state.currentUser.teamId];
   if (team) document.getElementById('main-user-name').textContent += ' (' + team.name_en + ')';
-  renderBracket();
+  renderGames();
 }
 
-function renderBracket() {
-  var container = document.getElementById('bracket-view');
+function renderGames() {
+  var container = document.getElementById('games-view');
   container.innerHTML = '<div class="loading">&#9917;</div>';
 
   if (!state.games.length || !state.teamsArr.length) {
@@ -540,12 +541,12 @@ function renderBracket() {
         state._allPredictions = [];
         state.predictions = [];
       }
-      renderBracketHTML(container);
+      renderGamesHTML(container);
     });
   } else {
     state.predictions = [];
     state._allPredictions = [];
-    renderBracketHTML(container);
+    renderGamesHTML(container);
   }
 }
 
@@ -571,7 +572,7 @@ function getDateSortKey(dateStr) {
   return dateParts[2] + month + day + time;
 }
 
-function renderBracketHTML(container) {
+function renderGamesHTML(container) {
   var knockout = state.games.filter(function(g) { return CONFIG.ROUND_ORDER.indexOf(g.type) !== -1; });
   knockout.sort(function(a, b) {
     var ka = getDateSortKey(a.date);
@@ -627,10 +628,18 @@ function determineCurrentRound(rounds) {
   return roundKeys[roundKeys.length - 1];
 }
 
+function isGameStarted(game) {
+  if (!game.date || !game.stadiumId) return false;
+  var tz = STADIUM_TZ[game.stadiumId];
+  if (!tz) return false;
+  var startTime = parseVenueDate(game.date, tz);
+  return startTime && startTime <= new Date();
+}
+
 function renderGameCard(game, isCurrent, allDone, isInteractiveRound) {
   var team1Known = game.team1Id && game.team1Id !== '0';
   var team2Known = game.team2Id && game.team2Id !== '0';
-  var canPredict = isCurrent && team1Known && team2Known && !game.finished;
+  var canPredict = isCurrent && team1Known && team2Known && !game.finished && !isGameStarted(game);
   var existingPred = state.predictions.find(function(p) { return p.gameId === game.id; });
 
   var cardClass = 'game-card';
@@ -640,8 +649,10 @@ function renderGameCard(game, isCurrent, allDone, isInteractiveRound) {
     if (!pred) cardClass += ' no-pick';
     else if (pred.predictedTeamId === game.winner) cardClass += ' correct';
     else cardClass += ' wrong';
+  } else if (isGameStarted(game)) {
+    cardClass += ' started';
   } else if (canPredict) cardClass += ' current';
-  else if (!game.finished) cardClass += ' locked';
+  else cardClass += ' locked';
 
   var html = '<div class="' + cardClass + '" data-game-id="' + game.id + '">';
 
@@ -854,7 +865,7 @@ window.submitPrediction = function(btn) {
   }).then(function(res) {
     if (res.success) {
       toast('Prediction saved!', 'success');
-      renderBracket();
+      renderGames();
     } else {
       toast(res.error || 'Failed to save', 'error');
       btn.disabled = false;
@@ -877,7 +888,7 @@ window.deletePrediction = function(btn) {
   }).then(function(res) {
     if (res.success) {
       toast('Prediction removed', 'success');
-      renderBracket();
+      renderGames();
     } else {
       toast(res.error || 'Failed to delete', 'error');
       btn.disabled = false;
