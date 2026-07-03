@@ -177,7 +177,7 @@ input, select, button {
   border-radius: 8px; padding: 12px 16px; margin-bottom: 8px;
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
 }
-.game-card.completed { opacity: 0.85; padding: 8px 12px; gap: 6px; margin-bottom: 4px; }
+.game-card.completed { opacity: 0.75; padding: 8px 12px; gap: 6px; margin-bottom: 4px; }
 .game-card.completed .game-teams { gap: 6px; }
 .game-card.completed .team { padding: 2px 6px; }
 .game-card.completed .team img { width: 20px; height: 14px; }
@@ -188,7 +188,7 @@ input, select, button {
 .game-card.completed.wrong { border-left: 3px solid var(--accent2); }
 .game-card.completed.no-pick { border-left: 3px solid var(--text2); }
 .game-card.locked { opacity: 0.5; }
-.game-card.started { opacity: 0.5; border-left: 3px solid orange; }
+.game-card.started { border-left: 3px solid #00bcd4; }
 .game-card.current { border-left: 3px solid var(--accent); }
 
 .game-teams {
@@ -202,7 +202,7 @@ input, select, button {
 .game-teams .team.selected { background: rgba(232,184,48,0.15); }
 .game-teams .team.winner { background: rgba(48,184,112,0.15); }
 .game-teams .team.loser { opacity: 0.5; }
-.game-teams .team.predicted { background: rgba(232,184,48,0.15); outline: 1px solid var(--accent); }
+.game-teams .team.predicted { background: rgba(232,184,48,0.15); outline: 1px solid var(--accent); color: var(--accent); }
 .game-teams .team img { width: 24px; height: 16px; object-fit: cover; border-radius: 2px; }
 .game-teams .team .flag-placeholder { width: 24px; height: 16px; background: var(--bg3); border-radius: 2px; }
 .game-teams .vs { color: var(--text2); font-size: 0.8rem; font-weight: 600; }

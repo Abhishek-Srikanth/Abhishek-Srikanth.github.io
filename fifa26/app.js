@@ -660,7 +660,7 @@ function renderGameCard(game, isCurrent, allDone, isInteractiveRound) {
   html += renderTeamSlot(game, 'team1', team1Known, canPredict, existingPred ? existingPred.predictedTeamId : null);
   html += '<span class="vs">vs</span>';
   html += renderTeamSlot(game, 'team2', team2Known, canPredict, existingPred ? existingPred.predictedTeamId : null);
-  if (game.finished) {
+  if (game.finished || isGameStarted(game)) {
     html += renderVotePill(game);
   }
   html += '</div>';
@@ -676,12 +676,7 @@ function renderGameCard(game, isCurrent, allDone, isInteractiveRound) {
     }
     html += '<div class="game-info game-info-dt">' + dateLine + '</div>';
   }
-  if (canPredict && existingPred) {
-    var pickName = existingPred.predictedTeamId === game.team1Id
-      ? (state.teams[game.team1Id] ? state.teams[game.team1Id].name_en : 'Team 1')
-      : (state.teams[game.team2Id] ? state.teams[game.team2Id].name_en : 'Team 2');
-    html += '<div class="game-info">Your pick: ' + escapeHtml(pickName) + '</div>';
-  } else if (canPredict) {
+  if (canPredict && !existingPred) {
     html += renderPredictionControls(game);
   }
 
@@ -710,7 +705,7 @@ function renderTeamSlot(game, side, known, canPredict, predictedTeamId) {
 
     return '<div class="' + cls + '" title="Tap for team info" onclick="showTeamPopup(' + id + ')">' +
       (flagUrl ? '<img src="' + flagUrl + '" alt="" loading="lazy">' : '<span class="flag-placeholder"></span>') +
-      '<span>' + escapeHtml(teamName) + (predictedTeamId && String(id) === String(predictedTeamId) ? ' \u2713' : '') + '</span>' +
+      '<span>' + escapeHtml(teamName) + '' + '</span>' +
       (game.finished ? '<span class="score">' + (score || '') + '</span>' : '') +
       '</div>';
   } else if (label) {
