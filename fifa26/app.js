@@ -942,30 +942,16 @@ function renderLeaderboard() {
 
     var maxScore = result[0].totalScore;
 
-    // form guide: 3 most recent finished games
-    var fgGames = state.games.filter(function(g) { return g.finished; });
-    fgGames.sort(function(a, b) {
+    var allFinished = state.games.filter(function(g) { return g.finished; });
+    allFinished.sort(function(a, b) {
       var ka = getDateSortKey(a.date), kb = getDateSortKey(b.date);
-      return ka > kb ? -1 : (ka < kb ? 1 : 0);
+      return ka > kb ? 1 : (ka < kb ? -1 : 0);
     });
-    fgGames = fgGames.slice(0, 3).reverse();
 
     var allPreds = state._allPredictions || [];
     var fgData = {};
     state.users.forEach(function(u) {
-      var slots = [], streak = 0;
-      fgGames.forEach(function(game) {
-        var pred = null;
-        for (var p = 0; p < allPreds.length; p++) {
-          if (Number(allPreds[p].userId) === u.userId && allPreds[p].gameId === game.id) {
-            pred = allPreds[p]; break;
-          }
-        }
-        if (!pred) { slots.push(null); streak = 0; }
-        else if (String(pred.predictedTeamId) === String(game.winner)) { streak++; slots.push({ r: 1, s: Math.min(streak, 3) }); }
-        else { slots.push({ r: 0 }); streak = 0; }
-      });
-      fgData[u.userId] = slots;
+      fgData[u.userId] = computeStreakHistory(u.userId, allFinished, allPreds).slice(-3);
     });
 
     var html = '<div class="lb-cards">';
@@ -1018,7 +1004,8 @@ function renderFormGuide(slots) {
     } else if (s.r === 0) {
       html += '<span class="' + cls + ' fg-wrong"><svg viewBox="0 0 20 20" width="16" height="16"><rect x="4" y="3" width="12" height="14" rx="1.5" fill="#f04850"/></svg></span>';
     } else {
-      html += '<span class="' + cls + ' fg-correct fg-s-' + s.s + '">&#9917;</span>';
+      var sc = s.s >= 3 ? 'fg-s-3' : s.s === 2 ? 'fg-s-2' : '';
+      html += '<span class="' + cls + ' fg-correct' + (sc ? ' ' + sc : '') + '">&#9917;</span>';
     }
   }
   return html + '</span>';
@@ -1237,6 +1224,27 @@ function initTeamMap(team, mapDiv) {
     .catch(function() {
       mapDiv.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text2)">Map unavailable</div>';
     });
+}
+
+function computeStreakHistory(userId, games, predictions) {
+  var streak = 0;
+  var slots = [];
+  for (var g = 0; g < games.length; g++) {
+    var game = games[g];
+    var pred = null;
+    for (var p = 0; p < predictions.length; p++) {
+      if (Number(predictions[p].userId) === userId && predictions[p].gameId === game.id) {
+        pred = predictions[p]; break;
+      }
+    }
+    if (!pred) { slots.push(null); streak = 0; }
+    else if (String(pred.predictedTeamId) === String(game.winner)) {
+      streak++;
+      slots.push({ r: 1, s: streak });
+    }
+    else { slots.push({ r: 0 }); streak = 0; }
+  }
+  return slots;
 }
 
 function escapeHtml(str) {
