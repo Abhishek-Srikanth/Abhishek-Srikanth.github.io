@@ -555,6 +555,11 @@ var ROUND_LABELS = {
   sf: 'Semi-finals', third: '3rd Place', final: 'Final'
 };
 
+var ROUND_COLORS = {
+  r32: '#15803d', r16: '#4ade80', qf: '#facc15',
+  sf: '#f97316', third: '#ef4444', final: '#ffffff'
+};
+
 function getPrevRound(round) {
   if (round === 'final' || round === 'third') return 'sf';
   var idx = CONFIG.ROUND_ORDER.indexOf(round);
@@ -907,7 +912,7 @@ function renderLeaderboard() {
 
     var scores = {};
     state.users.forEach(function(u) {
-      scores[u.userId] = { name: u.name, totalScore: 0, correctCount: 0 };
+      scores[u.userId] = { name: u.name, totalScore: 0, correctCount: 0, rounds: {} };
     });
 
     allPredictions.forEach(function(pred) {
@@ -917,6 +922,8 @@ function renderLeaderboard() {
       if (game.winner && String(game.winner) === pred.predictedTeamId) {
         scores[pred.userId].totalScore++;
         scores[pred.userId].correctCount++;
+        if (!scores[pred.userId].rounds[game.type]) scores[pred.userId].rounds[game.type] = 0;
+        scores[pred.userId].rounds[game.type]++;
       }
     });
 
@@ -925,7 +932,8 @@ function renderLeaderboard() {
         userId: Number(uid),
         name: scores[uid].name,
         totalScore: scores[uid].totalScore,
-        correctCount: scores[uid].correctCount
+        correctCount: scores[uid].correctCount,
+        rounds: scores[uid].rounds
       };
     });
     result.sort(function(a, b) {
@@ -968,8 +976,6 @@ function renderLeaderboard() {
       var team = user ? state.teams[user.teamId] : null;
       var flagUrl = team ? TEAM_FLAG_MAP[user.teamId] : '';
 
-      var barPct = maxScore > 0 ? (row.totalScore / maxScore * 100) : 0;
-
       html += '<div class="lb-card' + (isMe ? ' me' : '') + '" data-user-id="' + row.userId + '">' +
         '<div class="lb-main">' +
         '<span class="' + rankClass + '">' + rankStr + '</span>' +
@@ -978,7 +984,7 @@ function renderLeaderboard() {
         renderFormGuide(fgData[row.userId]) +
         '<span class="lb-score">' + row.correctCount + '</span>' +
         '</div>' +
-        '<div class="lb-bar"><div class="lb-bar-fill" style="width:' + barPct + '%"></div></div>' +
+        renderBar(row, maxScore) +
         '</div>';
     });
 
@@ -1009,6 +1015,24 @@ function renderFormGuide(slots) {
     }
   }
   return html + '</span>';
+}
+
+function renderBar(row, maxScore) {
+  var barPct = maxScore > 0 ? (row.totalScore / maxScore * 100) : 0;
+  var segsHtml = '';
+  if (row.totalScore > 0) {
+    CONFIG.ROUND_ORDER.forEach(function(type) {
+      var s = row.rounds[type] || 0;
+      var pct = (s / row.totalScore) * 100;
+      if (pct > 0) {
+        segsHtml += '<span class="lb-bar-seg" style="width:' + pct + '%;background:' + ROUND_COLORS[type] + '"></span>';
+      }
+    });
+  }
+  return '<div class="lb-bar"><div class="lb-bar-fill" style="width:' + barPct + '%">' +
+    '<div class="lb-bar-gold"></div>' +
+    '<div class="lb-bar-segs">' + segsHtml + '</div>' +
+    '</div></div>';
 }
 
 function openPlayerPredictions(userId) {
