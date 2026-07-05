@@ -264,6 +264,16 @@ input, select, button {
 .lb-bar-segs { height: 2px; width: 100%; display: flex; flex-shrink: 0; margin-top: 1px; }
 .lb-bar-seg { height: 100%; }
 
+/* Race Chart */
+.race-toggle { margin-bottom: 16px; background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.race-toggle summary { padding: 12px 16px; cursor: pointer; font-weight: 600; font-size: 0.95rem; color: var(--text); user-select: none; list-style: none; display: flex; align-items: center; gap: 8px; }
+.race-toggle summary::-webkit-details-marker { display: none; }
+.race-toggle summary::before { content: '\25b6'; font-size: 0.7rem; color: var(--text2); transition: transform 0.2s; }
+.race-toggle[open] summary::before { transform: rotate(90deg); }
+.race-toggle summary:hover { background: rgba(255,255,255,0.03); }
+#race-chart-container { padding: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+#race-chart-container svg { height: auto; display: block; min-width: 800px; }
+
 /* Form Guide */
 .fg {
   display: inline-flex;

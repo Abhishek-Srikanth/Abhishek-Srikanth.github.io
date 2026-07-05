@@ -10,6 +10,7 @@ var state = {
   highlights: {},
   stadiums: {},
   selectedTeams: {},
+  selectedRaceUser: null,
 };
 
 var TEAM_FLAG_MAP = {};
@@ -247,6 +248,8 @@ function fetchGames() {
             team2Name: g.away_team_name_en || null,
             score1: g.finished === 'TRUE' ? g.home_score : null,
             score2: g.finished === 'TRUE' ? g.away_score : null,
+            penalty1: g.finished === 'TRUE' && g.home_penalty_score ? g.home_penalty_score : null,
+            penalty2: g.finished === 'TRUE' && g.away_penalty_score ? g.away_penalty_score : null,
             finished: g.finished === 'TRUE',
             winner: winner,
             date: g.local_date || null,
@@ -989,7 +992,19 @@ function renderLeaderboard() {
     });
 
     html += '</div>';
-    container.innerHTML = html;
+    container.innerHTML = '<details class="race-toggle"><summary>&#127944; Race Chart</summary><div id="race-chart-container"></div></details>' + html;
+
+    if (state.selectedRaceUser === null && state.currentUser) {
+      state.selectedRaceUser = state.currentUser.userId;
+    }
+
+    var rcDetails = container.querySelector('.race-toggle');
+    rcDetails.addEventListener('toggle', function() {
+      if (this.open && !this._rendered) {
+        renderRaceChart(document.getElementById('race-chart-container'));
+        this._rendered = true;
+      }
+    });
 
     container.querySelectorAll('.lb-card').forEach(function(card) {
       card.addEventListener('click', function() {
@@ -1033,6 +1048,161 @@ function renderBar(row, maxScore) {
     '<div class="lb-bar-gold"></div>' +
     '<div class="lb-bar-segs">' + segsHtml + '</div>' +
     '</div></div>';
+}
+
+function renderRaceChart(container) {
+  var games = state.games.filter(function(g) {
+    return g.finished && CONFIG.ROUND_ORDER.indexOf(g.type) !== -1;
+  });
+  games.sort(function(a, b) {
+    var ka = getDateSortKey(a.date), kb = getDateSortKey(b.date);
+    return ka > kb ? 1 : (ka < kb ? -1 : 0);
+  });
+  if (!games.length) { container.innerHTML = ''; return; }
+
+  var predictions = state._allPredictions || [];
+  var userLines = [];
+  var maxScore = 0;
+
+  state.users.forEach(function(user) {
+    var score = 0;
+    var points = [];
+    games.forEach(function(game) {
+      var pred = null;
+      for (var p = 0; p < predictions.length; p++) {
+        if (Number(predictions[p].userId) === user.userId && predictions[p].gameId === game.id) {
+          pred = predictions[p]; break;
+        }
+      }
+      if (pred && String(pred.predictedTeamId) === String(game.winner)) score++;
+      points.push(score);
+    });
+    if (score > maxScore) maxScore = score;
+    userLines.push({ userId: user.userId, name: user.name, points: points });
+  });
+
+  var M_TOP = 25, M_RIGHT = 20, M_BOTTOM = 80, M_LEFT = 35;
+  var SVG_W = 800, SVG_H = 400;
+  var CHART_W = SVG_W - M_LEFT - M_RIGHT;
+  var CHART_H = SVG_H - M_TOP - M_BOTTOM;
+  var CX = M_LEFT, CY = M_TOP, CB = CY + CHART_H, CR = CX + CHART_W;
+  var gameCount = games.length;
+  var yMax = Math.max(Math.ceil(maxScore / 5) * 5, 5);
+
+  function toY(s) { return CB - (s / yMax) * CHART_H; }
+  function toX(i) { return CX + (gameCount > 1 ? (i / (gameCount - 1)) * CHART_W : CHART_W / 2); }
+
+  var selUser = state.users.find(function(u) { return u.userId === state.selectedRaceUser; });
+  var selName = selUser ? selUser.name : '';
+
+  var svg = '<svg viewBox="0 0 ' + SVG_W + ' ' + SVG_H + '" xmlns="http://www.w3.org/2000/svg">' +
+    '<text x="' + CX + '" y="16" fill="var(--text)" font-weight="600" font-size="13">' +
+    escapeHtml(selName) + '\'s Race</text>';
+
+  var ySteps = [0];
+  for (var ys = 1; ys <= 4; ys++) ySteps.push(Math.round(yMax * ys / 4));
+  ySteps = ySteps.filter(function(v, i, a) { return a.indexOf(v) === i; });
+  ySteps.forEach(function(s) {
+    var y = toY(s);
+    svg += '<line x1="' + CX + '" y1="' + y + '" x2="' + CR + '" y2="' + y + '" stroke="var(--border)" stroke-width="1" stroke-dasharray="4,4"/>';
+    svg += '<text x="' + (CX - 6) + '" y="' + (y + 4) + '" text-anchor="end" fill="var(--text2)" font-size="11">' + s + '</text>';
+  });
+
+  games.forEach(function(game, i) {
+    var x = toX(i);
+    var wId = String(game.winner), lId = String(game.team1Id) === wId ? game.team2Id : game.team1Id;
+    var wF = TEAM_FLAG_MAP[wId] || '', lF = TEAM_FLAG_MAP[lId] || '';
+    var wScore = String(game.team1Id) === wId ? game.score1 : game.score2;
+    var lScore = String(game.team1Id) === wId ? game.score2 : game.score1;
+    var wPen = String(game.team1Id) === wId ? game.penalty1 : game.penalty2;
+    var lPen = String(game.team1Id) === wId ? game.penalty2 : game.penalty1;
+    var isPens = wScore != null && lScore != null && wScore === lScore && game.penalty1 != null && game.penalty2 != null;
+    var wSuffix = isPens ? ' (' + wPen + ')' : '';
+    var lSuffix = isPens ? ' (' + lPen + ')' : '';
+    var fw = 24, fh = 16, fy = CB + 10;
+    var ts = 'paint-order:stroke;stroke:rgba(0,0,0,0.6);stroke-width:2px';
+    // Winner flag
+    if (wF) svg += '<image href="' + wF + '" x="' + (x - fw/2) + '" y="' + fy + '" width="' + fw + '" height="' + fh + '" opacity="0.3"/>';
+    if (wF && wScore != null) svg += '<text x="' + x + '" y="' + (fy + fh + 12) + '" text-anchor="middle" fill="var(--accent)" font-size="12" font-weight="700" style="' + ts + '">' + wScore + (wSuffix ? '<tspan font-size="8">' + wSuffix + '</tspan>' : '') + '</text>';
+    // Loser flag
+    var loseFy = fy + fh + 12 + 2;
+    if (lF) svg += '<image href="' + lF + '" x="' + (x - fw/2) + '" y="' + loseFy + '" width="' + fw + '" height="' + fh + '" opacity="0.3"/>';
+    if (lF && lScore != null) svg += '<text x="' + x + '" y="' + (loseFy + fh + 12) + '" text-anchor="middle" fill="#fff" font-size="12" font-weight="700" opacity="0.85" style="' + ts + '">' + lScore + (lSuffix ? '<tspan font-size="8">' + lSuffix + '</tspan>' : '') + '</text>';
+  });
+
+  userLines.forEach(function(ul) {
+    if (!ul.points.length) return;
+    var pts = ul.points.map(function(s, i) { return toX(i) + ',' + toY(s); }).join(' ');
+    var isSel = ul.userId === state.selectedRaceUser;
+    var sw = isSel ? 3 : 1.5;
+    var op = isSel ? 1 : 0.25;
+    svg += '<polyline fill="none" stroke="var(--accent)" stroke-width="' + sw + '" opacity="' + op + '" points="' + pts +
+      '" data-user-id="' + ul.userId + '"/>';
+  });
+
+  var scoreGroups = {};
+  userLines.forEach(function(ul) {
+    if (!ul.points.length) return;
+    var s = ul.points[ul.points.length - 1];
+    if (!scoreGroups[s]) scoreGroups[s] = [];
+    scoreGroups[s].push(ul);
+  });
+
+  var markerSpacing = 22;
+  var markerR = 10;
+  var endX = toX(gameCount - 1);
+  var pad = 8;
+  var maxPerRow = 8;
+
+  Object.keys(scoreGroups).forEach(function(score) {
+    var group = scoreGroups[score];
+    var y = toY(Number(score));
+    var rows = [];
+    for (var ri = 0; ri < group.length; ri += maxPerRow)
+      rows.push(group.slice(ri, ri + maxPerRow));
+
+    rows.forEach(function(row, ri) {
+      var rowY = y + ri * (markerR * 2 + 4);
+      var rowW = (row.length - 1) * markerSpacing;
+      var startX = endX - rowW / 2;
+      var minX = pad + markerR;
+      var maxX = SVG_W - pad - markerR - (row.length > 1 ? rowW : 0);
+      if (startX < minX) startX = minX;
+      if (startX > maxX) startX = maxX;
+
+      row.forEach(function(ul, i) {
+        var x = startX + i * markerSpacing;
+        var user = state.users.find(function(u) { return u.userId === ul.userId; });
+        var team = user ? state.teams[user.teamId] : null;
+        var flagUrl = team ? TEAM_FLAG_MAP[user.teamId] : '';
+        var initial = user ? user.name.charAt(0).toUpperCase() : '?';
+        var uid = ul.userId;
+        var isSel = uid === state.selectedRaceUser;
+        var ringColor = isSel ? 'var(--accent)' : '#ffffff';
+
+        svg += '<g data-user-id="' + uid + '" style="cursor:pointer">';
+        svg += '<circle cx="' + x + '" cy="' + rowY + '" r="' + markerR + '" fill="var(--card-bg)" stroke="' + ringColor + '" stroke-width="1.5"/>';
+        if (flagUrl) {
+          var clipId = 'rc-clip-' + uid;
+          svg += '<clipPath id="' + clipId + '"><circle cx="' + x + '" cy="' + rowY + '" r="' + (markerR - 2) + '"/></clipPath>';
+          svg += '<image href="' + flagUrl + '" x="' + (x - markerR + 2) + '" y="' + (rowY - markerR + 2) + '" width="' + (2 * markerR - 4) + '" height="' + (2 * markerR - 4) + '" clip-path="url(#' + clipId + ')" preserveAspectRatio="xMidYMid slice"/>';
+        }
+        svg += '<text x="' + x + '" y="' + (rowY + 4) + '" text-anchor="middle" fill="#fff" font-weight="700" font-size="11" style="paint-order:stroke;stroke:rgba(0,0,0,0.6);stroke-width:1.5px">' + initial + '</text>';
+        svg += '</g>';
+      });
+    });
+  });
+
+  svg += '</svg>';
+  container.innerHTML = svg;
+
+  container.querySelectorAll('[data-user-id]').forEach(function(el) {
+    el.addEventListener('click', function() {
+      state.selectedRaceUser = Number(this.dataset.userId);
+      renderRaceChart(document.getElementById('race-chart-container'));
+    });
+  });
+  container.scrollLeft = container.scrollWidth - container.clientWidth;
 }
 
 function openPlayerPredictions(userId) {
