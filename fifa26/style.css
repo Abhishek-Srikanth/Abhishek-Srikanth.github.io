@@ -13,6 +13,8 @@
   --card-bg: #1e1e34;
   --shadow: rgba(0,0,0,0.4);
   --radius: 10px;
+  --rc-line-opacity: 0.65;
+  --rc-band-opacity: 0.1;
 }
 
 html, body {
@@ -234,6 +236,27 @@ input, select, button {
 .stadium-name.canada { color: var(--accent2); }
 .stadium-name.usa { color: #5890ff; }
 
+/* Leaderboard Filter */
+.lb-filter {
+  max-width: 600px; margin: 0 auto 12px;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.lb-filter-btns {
+  display: flex; gap: 0; width: fit-content; margin: 0 auto;
+  border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+}
+.lb-filter-btn {
+  background: transparent; color: var(--text2); border: none;
+  padding: 6px 14px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  border-right: 1px solid var(--border);
+}
+.lb-filter-btn:last-child { border-right: none; }
+.lb-filter-btn:hover { color: var(--text); background: var(--bg3); }
+.lb-filter-btn.active {
+  background: var(--accent); color: #111;
+}
+
 /* Leaderboard Cards */
 .lb-cards {
   max-width: 600px; margin: 0 auto;
@@ -269,15 +292,19 @@ input, select, button {
 .lb-bar-segs { height: 2px; width: 100%; display: flex; flex-shrink: 0; margin-top: 1px; }
 .lb-bar-seg { height: 100%; }
 
-/* Race Chart */
-.race-toggle { margin-bottom: 16px; background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-.race-toggle summary { padding: 12px 16px; cursor: pointer; font-weight: 600; font-size: 0.95rem; color: var(--text); user-select: none; list-style: none; display: flex; align-items: center; gap: 8px; }
-.race-toggle summary::-webkit-details-marker { display: none; }
-.race-toggle summary::before { content: '\25b6'; font-size: 0.7rem; color: var(--text2); transition: transform 0.2s; }
-.race-toggle[open] summary::before { transform: rotate(90deg); }
-.race-toggle summary:hover { background: rgba(255,255,255,0.03); }
-#race-chart-container { padding: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-#race-chart-container svg { height: auto; display: block; min-width: 800px; }
+/* Race Chart Button */
+.race-chart-btn {
+  max-width: 600px; margin: 0 auto 10px; display: block;
+  text-align: center;
+  background: transparent; border: 1px dashed var(--border);
+  color: var(--text2); padding: 8px; border-radius: var(--radius);
+  font-size: 0.85rem; font-weight: 600; cursor: pointer;
+  transition: all 0.15s;
+}
+.race-chart-btn:hover { border-color: var(--accent); color: var(--accent); }
+.race-chart-btn.dimmed { opacity: 0.4; cursor: default; }
+.race-chart-btn.dimmed:hover { border-color: var(--border); color: var(--text2); }
+#race-chart-container svg { height: auto; display: block; min-width: 600px; width: 100%; }
 
 /* Form Guide */
 .fg {
@@ -329,7 +356,7 @@ input, select, button {
 .pp-overlay.active .pp-sheet { transform: translateY(0); }
 .pp-sheet {
   background: var(--bg2); border-top: 1px solid var(--border);
-  border-radius: 16px 16px 0 0; width: 100%; max-height: 80vh;
+  border-radius: 16px 16px 0 0; width: 100%;   max-height: 90vh;
   display: flex; flex-direction: column;
   transform: translateY(100%); transition: transform 0.3s ease;
 }

@@ -44,6 +44,17 @@
     <div id="games-view"></div>
   </div>
   <div class="tab-content" id="tab-leaderboard">
+    <div class="lb-filter">
+      <div class="lb-filter-btns" id="lb-round-filter" role="radiogroup">
+        <button class="lb-filter-btn active" data-value="cumulative">All</button>
+        <button class="lb-filter-btn" data-value="r32">R32</button>
+        <button class="lb-filter-btn" data-value="r16">R16</button>
+        <button class="lb-filter-btn" data-value="qf">QF</button>
+        <button class="lb-filter-btn" data-value="sf">SF</button>
+        <button class="lb-filter-btn" data-value="third">3rd</button>
+        <button class="lb-filter-btn" data-value="final">Final</button>
+      </div>
+    </div>
     <div id="leaderboard-view"></div>
   </div>
 </div>
@@ -115,6 +126,18 @@
 
 <div class="modal-overlay pp-overlay" id="modal-vote-breakdown" onclick="if (event.target === this) closeModal('modal-vote-breakdown')">
   <div class="pp-sheet" id="vb-sheet"></div>
+</div>
+
+<div class="modal-overlay pp-overlay" id="modal-race-chart" onclick="if (event.target === this) closeModal('modal-race-chart')">
+  <div class="pp-sheet">
+    <div class="pp-header">
+      <h2>Race Chart</h2>
+      <button class="pp-close" onclick="closeModal('modal-race-chart')">&times;</button>
+    </div>
+    <div class="pp-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch" id="rc-body">
+      <div id="race-chart-container"></div>
+    </div>
+  </div>
 </div>
 
 <div class="modal-overlay" id="modal-team-popup" onclick="if (event.target === this) closeModal('modal-team-popup')">

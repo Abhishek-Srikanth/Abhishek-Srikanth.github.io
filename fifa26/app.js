@@ -11,6 +11,8 @@ var state = {
   stadiums: {},
   selectedTeams: {},
   selectedRaceUser: null,
+  predictionsCache: { data: null, timestamp: 0 },
+  leaderboardFilter: 'cumulative',
 };
 
 var TEAM_FLAG_MAP = {};
@@ -43,6 +45,18 @@ function init() {
   document.getElementById('auth-submit').addEventListener('click', authenticateUser);
   document.getElementById('confirm-submit').addEventListener('click', confirmRegistration);
   document.getElementById('logout-btn').addEventListener('click', logout);
+
+  var filterContainer = document.getElementById('lb-round-filter');
+  if (filterContainer) {
+    filterContainer.addEventListener('click', function(e) {
+      var btn = e.target.closest('.lb-filter-btn');
+      if (!btn || btn.classList.contains('active')) return;
+      filterContainer.querySelector('.active').classList.remove('active');
+      btn.classList.add('active');
+      state.leaderboardFilter = btn.dataset.value;
+      renderLeaderboard();
+    });
+  }
 
   document.querySelectorAll('.tab').forEach(function(tab) {
     tab.addEventListener('click', function() {
@@ -920,11 +934,26 @@ window.deletePrediction = function(btn) {
   });
 };
 
+function getPredictionsCached() {
+  var CACHE_TTL = 5 * 60 * 1000;
+  var now = Date.now();
+  if (state.predictionsCache.data && (now - state.predictionsCache.timestamp) < CACHE_TTL) {
+    return Promise.resolve(state.predictionsCache.data);
+  }
+  return apiGet({ action: 'getPredictions' }).then(function(res) {
+    if (res.success) {
+      state.predictionsCache.data = res;
+      state.predictionsCache.timestamp = Date.now();
+    }
+    return res;
+  });
+}
+
 function renderLeaderboard() {
   var container = document.getElementById('leaderboard-view');
   container.innerHTML = '<div class="loading">&#9917;</div>';
 
-  apiGet({ action: 'getPredictions' }).then(function(res) {
+  getPredictionsCached().then(function(res) {
     if (!res.success || !res.data) {
       container.innerHTML = '<p style="text-align:center;color:var(--text2)">Failed to load leaderboard</p>';
       return;
@@ -938,10 +967,13 @@ function renderLeaderboard() {
       scores[u.userId] = { name: u.name, totalScore: 0, correctCount: 0, rounds: {} };
     });
 
+    var filter = state.leaderboardFilter;
+
     allPredictions.forEach(function(pred) {
       if (!scores[pred.userId]) return;
       var game = state.games.find(function(g) { return g.id === pred.gameId; });
       if (!game || !game.finished) return;
+      if (filter !== 'cumulative' && game.type !== filter) return;
       if (game.winner && String(game.winner) === pred.predictedTeamId) {
         scores[pred.userId].totalScore++;
         scores[pred.userId].correctCount++;
@@ -973,7 +1005,11 @@ function renderLeaderboard() {
 
     var maxScore = result[0].totalScore;
 
-    var allFinished = state.games.filter(function(g) { return g.finished; });
+    var allFinished = state.games.filter(function(g) {
+      if (!g.finished) return false;
+      if (filter !== 'cumulative' && g.type !== filter) return false;
+      return true;
+    });
     allFinished.sort(function(a, b) {
       var ka = getDateSortKey(a.date), kb = getDateSortKey(b.date);
       return ka > kb ? 1 : (ka < kb ? -1 : 0);
@@ -1012,19 +1048,17 @@ function renderLeaderboard() {
     });
 
     html += '</div>';
-    container.innerHTML = '<details class="race-toggle"><summary>&#128200; Race Chart</summary><div id="race-chart-container"></div></details>' + html;
+    container.innerHTML = '<button class="race-chart-btn" id="rc-btn">&#128200; Race Chart</button>' + html;
 
     if (state.selectedRaceUser === null && state.currentUser) {
       state.selectedRaceUser = state.currentUser.userId;
     }
 
-    var rcDetails = container.querySelector('.race-toggle');
-    rcDetails.addEventListener('toggle', function() {
-      if (this.open && !this._rendered) {
-        renderRaceChart(document.getElementById('race-chart-container'));
-        this._rendered = true;
-      }
-    });
+    var rcBtn = document.getElementById('rc-btn');
+    if (rcBtn) {
+      rcBtn.classList.toggle('dimmed', allFinished.length <= 1);
+      rcBtn.addEventListener('click', openRaceChartSheet);
+    }
 
     container.querySelectorAll('.lb-card').forEach(function(card) {
       card.addEventListener('click', function() {
@@ -1032,6 +1066,16 @@ function renderLeaderboard() {
       });
     });
   });
+}
+
+function openRaceChartSheet() {
+  var container = document.getElementById('race-chart-container');
+  renderRaceChart(container);
+  if (container.querySelector('svg')) {
+    showModal('modal-race-chart');
+  } else {
+    toast('Race chart needs at least 2 games in this round', 'error');
+  }
 }
 
 function renderFormGuide(slots) {
@@ -1071,14 +1115,18 @@ function renderBar(row, maxScore) {
 }
 
 function renderRaceChart(container) {
+  var filter = state.leaderboardFilter;
   var games = state.games.filter(function(g) {
-    return g.finished && CONFIG.ROUND_ORDER.indexOf(g.type) !== -1;
+    if (!g.finished) return false;
+    if (CONFIG.ROUND_ORDER.indexOf(g.type) === -1) return false;
+    if (filter !== 'cumulative' && g.type !== filter) return false;
+    return true;
   });
   games.sort(function(a, b) {
     var ka = getDateSortKey(a.date), kb = getDateSortKey(b.date);
     return ka > kb ? 1 : (ka < kb ? -1 : 0);
   });
-  if (!games.length) { container.innerHTML = ''; return; }
+  if (games.length <= 1) { container.innerHTML = ''; return; }
 
   var predictions = state._allPredictions || [];
   var userLines = [];
@@ -1107,10 +1155,18 @@ function renderRaceChart(container) {
   var CHART_H = SVG_H - M_TOP - M_BOTTOM;
   var CX = M_LEFT, CY = M_TOP, CB = CY + CHART_H, CR = CX + CHART_W;
   var gameCount = games.length;
-  var yMax = Math.max(Math.ceil(maxScore / 5) * 5, 5);
+  var yMax = maxScore + 1;
 
   function toY(s) { return CB - (s / yMax) * CHART_H; }
   function toX(i) { return CX + (gameCount > 1 ? (i / (gameCount - 1)) * CHART_W : CHART_W / 2); }
+  function gameLine(x, color) {
+    return '<line x1="' + x + '" y1="' + CY + '" x2="' + x + '" y2="' + CB + '" stroke="' + color + '" stroke-width="1" stroke-dasharray="3,4" style="opacity:var(--rc-line-opacity,0.4)"/>';
+  }
+  function gameBand(x, px, nx, color) {
+    var left = px != null ? (px + x) / 2 : CX;
+    var right = nx != null ? (x + nx) / 2 : CR;
+    return '<rect x="' + left + '" y="' + CY + '" width="' + (right - left) + '" height="' + (CB - CY) + '" fill="' + color + '" style="opacity:var(--rc-band-opacity,0.06)"/>';
+  }
 
   var selUser = state.users.find(function(u) { return u.userId === state.selectedRaceUser; });
   var selName = selUser ? selUser.name : '';
@@ -1119,9 +1175,14 @@ function renderRaceChart(container) {
     '<text x="' + CX + '" y="16" fill="var(--text)" font-weight="600" font-size="13">' +
     escapeHtml(selName) + '\'s Race</text>';
 
-  var ySteps = [0];
-  for (var ys = 1; ys <= 4; ys++) ySteps.push(Math.round(yMax * ys / 4));
-  ySteps = ySteps.filter(function(v, i, a) { return a.indexOf(v) === i; });
+  var ySteps;
+  if (yMax <= 5) {
+    ySteps = [];
+    for (var i = 0; i <= yMax; i++) ySteps.push(i);
+  } else {
+    ySteps = [0, 1];
+    for (var i = 3; i <= yMax; i += 2) ySteps.push(i);
+  }
   ySteps.forEach(function(s) {
     var y = toY(s);
     svg += '<line x1="' + CX + '" y1="' + y + '" x2="' + CR + '" y2="' + y + '" stroke="var(--border)" stroke-width="1" stroke-dasharray="4,4"/>';
@@ -1130,6 +1191,11 @@ function renderRaceChart(container) {
 
   games.forEach(function(game, i) {
     var x = toX(i);
+    var teamColor = CONFIG.TEAM_COLORS[String(game.winner)] || 'var(--border)';
+    var prevX = i > 0 ? toX(i-1) : null;
+    var nextX = i < gameCount - 1 ? toX(i+1) : null;
+    svg += gameBand(x, prevX, nextX, teamColor);
+    svg += gameLine(x, teamColor);
     var wId = String(game.winner), lId = String(game.team1Id) === wId ? game.team2Id : game.team1Id;
     var wF = TEAM_FLAG_MAP[wId] || '', lF = TEAM_FLAG_MAP[lId] || '';
     var wScore = String(game.team1Id) === wId ? game.score1 : game.score2;
@@ -1199,9 +1265,10 @@ function renderRaceChart(container) {
         var uid = ul.userId;
         var isSel = uid === state.selectedRaceUser;
         var ringColor = isSel ? 'var(--accent)' : '#ffffff';
+        var ringWidth = isSel ? 1.5 : 0.75;
 
         svg += '<g data-user-id="' + uid + '" style="cursor:pointer">';
-        svg += '<circle cx="' + x + '" cy="' + rowY + '" r="' + markerR + '" fill="var(--card-bg)" stroke="' + ringColor + '" stroke-width="1.5"/>';
+        svg += '<circle cx="' + x + '" cy="' + rowY + '" r="' + markerR + '" fill="var(--card-bg)" stroke="' + ringColor + '" stroke-width="' + ringWidth + '"/>';
         if (flagUrl) {
           var clipId = 'rc-clip-' + uid;
           svg += '<clipPath id="' + clipId + '"><circle cx="' + x + '" cy="' + rowY + '" r="' + (markerR - 2) + '"/></clipPath>';
