@@ -1158,14 +1158,14 @@ function renderRaceChart(container) {
   var yMax = maxScore + 1;
 
   function toY(s) { return CB - (s / yMax) * CHART_H; }
-  function toX(i) { return CX + (gameCount > 1 ? (i / (gameCount - 1)) * CHART_W : CHART_W / 2); }
-  function gameLine(x, color) {
-    return '<line x1="' + x + '" y1="' + CY + '" x2="' + x + '" y2="' + CB + '" stroke="' + color + '" stroke-width="1" stroke-dasharray="3,4" style="opacity:var(--rc-line-opacity,0.4)"/>';
-  }
-  function gameBand(x, px, nx, color) {
+  function toX(i) { return CX + ((i + 1) / (gameCount + 1)) * CHART_W; }
+  function gameBand(x, px, nx, flagUrl) {
     var left = px != null ? (px + x) / 2 : CX;
     var right = nx != null ? (x + nx) / 2 : CR;
-    return '<rect x="' + left + '" y="' + CY + '" width="' + (right - left) + '" height="' + (CB - CY) + '" fill="' + color + '" style="opacity:var(--rc-band-opacity,0.06)"/>';
+    if (flagUrl) {
+      return '<image href="' + flagUrl + '" x="' + left + '" y="' + CY + '" width="' + (right - left) + '" height="' + (CB - CY) + '" preserveAspectRatio="none" style="opacity:var(--rc-band-opacity,0.12)"/>';
+    }
+    return '<rect x="' + left + '" y="' + CY + '" width="' + (right - left) + '" height="' + (CB - CY) + '" fill="var(--border)" style="opacity:var(--rc-band-opacity,0.12)"/>';
   }
 
   var selUser = state.users.find(function(u) { return u.userId === state.selectedRaceUser; });
@@ -1191,13 +1191,11 @@ function renderRaceChart(container) {
 
   games.forEach(function(game, i) {
     var x = toX(i);
-    var teamColor = CONFIG.TEAM_COLORS[String(game.winner)] || 'var(--border)';
-    var prevX = i > 0 ? toX(i-1) : null;
-    var nextX = i < gameCount - 1 ? toX(i+1) : null;
-    svg += gameBand(x, prevX, nextX, teamColor);
-    svg += gameLine(x, teamColor);
     var wId = String(game.winner), lId = String(game.team1Id) === wId ? game.team2Id : game.team1Id;
     var wF = TEAM_FLAG_MAP[wId] || '', lF = TEAM_FLAG_MAP[lId] || '';
+    var prevX = i > 0 ? toX(i-1) : null;
+    var nextX = i < gameCount - 1 ? toX(i+1) : null;
+    svg += gameBand(x, prevX, nextX, wF);
     var wScore = String(game.team1Id) === wId ? game.score1 : game.score2;
     var lScore = String(game.team1Id) === wId ? game.score2 : game.score1;
     var wPen = String(game.team1Id) === wId ? game.penalty1 : game.penalty2;
@@ -1218,12 +1216,17 @@ function renderRaceChart(container) {
 
   userLines.forEach(function(ul) {
     if (!ul.points.length) return;
-    var pts = ul.points.map(function(s, i) { return toX(i) + ',' + toY(s); }).join(' ');
+    var originX = CX, originY = toY(0);
+    var pts = originX + ',' + originY + ' ' + ul.points.map(function(s, i) { return toX(i) + ',' + toY(s); }).join(' ');
     var isSel = ul.userId === state.selectedRaceUser;
     var sw = isSel ? 3 : 1.5;
     var op = isSel ? 1 : 0.25;
     svg += '<polyline fill="none" stroke="var(--accent)" stroke-width="' + sw + '" opacity="' + op + '" points="' + pts +
       '" data-user-id="' + ul.userId + '"/>';
+    svg += '<circle cx="' + originX + '" cy="' + originY + '" r="2.5" fill="var(--accent)" opacity="' + op + '" data-user-id="' + ul.userId + '"/>';
+    ul.points.forEach(function(s, i) {
+      svg += '<circle cx="' + toX(i) + '" cy="' + toY(s) + '" r="2.5" fill="var(--accent)" opacity="' + op + '" data-user-id="' + ul.userId + '"/>';
+    });
   });
 
   var scoreGroups = {};
