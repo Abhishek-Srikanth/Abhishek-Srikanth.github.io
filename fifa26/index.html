@@ -121,6 +121,13 @@
   <div class="modal team-popup-content" id="team-popup-body"></div>
 </div>
 
+<div class="modal-overlay" id="modal-kit-lightbox" onclick="if (event.target === this) closeModal('modal-kit-lightbox')">
+  <div class="kit-lightbox-content">
+    <button class="tp-close" onclick="closeModal('modal-kit-lightbox')">&times;</button>
+    <img id="kit-lightbox-img" src="" alt="Kit">
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <div id="loading-overlay" class="loading-overlay hidden">

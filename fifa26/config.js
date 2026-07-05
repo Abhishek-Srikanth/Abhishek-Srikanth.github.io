@@ -59,5 +59,11 @@ const CONFIG = {
     England: 'Europe', Croatia: 'Europe', Ghana: 'Africa', Panama: 'North America'
   },
 
-  KIT_IMAGES: {}
+  KIT_IMAGES: {},
+
+  SPORTSDB_MAP: {
+    'United States': 'USA',
+    'Bosnia and Herzegovina': 'Bosnia',
+    'DR Congo': 'DR Congo'
+  }
 };

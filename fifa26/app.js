@@ -1361,7 +1361,10 @@ function showTeamPopup(teamId) {
   var rank = state.rankings[team.name_en] || state.rankings[team.name_en.replace(/['\u2019]/g, "'")] || 'N/A';
   var region = CONFIG.REGION_MAP[team.name_en] || '';
   var flagUrl = TEAM_FLAG_MAP[teamId];
-  var kitUrl = CONFIG.KIT_IMAGES[teamId] || '';
+  var kitUrl = CONFIG.KIT_IMAGES[teamId] || localStorage.getItem('kit_' + teamId) || '';
+  if (kitUrl && !CONFIG.KIT_IMAGES[teamId]) {
+    CONFIG.KIT_IMAGES[teamId] = kitUrl;
+  }
 
   var pastGames = state.games.filter(function(g) {
     return g.finished && (String(g.team1Id) === String(teamId) || String(g.team2Id) === String(teamId));
@@ -1376,11 +1379,10 @@ function showTeamPopup(teamId) {
     '<div class="item"><div class="label">FIFA Ranking</div><div class="value">' + rank + '</div></div>' +
     '<div class="item"><div class="label">Region</div><div class="value">' + region + '</div></div>' +
     '</div>' +
-    '<div class="tp-map"><div id="team-map" style="height:200px;border-radius:6px;background:var(--bg3)"></div></div>';
-
-  if (kitUrl) {
-    html += '<div class="tp-kit"><h3>Kit</h3><img src="' + escapeHtml(kitUrl) + '" alt="Kit"></div>';
-  }
+    '<div class="tp-map-row">' +
+    '<div class="tp-map"><div id="team-map" style="height:200px;border-radius:6px;background:var(--bg3)"></div></div>' +
+    (kitUrl ? '<div class="tp-kit"><h3>Kit</h3><img src="' + escapeHtml(kitUrl) + '" alt="Kit" onclick="openKitLightbox(this.src)"></div>' : '') +
+    '</div>';
 
   if (pastGames.length) {
     html += '<div class="tp-results"><h3>Recent Results</h3>';
@@ -1402,6 +1404,10 @@ function showTeamPopup(teamId) {
   document.getElementById('team-popup-body').innerHTML = html;
   showModal('modal-team-popup');
 
+  if (!kitUrl) {
+    fetchKitImage(teamId);
+  }
+
   setTimeout(function() {
     var mapDiv = document.getElementById('team-map');
     if (mapDiv) {
@@ -1410,8 +1416,47 @@ function showTeamPopup(teamId) {
   }, 200);
 }
 
+function fetchKitImage(teamId) {
+  var team = state.teams[teamId];
+  if (!team) return;
+
+  var searchName = CONFIG.SPORTSDB_MAP[team.name_en] || team.name_en;
+  var apiUrl = 'https://www.thesportsdb.com/api/v1/json/123/searchteams.php?t=' + encodeURIComponent(searchName);
+
+  fetch(apiUrl)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data && data.teams && data.teams[0] && data.teams[0].strEquipment) {
+        var kitUrl = data.teams[0].strEquipment;
+        CONFIG.KIT_IMAGES[teamId] = kitUrl;
+        localStorage.setItem('kit_' + teamId, kitUrl);
+
+        var popup = document.getElementById('modal-team-popup');
+        if (popup && popup.classList.contains('active')) {
+          var row = document.getElementById('team-popup-body').querySelector('.tp-map-row');
+          if (row && !row.querySelector('.tp-kit')) {
+            var el = document.createElement('div');
+            el.className = 'tp-kit';
+            el.innerHTML = '<h3>Kit</h3><img src="' + escapeHtml(kitUrl) + '" alt="Kit" onclick="openKitLightbox(this.src)">';
+            row.appendChild(el);
+          }
+        }
+      }
+    })
+    .catch(function(err) { console.error('Kit fetch error:', err); });
+}
+
+function openKitLightbox(src) {
+  var img = document.getElementById('kit-lightbox-img');
+  if (img) {
+    img.src = src;
+    showModal('modal-kit-lightbox');
+  }
+}
+
 function initTeamMap(team, mapDiv) {
-  fetch('https://nominatim.openstreetmap.org/search?country=' + encodeURIComponent(team.name_en) + '&format=json&limit=1')
+  var teamColor = CONFIG.TEAM_COLORS[team.id] || '#e8b830';
+  fetch('https://nominatim.openstreetmap.org/search?country=' + encodeURIComponent(team.name_en) + '&format=json&limit=1&polygon_geojson=1')
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data && data[0]) {
@@ -1422,14 +1467,27 @@ function initTeamMap(team, mapDiv) {
           maxZoom: 18
         }).addTo(map);
         map.setView([parseFloat(loc.lat), parseFloat(loc.lon)], 5);
-        var bounds = loc.boundingbox;
-        if (bounds) {
-          try {
-            map.fitBounds([
-              [parseFloat(bounds[0]), parseFloat(bounds[2])],
-              [parseFloat(bounds[1]), parseFloat(bounds[3])]
-            ]);
-          } catch(e) {}
+
+        if (loc.geojson) {
+          var geoLayer = L.geoJSON(loc.geojson, {
+            style: {
+              color: teamColor,
+              weight: 2,
+              fillColor: teamColor,
+              fillOpacity: 0.2
+            }
+          }).addTo(map);
+          map.fitBounds(geoLayer.getBounds());
+        } else {
+          var bounds = loc.boundingbox;
+          if (bounds) {
+            try {
+              map.fitBounds([
+                [parseFloat(bounds[0]), parseFloat(bounds[2])],
+                [parseFloat(bounds[1]), parseFloat(bounds[3])]
+              ]);
+            } catch(e) {}
+          }
         }
       } else {
         mapDiv.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text2)">Map unavailable</div>';
