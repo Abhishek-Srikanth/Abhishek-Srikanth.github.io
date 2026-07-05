@@ -664,6 +664,7 @@ function renderGameCard(game, isCurrent, allDone, isInteractiveRound) {
 
   var html = '<div class="' + cardClass + '" data-game-id="' + game.id + '">';
 
+  html += renderVoteBar(game);
   html += '<div class="game-teams">';
   html += renderTeamSlot(game, 'team1', team1Known, canPredict, existingPred ? existingPred.predictedTeamId : null);
   html += '<span class="vs">vs</span>';
@@ -752,6 +753,25 @@ function renderVotePill(game) {
   var count = predictions.length;
   if (!count) return '';
   return '<span class="vote-pill" onclick="showVoteBreakdown(\'' + game.id + '\')">' + count + ' vote' + (count !== 1 ? 's' : '') + '</span>';
+}
+
+function renderVoteBar(game) {
+  var predictions = (state._allPredictions || []).filter(function(p) { return p.gameId === game.id; });
+  var count = predictions.length;
+  if (count < 8 || state.users.length === 0) return '';
+  var team1Votes = 0, team2Votes = 0;
+  predictions.forEach(function(p) {
+    if (String(p.predictedTeamId) === String(game.team1Id)) team1Votes++;
+    else if (String(p.predictedTeamId) === String(game.team2Id)) team2Votes++;
+  });
+  var total = state.users.length;
+  var t1Pct = Math.round(team1Votes / total * 100);
+  var t2Pct = Math.round(team2Votes / total * 100);
+  var t1c = CONFIG.TEAM_COLORS[game.team1Id] || '#666';
+  var t2c = CONFIG.TEAM_COLORS[game.team2Id] || '#666';
+  return '<div class="vote-bar" style="background:linear-gradient(to right,' +
+    t1c + ' ' + t1Pct + '%,' + t2c + ' ' + t1Pct + '%,' +
+    t2c + ' ' + (t1Pct + t2Pct) + '%,var(--text2) ' + (t1Pct + t2Pct) + '%)"></div>';
 }
 
 function showVoteBreakdown(gameId) {
@@ -992,7 +1012,7 @@ function renderLeaderboard() {
     });
 
     html += '</div>';
-    container.innerHTML = '<details class="race-toggle"><summary>&#127944; Race Chart</summary><div id="race-chart-container"></div></details>' + html;
+    container.innerHTML = '<details class="race-toggle"><summary>&#128200; Race Chart</summary><div id="race-chart-container"></div></details>' + html;
 
     if (state.selectedRaceUser === null && state.currentUser) {
       state.selectedRaceUser = state.currentUser.userId;

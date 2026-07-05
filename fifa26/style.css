@@ -176,6 +176,11 @@ input, select, button {
   background: var(--card-bg); border: 1px solid var(--border);
   border-radius: 8px; padding: 12px 16px; margin-bottom: 8px;
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  position: relative; overflow: hidden;
+}
+.vote-bar {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 1px; z-index: 1;
 }
 .game-card.completed { opacity: 0.75; padding: 8px 12px; gap: 6px; margin-bottom: 4px; }
 .game-card.completed .game-teams { gap: 6px; }
