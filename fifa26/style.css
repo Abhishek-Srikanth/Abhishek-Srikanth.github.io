@@ -340,7 +340,8 @@ input, select, button {
 .badge-card-icon { margin-bottom: 2px; }
 .badge-card-name { font-size: 0.65rem; font-weight: 600; color: var(--text2); line-height: 1.2; }
 .badge-card-detail { font-size: 0.6rem; color: var(--text2); opacity: 0.7; line-height: 1.2; }
-.badge-detail-game { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80px; }
+.badge-detail-game { word-wrap: break-word; overflow-wrap: break-word; }
+.badge-detail-pct { opacity: 0.6; }
 .badge-detail-stat { font-weight: 600; }
 .badge-count { font-weight: 700; }
 
@@ -349,7 +350,6 @@ input, select, button {
   .badge-icon { width: 16px !important; height: 16px !important; }
   .badge-card { width: 70px; }
   .badge-card-icon svg { width: 32px !important; height: 32px !important; }
-  .badge-detail-game { max-width: 70px; }
 }
 
 /* Race Chart Button */

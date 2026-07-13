@@ -814,6 +814,8 @@ function renderBadgeShowcase(userId) {
 
   html += '<div class="badge-showcase-grid">';
 
+  var expandTypes = ['giant_slayer', 'lone_wolf', 'close_call', 'loyal_fan'];
+
   badges.forEach(function(badge) {
     var info = BADGE_TYPES[badge.type];
     var user = state.users.find(function(u) { return u.userId === userId; });
@@ -821,31 +823,35 @@ function renderBadgeShowcase(userId) {
     var flagUrl = (user && TEAM_FLAG_MAP[user.teamId]) ? TEAM_FLAG_MAP[user.teamId] : '';
     var icon = renderBadgeIcon(badge.type, 40, teamColor, flagUrl);
 
-    var detail = '';
-    if (badge.games && badge.games.length > 0) {
-      var gameLines = badge.games.slice(0, 4).map(function(entry) {
+    if (expandTypes.indexOf(badge.type) !== -1 && badge.games && badge.games.length > 0) {
+      badge.games.forEach(function(entry) {
         var g = entry.game || entry;
         var t1 = state.teams[g.team1Id];
         var t2 = state.teams[g.team2Id];
         var n1 = t1 ? t1.name_en : g.team1Name;
         var n2 = t2 ? t2.name_en : g.team2Name;
         var score = g.finished ? (' ' + (g.score1 || 0) + '-' + (g.score2 || 0)) : '';
-        var extra = badge.type === 'lone_wolf' && entry.split ? (' (' + entry.split + '%)') : '';
-        return '<div class="badge-detail-game">' + escapeHtml(n1) + ' vs ' + escapeHtml(n2) + score + extra + '</div>';
+        var detail = '<div class="badge-detail-game">' + escapeHtml(n1) + ' vs ' + escapeHtml(n2) + score + '</div>';
+
+        html += '<div class="badge-card">' +
+          '<div class="badge-card-icon">' + icon + '</div>' +
+          '<div class="badge-card-name">' + info.name + '</div>' +
+          '<div class="badge-card-detail">' + detail + '</div>' +
+          '</div>';
       });
-      if (badge.games.length > 4) gameLines.push('<div class="badge-detail-game">+' + (badge.games.length - 4) + ' more</div>');
-      detail = gameLines.join('');
-    } else if (badge.pct != null) {
-      detail = '<div class="badge-detail-stat">' + badge.num + '/' + badge.den + ' games (' + badge.pct + '%)</div>';
+    } else {
+      var detail = '';
+      if (badge.pct != null) {
+        detail = '<div class="badge-detail-stat">' + badge.num + '/' + badge.den + ' games (' + badge.pct + '%)</div>';
+      }
+      var countLabel = badge.count > 1 ? ' <span class="badge-count">x' + badge.count + '</span>' : '';
+
+      html += '<div class="badge-card">' +
+        '<div class="badge-card-icon">' + icon + '</div>' +
+        '<div class="badge-card-name">' + info.name + countLabel + '</div>' +
+        '<div class="badge-card-detail">' + detail + '</div>' +
+        '</div>';
     }
-
-    var countLabel = badge.count > 1 ? ' <span class="badge-count">x' + badge.count + '</span>' : '';
-
-    html += '<div class="badge-card">' +
-      '<div class="badge-card-icon">' + icon + '</div>' +
-      '<div class="badge-card-name">' + info.name + countLabel + '</div>' +
-      '<div class="badge-card-detail">' + detail + '</div>' +
-      '</div>';
   });
 
   html += '</div></div>';
