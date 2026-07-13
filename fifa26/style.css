@@ -181,7 +181,14 @@ input, select, button {
 }
 .vote-bar {
   position: absolute; bottom: 0; left: 0; right: 0;
-  height: 1px; z-index: 1;
+  height: 2px; z-index: 1;
+  display: flex;
+}
+.vb-seg { height: 100%; }
+.vb-gap { background: var(--text2); opacity: 0.3; }
+.vb-gold-line {
+  width: 3px; height: 100%; flex-shrink: 0;
+  background: linear-gradient(to right, #000 1px, #d4af37 1px, #d4af37 2px, #000 2px);
 }
 .game-card.completed { opacity: 0.75; padding: 8px 12px; gap: 6px; margin-bottom: 4px; }
 .game-card.completed .game-teams { gap: 6px; }

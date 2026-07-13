@@ -783,9 +783,18 @@ function renderVoteBar(game) {
   var t2Pct = Math.round(team2Votes / total * 100);
   var t1c = CONFIG.TEAM_COLORS[game.team1Id] || '#666';
   var t2c = CONFIG.TEAM_COLORS[game.team2Id] || '#666';
-  return '<div class="vote-bar" style="background:linear-gradient(to right,' +
-    t1c + ' ' + t1Pct + '%,' + t2c + ' ' + t1Pct + '%,' +
-    t2c + ' ' + (t1Pct + t2Pct) + '%,var(--text2) ' + (t1Pct + t2Pct) + '%)"></div>';
+
+  var gapPct = Math.max(0, 100 - t1Pct - t2Pct);
+  var gap = gapPct > 0
+    ? '<div class="vb-gold-line"></div><div class="vb-seg vb-gap" style="width:' + gapPct + '%"></div>'
+    : '';
+
+  return '<div class="vote-bar">' +
+    '<div class="vb-seg" style="width:' + t1Pct + '%;background:' + t1c + '"></div>' +
+    '<div class="vb-gold-line"></div>' +
+    '<div class="vb-seg" style="width:' + t2Pct + '%;background:' + t2c + '"></div>' +
+    gap +
+    '</div>';
 }
 
 function showVoteBreakdown(gameId) {
@@ -1150,7 +1159,7 @@ function renderRaceChart(container) {
   });
 
   var M_TOP = 25, M_RIGHT = 20, M_BOTTOM = 80, M_LEFT = 35;
-  var SVG_W = 800, SVG_H = 400;
+  var SVG_W = 800, SVG_H = window.innerWidth <= 600 ? 560 : 400;
   var CHART_W = SVG_W - M_LEFT - M_RIGHT;
   var CHART_H = SVG_H - M_TOP - M_BOTTOM;
   var CX = M_LEFT, CY = M_TOP, CB = CY + CHART_H, CR = CX + CHART_W;
