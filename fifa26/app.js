@@ -262,8 +262,8 @@ function fetchGames() {
             team2Name: g.away_team_name_en || null,
             score1: g.finished === 'TRUE' ? g.home_score : null,
             score2: g.finished === 'TRUE' ? g.away_score : null,
-            penalty1: g.finished === 'TRUE' && g.home_penalty_score ? g.home_penalty_score : null,
-            penalty2: g.finished === 'TRUE' && g.away_penalty_score ? g.away_penalty_score : null,
+            penalty1: g.finished === 'TRUE' && g.home_penalty_score && g.home_penalty_score !== 'null' ? g.home_penalty_score : null,
+            penalty2: g.finished === 'TRUE' && g.away_penalty_score && g.away_penalty_score !== 'null' ? g.away_penalty_score : null,
             finished: g.finished === 'TRUE',
             winner: winner,
             date: g.local_date || null,
@@ -576,6 +576,281 @@ var ROUND_COLORS = {
   r32: '#15803d', r16: '#4ade80', qf: '#facc15',
   sf: '#f97316', third: '#ef4444', final: '#ffffff'
 };
+
+var BADGE_TYPES = {
+  giant_slayer: { name: 'Giant Killer', shape: 'shield', color: '#4A90D9', priority: 1,
+    desc: 'Correctly predicted an underdog winning with a FIFA rank gap of 15+' },
+  lone_wolf:    { name: 'Lone Wolf',    shape: 'shield', color: '#A0A0A0', priority: 2,
+    desc: 'Picked the minority side when 75%+ predicted the other team, and won' },
+  close_call:   { name: 'Close Call',   shape: 'shield', color: '#E8A838', priority: 3,
+    desc: 'Correctly predicted a game decided by penalties' },
+  loyal_fan:    { name: 'Loyal Fan',    shape: 'shield', color: null,      priority: 4,
+    desc: 'Predicted your supported team to win, and they did' },
+  fav_picker:   { name: 'Safe Bet', shape: 'circle', color: '#9B59B6', priority: 5,
+    desc: '75%+ of your predictions were for the higher-ranked team' },
+  underdog:     { name: 'Underdog Lover',   shape: 'circle', color: '#27AE60', priority: 6,
+    desc: '20%+ of your predictions were for the lower-ranked team' }
+};
+
+function computeBadges(userId) {
+  var user = state.users.find(function(u) { return u.userId === userId; });
+  if (!user) return [];
+
+  var allPreds = state._allPredictions || [];
+  var userPreds = allPreds.filter(function(p) { return Number(p.userId) === userId; });
+  if (!userPreds.length) return [];
+
+  var filter = state.leaderboardFilter;
+  var finished = state.games.filter(function(g) {
+    if (!g.finished) return false;
+    if (CONFIG.ROUND_ORDER.indexOf(g.type) === -1) return false;
+    if (filter !== 'cumulative' && g.type !== filter) return false;
+    return true;
+  });
+  finished.sort(function(a, b) {
+    var ka = getDateSortKey(a.date), kb = getDateSortKey(b.date);
+    return ka > kb ? 1 : (ka < kb ? -1 : 0);
+  });
+
+  var result = [];
+
+  var gsCount = 0, gsGames = [];
+  var lwCount = 0, lwGames = [];
+  var ccCount = 0, ccGames = [];
+  var lfCount = 0, lfGames = [];
+  var favTotal = 0, favCount = 0;
+  var udTotal = 0, udCount = 0;
+
+  finished.forEach(function(game) {
+    var pred = userPreds.find(function(p) { return p.gameId === game.id; });
+    if (!pred) return;
+    var correct = String(pred.predictedTeamId) === String(game.winner);
+
+    var r1 = state.rankings[game.team1Name] || state.rankings[(game.team1Name || '').replace(/['\u2019]/g, "'")];
+    var r2 = state.rankings[game.team2Name] || state.rankings[(game.team2Name || '').replace(/['\u2019]/g, "'")];
+    if (r1) r1 = parseInt(r1, 10);
+    if (r2) r2 = parseInt(r2, 10);
+
+    if (r1 && r2) {
+      var winnerRank = String(game.winner) === String(game.team1Id) ? r1 : r2;
+      var loserRank = String(game.winner) === String(game.team1Id) ? r2 : r1;
+      if (winnerRank > loserRank && winnerRank - loserRank >= 15 && correct) {
+        gsCount++;
+        gsGames.push(game);
+      }
+      if (r1 !== r2) {
+        favTotal++;
+        udTotal++;
+        var favId = r1 < r2 ? game.team1Id : game.team2Id;
+        var udId = r1 > r2 ? game.team1Id : game.team2Id;
+        if (String(pred.predictedTeamId) === String(favId)) favCount++;
+        if (String(pred.predictedTeamId) === String(udId)) udCount++;
+      }
+    }
+
+    var preds = allPreds.filter(function(p) { return p.gameId === game.id; });
+    var total = preds.length;
+    if (total >= 8 && game.winner) {
+      var t1v = 0, t2v = 0;
+      preds.forEach(function(p) {
+        if (String(p.predictedTeamId) === String(game.team1Id)) t1v++;
+        else if (String(p.predictedTeamId) === String(game.team2Id)) t2v++;
+      });
+      var majPct = Math.max(t1v, t2v) / total;
+      var minId = t1v < t2v ? game.team1Id : game.team2Id;
+      if (majPct >= 0.75 && String(game.winner) === String(minId) && String(pred.predictedTeamId) === String(minId)) {
+        lwCount++;
+        lwGames.push({ game: game, split: Math.round(Math.min(t1v, t2v) / total * 100) });
+      }
+    }
+
+    if (correct && game.penalty1 != null && game.penalty2 != null &&
+        game.penalty1 !== 'null' && game.penalty2 !== 'null') {
+      ccCount++;
+      ccGames.push(game);
+    }
+
+    if (correct && String(pred.predictedTeamId) === String(user.teamId) && String(game.winner) === String(user.teamId)) {
+      lfCount++;
+      lfGames.push(game);
+    }
+  });
+
+  if (gsCount > 0) result.push({ type: 'giant_slayer', count: gsCount, games: gsGames });
+  if (lwCount > 0) result.push({ type: 'lone_wolf', count: lwCount, games: lwGames });
+  if (ccCount > 0) result.push({ type: 'close_call', count: ccCount, games: ccGames });
+  if (lfCount > 0) result.push({ type: 'loyal_fan', count: lfCount, games: lfGames });
+  if (favTotal > 0 && favCount / favTotal >= 0.75) result.push({ type: 'fav_picker', count: 1, pct: Math.round(favCount / favTotal * 100), num: favCount, den: favTotal });
+  if (udTotal > 0 && udCount / udTotal >= 0.20) result.push({ type: 'underdog', count: 1, pct: Math.round(udCount / udTotal * 100), num: udCount, den: udTotal });
+
+  result.sort(function(a, b) {
+    return (BADGE_TYPES[a.type].priority || 99) - (BADGE_TYPES[b.type].priority || 99);
+  });
+
+  return result;
+}
+
+var _badgeUid = 0;
+
+function renderBadgeIcon(type, size, teamColor, flagUrl) {
+  var s = size || 20;
+  var info = BADGE_TYPES[type];
+  var color = info.color;
+  if (type === 'loyal_fan' && teamColor) color = teamColor;
+
+  if (info.shape === 'shield') {
+    var stroke = color;
+    var fill = color;
+    var icon = '';
+    if (type === 'giant_slayer') {
+      // Crossed swords icon by Lorc from Game-icons.net, CC BY 3.0
+      icon = '<g transform="scale(0.0625)">' +
+             '<path fill="#fff" d="M19.75 14.438c59.538 112.29 142.51 202.35 232.28 292.718l3.626 3.75.063-.062c21.827 21.93 44.04 43.923 66.405 66.25-18.856 14.813-38.974 28.2-59.938 40.312l28.532 28.53 68.717-68.717c42.337 27.636 76.286 63.646 104.094 105.81l28.064-28.06c-42.47-27.493-79.74-60.206-106.03-103.876l68.936-68.938-28.53-28.53c-11.115 21.853-24.413 42.015-39.47 60.593-43.852-43.8-86.462-85.842-130.125-125.47-.224-.203-.432-.422-.656-.625C183.624 122.75 108.515 63.91 19.75 14.437zm471.875 0c-83.038 46.28-154.122 100.78-221.97 161.156l22.814 21.562 56.81-56.812 13.22 13.187-56.438 56.44 24.594 23.186c61.802-66.92 117.6-136.92 160.97-218.72zm-329.53 125.906 200.56 200.53a402.965 402.965 0 0 1-13.405 13.032L148.875 153.53l13.22-13.186zm-76.69 113.28-28.5 28.532 68.907 68.906c-26.29 43.673-63.53 76.414-106 103.907l28.063 28.06c27.807-42.164 61.758-78.174 104.094-105.81l68.718 68.717 28.53-28.53c-20.962-12.113-41.08-25.5-59.937-40.313 17.865-17.83 35.61-35.433 53.157-52.97l-24.843-25.655-55.47 55.467c-4.565-4.238-9.014-8.62-13.374-13.062l55.844-55.844-24.53-25.374c-18.28 17.856-36.602 36.06-55.158 54.594-15.068-18.587-28.38-38.758-39.5-60.625z"/>' +
+             '</g>';
+    } else if (type === 'lone_wolf') {
+      // Wolf head icon by Lorc from Game-icons.net, CC BY 3.0
+      icon = '<g transform="scale(0.0625)">' +
+             '<path fill="#fff" d="M179.3 38.94C154.7 77.7 142.7 139.7 168.4 185.9l-16.3 9.2c-6.7-11.9-11.2-24.4-13.9-37.2-34.5-6.3-69.42-7.5-104.98-2.1 34.07 10.1 52.77 23.7 76.68 46.7-26.82 9.7-60.25 30.2-92.93 70.2 35.47-8.8 64.83-11.5 89.43-6.3-36.94 22.5-64.06 56.1-88.34 114.1 35.9-17.2 64.89-18.8 102.94-18.8-23.07 32.7-35.27 77.2-36.31 112.8 24.51-26 57.61-60.2 87.21-79 3 29.9 15 58.3 35.9 85.3-.2-43.9 10.3-88.3 31.6-133.4-18.8 9-32.4 18.1-49.9 29.3 6.2-27.9 12.4-55.8 18.7-83.7-23.3 2.4-39 10-60.5 18.5 16.3-33.1 32.7-66.1 49.1-99.2l16.8 8.3-28.4 57.4c18.4-4.4 28.7-4.1 45.7-1.3-4.5 20.4-9 40.7-13.6 61 65.3-36.2 148.3-45.9 226.7-50 7.6-12.9 13.8-24.2 18.8-34.8l-6.3-24.4-24.4 30.8-7.8-27.5-22.5 29.2-7.5-26.1-23.9 31.5-7.7-28.2-23.8 31.4 1.2-41.1 22.6-42.7 7.6 28.3 23.9-31.5 7.6 28.2 23.5-30 6.5 26.9 24.5-30.8 7.8 27.5 24.6-32c2.3-10.8 4.6-22.4 7.4-35.7-55.5-3.7-106.3 4.8-154 9.8-38-20.8-80.8-26.8-121.9-18.5-13.6-29.69-27.2-59.38-40.9-89.06zM325.5 158.3c-4.5 14.2-13 18.3-24.7 20.6-16.1-4.4-28.3-15.5-34.4-30.2 20.4-3.8 42.4 3.4 59.1 9.6z"/>' +
+             '</g>';
+    } else if (type === 'close_call') {
+      // Crosshair icon by Delapouite from Game-icons.net, CC BY 3.0
+      icon = '<g transform="scale(0.0625)">' +
+             '<path fill="#fff" d="M247 32v23.21C143.25 59.8 59.798 143.25 55.21 247H32v18h23.21C59.8 368.75 143.25 452.202 247 456.79V480h18v-23.21C368.75 452.2 452.202 368.75 456.79 265H480v-18h-23.21C452.2 143.25 368.75 59.798 265 55.21V32h-18zm0 41.223V128h18V73.223C359 77.76 434.24 153 438.777 247H384v18h54.777C434.24 359 359 434.24 265 438.777V384h-18v54.777C153 434.24 77.76 359 73.223 265H128v-18H73.223C77.76 153 153 77.76 247 73.223zM247 224v23h-23v18h23v23h18v-23h23v-18h-23v-23h-18z"/>' +
+             '</g>';
+    } else if (type === 'loyal_fan') {
+      var uid = 'lf' + (++_badgeUid);
+      icon = '<defs><clipPath id="' + uid + '">' +
+             '<path d="M16 2 L28 7 L28 17 Q28 27 16 30 Q4 27 4 17 L4 7 Z"/>' +
+             '</clipPath></defs>';
+      if (flagUrl) {
+        icon += '<image href="' + flagUrl + '" x="0" y="0" width="32" height="32" clip-path="url(#' + uid + ')" preserveAspectRatio="xMidYMid slice"/>';
+      } else {
+        // Corner flag icon by Delapouite from Game-icons.net, CC BY 3.0
+        icon += '<g transform="scale(0.0625)">' +
+                '<path fill="#fff" d="M247 32v298.582l-41.893 22.178a81.053 81.053 0 0 1-16.877 29.303l67.77-35.88 105.512 55.86c-65.754 32.576-140.177 33.31-206.332 2.242A80.506 80.506 0 0 1 128 409a80.593 80.593 0 0 1-22.863-3.313L18 451.817v20.365l113.213-59.936c78.502 43.595 171.072 43.595 249.574 0L494 472.182v-20.364L265 330.582V143.756c25.495-1.29 37.302-7.34 55 .244 29.395 23.17 64 48 96 48l-16-32c-48 0-53.708-90.33-80-112-19.185-11.34-29.794-15.214-55-15.88V32h-18zM116.963 265.975a62.782 62.782 0 0 0-37.65 21.957L80 288l5.658 25.99-20.61 12.035c-.02.658-.048 1.313-.048 1.975 0 9.597 2.134 18.675 5.94 26.8l1.53-2.8 26.145 4.893 3.426 26.377-2.284 1.085C108.244 388.6 117.83 391 128 391c3.24 0 6.42-.244 9.525-.71l-6.257-6.618L144 360.316l26.146 4.89 1.124 8.64c10.107-9.54 17.04-22.395 19.09-36.87l-7.628 3.883-18.808-18.81L176 298.35l8.31 1.316a62.96 62.96 0 0 0-28.357-28.17l.094 1.15-24.547 10.25-14.537-16.92zM128 304l18.81 18.81-12.078 23.7-26.27-4.16-4.163-26.274L128 304z"/>' +
+                '</g>';
+      }
+    }
+    return '<svg viewBox="0 0 32 32" width="' + s + '" height="' + s + '" class="badge-icon badge-shield">' +
+      '<path d="M16 2 L28 7 L28 17 Q28 27 16 30 Q4 27 4 17 L4 7 Z" fill="' + fill + '" stroke="' + stroke + '" stroke-width="1.5"/>' +
+      icon + '</svg>';
+  }
+
+  if (info.shape === 'circle') {
+    var icon2 = '';
+    if (type === 'fav_picker') {
+      // Checked shield icon by Lorc from Game-icons.net, CC BY 3.0
+      icon2 = '<g transform="scale(0.0625)">' +
+              '<path fill="' + color + '" d="M48.906 19.656v10.782c0 103.173 10.53 206.07 41.313 289.53 30.78 83.463 82.763 148.094 164.53 170.563l2.188.626 2.25-.5c89.686-19.12 142.322-84.028 171.187-168.344 28.865-84.315 35.406-188.656 35.406-291.875v-10.78l-10.655 1.53C323.26 39.954 191.452 40 59.595 21.188l-10.69-1.53zM67.75 41.03c63.242 8.536 126.495 12.792 189.75 12.782v184.532h174.78c-4.905 27.572-11.31 53.747-19.592 77.937-27.348 79.884-73.757 137.33-155.157 155.564-.008-.003-.02.003-.03 0v-233.5H86.53c-12.87-60.99-18.277-128.81-18.78-197.313z"/>' +
+              '</g>';
+    } else if (type === 'underdog') {
+      // Plain arrow icon by Delapouite from Game-icons.net, CC BY 3.0
+      icon2 = '<g transform="scale(0.0625)">' +
+              '<path fill="' + color + '" d="M130.81 21.785v245.95H43.84L256 489.382l212.158-221.644H381.19V21.786H130.81z"/>' +
+              '</g>';
+    }
+    return '<svg viewBox="0 0 32 32" width="' + s + '" height="' + s + '" class="badge-icon badge-circle">' +
+      '<circle cx="16" cy="16" r="14" fill="none" stroke="' + color + '" stroke-width="1.5"/>' +
+      '<circle cx="16" cy="16" r="11.5" fill="none" stroke="' + color + '" stroke-width="0.75" opacity="0.4"/>' +
+      icon2 + '</svg>';
+  }
+
+  return '';
+}
+
+function renderBadge(badge, size) {
+  var info = BADGE_TYPES[badge.type];
+  var s = size || 20;
+  var user = state.currentUser;
+  var teamColor = (user && CONFIG.TEAM_COLORS[user.teamId]) ? CONFIG.TEAM_COLORS[user.teamId] : null;
+  var icon = renderBadgeIcon(badge.type, s, teamColor);
+
+  var numeral = '';
+  if (badge.count >= 2) {
+    var numerals = ['', '', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+    numeral = '<span class="badge-numeral">' + (numerals[badge.count] || badge.count) + '</span>';
+  }
+
+  var glowClass = badge.count >= 3 ? ' badge-gold' : '';
+  var cls = 'badge' + glowClass;
+
+  return '<span class="' + cls + '" title="' + info.name + (badge.count > 1 ? ' x' + badge.count : '') + '">' +
+    icon + numeral + '</span>';
+}
+
+function renderLeaderboardBadges(userId) {
+  var badges = computeBadges(userId);
+  if (!badges.length) return '';
+  var maxShow = 3;
+  var html = '<span class="lb-badges">';
+  for (var i = 0; i < Math.min(badges.length, maxShow); i++) {
+    html += renderBadge(badges[i], 20);
+  }
+  if (badges.length > maxShow) {
+    html += '<span class="lb-badge-overflow">+' + (badges.length - maxShow) + '</span>';
+  }
+  return html + '</span>';
+}
+
+function renderBadgeShowcase(userId) {
+  var badges = computeBadges(userId);
+  if (!badges.length) return '';
+
+  var html = '<div class="badge-showcase">';
+  html += '<div class="badge-showcase-title">BADGES ' +
+    '<span class="badge-info-btn" onclick="var el=this.parentNode.nextElementSibling;el.classList.toggle(\'open\');" title="What do these badges mean?">&#9432;</span>' +
+    '</div>';
+
+  html += '<div class="badge-legend">';
+  var types = ['giant_slayer','lone_wolf','close_call','loyal_fan','fav_picker','underdog'];
+  types.forEach(function(t) {
+    var info = BADGE_TYPES[t];
+    html += '<div class="badge-legend-row">' +
+      '<span class="badge-legend-icon">' + renderBadgeIcon(t, 18) + '</span>' +
+      '<span class="badge-legend-text"><strong>' + info.name + '</strong> ' + info.desc + '</span>' +
+      '</div>';
+  });
+  html += '</div>';
+
+  html += '<div class="badge-showcase-grid">';
+
+  badges.forEach(function(badge) {
+    var info = BADGE_TYPES[badge.type];
+    var user = state.users.find(function(u) { return u.userId === userId; });
+    var teamColor = (user && CONFIG.TEAM_COLORS[user.teamId]) ? CONFIG.TEAM_COLORS[user.teamId] : null;
+    var flagUrl = (user && TEAM_FLAG_MAP[user.teamId]) ? TEAM_FLAG_MAP[user.teamId] : '';
+    var icon = renderBadgeIcon(badge.type, 40, teamColor, flagUrl);
+
+    var detail = '';
+    if (badge.games && badge.games.length > 0) {
+      var gameLines = badge.games.slice(0, 4).map(function(entry) {
+        var g = entry.game || entry;
+        var t1 = state.teams[g.team1Id];
+        var t2 = state.teams[g.team2Id];
+        var n1 = t1 ? t1.name_en : g.team1Name;
+        var n2 = t2 ? t2.name_en : g.team2Name;
+        var score = g.finished ? (' ' + (g.score1 || 0) + '-' + (g.score2 || 0)) : '';
+        var extra = badge.type === 'lone_wolf' && entry.split ? (' (' + entry.split + '%)') : '';
+        return '<div class="badge-detail-game">' + escapeHtml(n1) + ' vs ' + escapeHtml(n2) + score + extra + '</div>';
+      });
+      if (badge.games.length > 4) gameLines.push('<div class="badge-detail-game">+' + (badge.games.length - 4) + ' more</div>');
+      detail = gameLines.join('');
+    } else if (badge.pct != null) {
+      detail = '<div class="badge-detail-stat">' + badge.num + '/' + badge.den + ' games (' + badge.pct + '%)</div>';
+    }
+
+    var countLabel = badge.count > 1 ? ' <span class="badge-count">x' + badge.count + '</span>' : '';
+
+    html += '<div class="badge-card">' +
+      '<div class="badge-card-icon">' + icon + '</div>' +
+      '<div class="badge-card-name">' + info.name + countLabel + '</div>' +
+      '<div class="badge-card-detail">' + detail + '</div>' +
+      '</div>';
+  });
+
+  html += '</div></div>';
+  return html;
+}
 
 function getPrevRound(round) {
   if (round === 'final' || round === 'third') return 'sf';
@@ -1049,8 +1324,11 @@ function renderLeaderboard() {
         '<span class="' + rankClass + '">' + rankStr + '</span>' +
         (flagUrl ? '<img class="lb-flag" src="' + flagUrl + '" alt="" loading="lazy">' : '') +
         '<span class="lb-name' + (row.rank <= 3 ? ' ' + ['gold','silver','bronze'][row.rank - 1] : '') + '">' + escapeHtml(row.name) + '</span>' +
+        renderLeaderboardBadges(row.userId) +
+        '<span class="lb-stats">' +
         renderFormGuide(fgData[row.userId]) +
         '<span class="lb-score">' + row.correctCount + '</span>' +
+        '</span>' +
         '</div>' +
         renderBar(row, maxScore) +
         '</div>';
@@ -1348,6 +1626,8 @@ function openPlayerPredictions(userId) {
     '</div>';
 
   html += '<div class="pp-body">';
+
+  html += renderBadgeShowcase(userId);
 
   var hasAny = false;
   CONFIG.ROUND_ORDER.forEach(function(type) {

@@ -291,12 +291,66 @@ input, select, button {
 .lb-rank.bronze, .lb-name.bronze { color: #cd7f32; }
 .lb-flag { width: 24px; height: 16px; border-radius: 2px; object-fit: cover; flex-shrink: 0; }
 .lb-name { flex: 1; font-weight: 600; font-size: 0.95rem; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb-stats { margin-left: auto; display: inline-flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .lb-score { font-weight: 700; color: var(--accent); font-size: 1.15rem; flex-shrink: 0; }
 .lb-bar { height: 7px; background: var(--bg3); border-radius: 3px; margin-top: 8px; overflow: hidden; }
 .lb-bar-fill { height: 100%; transition: width 0.5s ease; display: flex; flex-direction: column; }
 .lb-bar-gold { height: 2px; width: 100%; background: var(--accent); flex-shrink: 0; }
 .lb-bar-segs { height: 2px; width: 100%; display: flex; flex-shrink: 0; margin-top: 1px; }
 .lb-bar-seg { height: 100%; }
+
+/* Badges */
+.lb-badges { display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0; margin-left: 2px; }
+.badge { position: relative; display: inline-flex; align-items: center; justify-content: center; cursor: default; }
+.badge-icon { display: block; }
+.badge-numeral {
+  position: absolute; bottom: -2px; right: -4px;
+  font-size: 7px; font-weight: 700; line-height: 1;
+  background: var(--bg1); color: var(--text2);
+  padding: 0 2px; border-radius: 3px;
+}
+.badge-gold .badge-numeral { color: #d4af37; }
+.badge-gold .badge-shield path:first-child { filter: drop-shadow(0 0 2px rgba(212,175,55,0.5)); }
+.badge-gold .badge-circle circle:first-child { stroke: #d4af37; stroke-width: 2; }
+.lb-badge-overflow { font-size: 0.7rem; color: var(--text2); font-weight: 600; margin-left: 1px; }
+
+/* Badge Showcase (player detail modal) */
+.badge-showcase { padding: 0 0 12px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+.badge-showcase-title { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; color: var(--text2); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.badge-info-btn {
+  font-size: 0.85rem; color: var(--text2); cursor: pointer; opacity: 0.5;
+  transition: opacity 0.15s; user-select: none;
+}
+.badge-info-btn:hover { opacity: 1; }
+.badge-legend {
+  display: none; margin-bottom: 10px; padding: 8px;
+  background: var(--bg3); border-radius: var(--radius);
+}
+.badge-legend.open { display: block; }
+.badge-legend-row { display: flex; align-items: flex-start; gap: 8px; padding: 4px 0; }
+.badge-legend-row + .badge-legend-row { border-top: 1px solid var(--border); }
+.badge-legend-icon { flex-shrink: 0; margin-top: 1px; }
+.badge-legend-text { font-size: 0.65rem; color: var(--text2); line-height: 1.4; }
+.badge-legend-text strong { color: var(--text1); }
+.badge-showcase-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.badge-card {
+  width: 80px; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.badge-card-icon { margin-bottom: 2px; }
+.badge-card-name { font-size: 0.65rem; font-weight: 600; color: var(--text2); line-height: 1.2; }
+.badge-card-detail { font-size: 0.6rem; color: var(--text2); opacity: 0.7; line-height: 1.2; }
+.badge-detail-game { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80px; }
+.badge-detail-stat { font-weight: 600; }
+.badge-count { font-weight: 700; }
+
+@media (max-width: 480px) {
+  .lb-badges { gap: 2px; }
+  .badge-icon { width: 16px !important; height: 16px !important; }
+  .badge-card { width: 70px; }
+  .badge-card-icon svg { width: 32px !important; height: 32px !important; }
+  .badge-detail-game { max-width: 70px; }
+}
 
 /* Race Chart Button */
 .race-chart-btn {
