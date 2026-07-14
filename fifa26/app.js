@@ -586,9 +586,11 @@ var BADGE_TYPES = {
     desc: 'Correctly predicted a game decided by penalties' },
   loyal_fan:    { name: 'Loyal Fan',    shape: 'shield', color: null,      priority: 4,
     desc: 'Predicted your supported team to win, and they did' },
-  fav_picker:   { name: 'Safe Bet', shape: 'circle', color: '#9B59B6', priority: 5,
+  et_tu_brute:  { name: 'Et Tu Brute',  shape: 'shield', color: '#C0392B', priority: 5,
+    desc: 'Predicted the opposing team in a match your supported team was playing in' },
+  fav_picker:   { name: 'Safe Bet', shape: 'circle', color: '#9B59B6', priority: 6,
     desc: '75%+ of your predictions were for the higher-ranked team' },
-  underdog:     { name: 'Underdog Lover',   shape: 'circle', color: '#27AE60', priority: 6,
+  underdog:     { name: 'Underdog Lover',   shape: 'circle', color: '#27AE60', priority: 7,
     desc: '20%+ of your predictions were for the lower-ranked team' }
 };
 
@@ -618,6 +620,7 @@ function computeBadges(userId) {
   var lwCount = 0, lwGames = [];
   var ccCount = 0, ccGames = [];
   var lfCount = 0, lfGames = [];
+  var etbCount = 0, etbGames = [];
   var favTotal = 0, favCount = 0;
   var udTotal = 0, udCount = 0;
 
@@ -674,12 +677,20 @@ function computeBadges(userId) {
       lfCount++;
       lfGames.push(game);
     }
+
+    var votedAgainstOwnTeam = (String(game.team1Id) === String(user.teamId) || String(game.team2Id) === String(user.teamId)) &&
+                               String(pred.predictedTeamId) !== String(user.teamId);
+    if (votedAgainstOwnTeam) {
+      etbCount++;
+      etbGames.push(game);
+    }
   });
 
   if (gsCount > 0) result.push({ type: 'giant_slayer', count: gsCount, games: gsGames });
   if (lwCount > 0) result.push({ type: 'lone_wolf', count: lwCount, games: lwGames });
   if (ccCount > 0) result.push({ type: 'close_call', count: ccCount, games: ccGames });
   if (lfCount > 0) result.push({ type: 'loyal_fan', count: lfCount, games: lfGames });
+  if (etbCount > 0) result.push({ type: 'et_tu_brute', count: etbCount, games: etbGames });
   if (favTotal > 0 && favCount / favTotal >= 0.75) result.push({ type: 'fav_picker', count: 1, pct: Math.round(favCount / favTotal * 100), num: favCount, den: favTotal });
   if (udTotal > 0 && udCount / udTotal >= 0.20) result.push({ type: 'underdog', count: 1, pct: Math.round(udCount / udTotal * 100), num: udCount, den: udTotal });
 
@@ -730,6 +741,11 @@ function renderBadgeIcon(type, size, teamColor, flagUrl) {
                 '<path fill="#fff" d="M247 32v298.582l-41.893 22.178a81.053 81.053 0 0 1-16.877 29.303l67.77-35.88 105.512 55.86c-65.754 32.576-140.177 33.31-206.332 2.242A80.506 80.506 0 0 1 128 409a80.593 80.593 0 0 1-22.863-3.313L18 451.817v20.365l113.213-59.936c78.502 43.595 171.072 43.595 249.574 0L494 472.182v-20.364L265 330.582V143.756c25.495-1.29 37.302-7.34 55 .244 29.395 23.17 64 48 96 48l-16-32c-48 0-53.708-90.33-80-112-19.185-11.34-29.794-15.214-55-15.88V32h-18zM116.963 265.975a62.782 62.782 0 0 0-37.65 21.957L80 288l5.658 25.99-20.61 12.035c-.02.658-.048 1.313-.048 1.975 0 9.597 2.134 18.675 5.94 26.8l1.53-2.8 26.145 4.893 3.426 26.377-2.284 1.085C108.244 388.6 117.83 391 128 391c3.24 0 6.42-.244 9.525-.71l-6.257-6.618L144 360.316l26.146 4.89 1.124 8.64c10.107-9.54 17.04-22.395 19.09-36.87l-7.628 3.883-18.808-18.81L176 298.35l8.31 1.316a62.96 62.96 0 0 0-28.357-28.17l.094 1.15-24.547 10.25-14.537-16.92zM128 304l18.81 18.81-12.078 23.7-26.27-4.16-4.163-26.274L128 304z"/>' +
                 '</g>';
       }
+    } else if (type === 'et_tu_brute') {
+      // Shattered heart icon by Delapouite from Game-icons.net, CC BY 3.0
+      icon = '<g transform="scale(0.0625)">' +
+             '<path fill="#fff" d="M112 16c-22.1 4.7-42.55 16.45-58.12 35.68l80.32 75.42L112 16zm31.9 20.77c-.9 0-1.7.1-2.6.1l26.6 132.83 88.8 40.4 10.3-75.4c-17.2-63.6-70.1-97.97-120.7-97.93h-2.4zm226.7 41.18c-24 .1-49.2 7.75-72.6 24.35l-13.7 99.9 62.3 28.3 134-53.6c-6.5-60.1-55.1-99.25-110-98.95zM55.11 89.9c-5.99 10.5-10.78 22.6-14.01 36.4-14.83 63.3 15.59 125.4 51.48 181.8l56.62-129.8-94.09-88.4zM176.9 193.6 265 407.5c27.1-13.4 57.2-27.4 85.8-43.5l-22.6-101.7-151.3-68.7zm293.9 18.2-124.4 49.7 20.7 92.9c47.5-28.8 88.1-64.5 99.7-114 2.3-9.9 3.6-19.4 4-28.6zm-314.9 16.1-55.5 127.2c36.3 54.6 73.7 103.2 73.7 141.5 10.9-18.8 37.8-35.2 70.9-52.2l-89.1-216.5z"/>' +
+             '</g>';
     }
     return '<svg viewBox="0 0 32 32" width="' + s + '" height="' + s + '" class="badge-icon badge-shield">' +
       '<path d="M16 2 L28 7 L28 17 Q28 27 16 30 Q4 27 4 17 L4 7 Z" fill="' + fill + '" stroke="' + stroke + '" stroke-width="1.5"/>' +
@@ -802,7 +818,7 @@ function renderBadgeShowcase(userId) {
     '</div>';
 
   html += '<div class="badge-legend">';
-  var types = ['giant_slayer','lone_wolf','close_call','loyal_fan','fav_picker','underdog'];
+  var types = ['giant_slayer','lone_wolf','close_call','loyal_fan','et_tu_brute','fav_picker','underdog'];
   types.forEach(function(t) {
     var info = BADGE_TYPES[t];
     html += '<div class="badge-legend-row">' +
@@ -814,7 +830,7 @@ function renderBadgeShowcase(userId) {
 
   html += '<div class="badge-showcase-grid">';
 
-  var expandTypes = ['giant_slayer', 'lone_wolf', 'close_call', 'loyal_fan'];
+  var expandTypes = ['giant_slayer', 'lone_wolf', 'close_call', 'loyal_fan', 'et_tu_brute'];
 
   badges.forEach(function(badge) {
     var info = BADGE_TYPES[badge.type];
