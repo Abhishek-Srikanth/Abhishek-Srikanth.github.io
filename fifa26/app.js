@@ -703,6 +703,25 @@ function computeBadges(userId) {
 
 var _badgeUid = 0;
 
+function renderCheckeredShield(size) {
+  var s = size || 18;
+  var uid = 'cs' + (++_badgeUid);
+  var tiles = '';
+  for (var row = 0; row < 8; row++) {
+    for (var col = 0; col < 7; col++) {
+      if ((row + col) % 2 === 0) {
+        tiles += '<rect x="' + (4 + col * 4) + '" y="' + (2 + row * 4) + '" width="4" height="4" fill="#fff" opacity="0.35"/>';
+      }
+    }
+  }
+  return '<svg viewBox="0 0 32 32" width="' + s + '" height="' + s + '" class="badge-icon badge-shield">' +
+    '<defs><clipPath id="' + uid + '">' +
+    '<path d="M16 2 L28 7 L28 17 Q28 27 16 30 Q4 27 4 17 L4 7 Z"/>' +
+    '</clipPath></defs>' +
+    '<path d="M16 2 L28 7 L28 17 Q28 27 16 30 Q4 27 4 17 L4 7 Z" fill="#8B6914" stroke="#8B6914" stroke-width="1.5"/>' +
+    '<g clip-path="url(#' + uid + ')">' + tiles + '</g></svg>';
+}
+
 function renderBadgeIcon(type, size, teamColor, flagUrl) {
   var s = size || 20;
   var info = BADGE_TYPES[type];
@@ -735,11 +754,6 @@ function renderBadgeIcon(type, size, teamColor, flagUrl) {
              '</clipPath></defs>';
       if (flagUrl) {
         icon += '<image href="' + flagUrl + '" x="0" y="0" width="32" height="32" clip-path="url(#' + uid + ')" preserveAspectRatio="xMidYMid slice"/>';
-      } else {
-        // Corner flag icon by Delapouite from Game-icons.net, CC BY 3.0
-        icon += '<g transform="scale(0.0625)">' +
-                '<path fill="#fff" d="M247 32v298.582l-41.893 22.178a81.053 81.053 0 0 1-16.877 29.303l67.77-35.88 105.512 55.86c-65.754 32.576-140.177 33.31-206.332 2.242A80.506 80.506 0 0 1 128 409a80.593 80.593 0 0 1-22.863-3.313L18 451.817v20.365l113.213-59.936c78.502 43.595 171.072 43.595 249.574 0L494 472.182v-20.364L265 330.582V143.756c25.495-1.29 37.302-7.34 55 .244 29.395 23.17 64 48 96 48l-16-32c-48 0-53.708-90.33-80-112-19.185-11.34-29.794-15.214-55-15.88V32h-18zM116.963 265.975a62.782 62.782 0 0 0-37.65 21.957L80 288l5.658 25.99-20.61 12.035c-.02.658-.048 1.313-.048 1.975 0 9.597 2.134 18.675 5.94 26.8l1.53-2.8 26.145 4.893 3.426 26.377-2.284 1.085C108.244 388.6 117.83 391 128 391c3.24 0 6.42-.244 9.525-.71l-6.257-6.618L144 360.316l26.146 4.89 1.124 8.64c10.107-9.54 17.04-22.395 19.09-36.87l-7.628 3.883-18.808-18.81L176 298.35l8.31 1.316a62.96 62.96 0 0 0-28.357-28.17l.094 1.15-24.547 10.25-14.537-16.92zM128 304l18.81 18.81-12.078 23.7-26.27-4.16-4.163-26.274L128 304z"/>' +
-                '</g>';
       }
     } else if (type === 'et_tu_brute') {
       // Shattered heart icon by Delapouite from Game-icons.net, CC BY 3.0
@@ -774,12 +788,13 @@ function renderBadgeIcon(type, size, teamColor, flagUrl) {
   return '';
 }
 
-function renderBadge(badge, size) {
+function renderBadge(badge, size, userId) {
   var info = BADGE_TYPES[badge.type];
   var s = size || 20;
-  var user = state.currentUser;
+  var user = userId ? state.users.find(function(u) { return u.userId === userId; }) : state.currentUser;
   var teamColor = (user && CONFIG.TEAM_COLORS[user.teamId]) ? CONFIG.TEAM_COLORS[user.teamId] : null;
-  var icon = renderBadgeIcon(badge.type, s, teamColor);
+  var flagUrl = (user && TEAM_FLAG_MAP[user.teamId]) ? TEAM_FLAG_MAP[user.teamId] : '';
+  var icon = renderBadgeIcon(badge.type, s, teamColor, flagUrl);
 
   var numeral = '';
   if (badge.count >= 2) {
@@ -800,7 +815,7 @@ function renderLeaderboardBadges(userId) {
   var maxShow = 3;
   var html = '<span class="lb-badges">';
   for (var i = 0; i < Math.min(badges.length, maxShow); i++) {
-    html += renderBadge(badges[i], 20);
+    html += renderBadge(badges[i], 20, userId);
   }
   if (badges.length > maxShow) {
     html += '<span class="lb-badge-overflow">+' + (badges.length - maxShow) + '</span>';
@@ -821,8 +836,14 @@ function renderBadgeShowcase(userId) {
   var types = ['giant_slayer','lone_wolf','close_call','loyal_fan','et_tu_brute','fav_picker','underdog'];
   types.forEach(function(t) {
     var info = BADGE_TYPES[t];
+    var legendIcon;
+    if (t === 'loyal_fan') {
+      legendIcon = renderCheckeredShield(18);
+    } else {
+      legendIcon = renderBadgeIcon(t, 18);
+    }
     html += '<div class="badge-legend-row">' +
-      '<span class="badge-legend-icon">' + renderBadgeIcon(t, 18) + '</span>' +
+      '<span class="badge-legend-icon">' + legendIcon + '</span>' +
       '<span class="badge-legend-text"><strong>' + info.name + '</strong> ' + info.desc + '</span>' +
       '</div>';
   });
