@@ -6,6 +6,7 @@ const CONFIG = {
   RANKINGS_URL: 'https://raw.githubusercontent.com/salah23222/worldcup2026/main/data/rankings.json',
 
   ROUND_ORDER: ['r32', 'r16', 'qf', 'sf', 'third', 'final'],
+  SIMULTANEOUS_ROUNDS: [['third', 'final']],
 
   TEAM_COLORS: {
     "1": "#006847",   // Mexico

@@ -902,6 +902,17 @@ function getPrevRound(round) {
   return CONFIG.ROUND_ORDER[idx - 1];
 }
 
+function isRoundActive(type, currentRound) {
+  if (type === currentRound) return true;
+  for (var i = 0; i < CONFIG.SIMULTANEOUS_ROUNDS.length; i++) {
+    var group = CONFIG.SIMULTANEOUS_ROUNDS[i];
+    if (group.indexOf(type) !== -1 && group.indexOf(currentRound) !== -1) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function getDateSortKey(dateStr) {
   if (!dateStr) return '99999999999999';
   var parts = dateStr.split(' ');
@@ -934,7 +945,7 @@ function renderGamesHTML(container) {
     if (!rounds[type]) return;
     var games = rounds[type];
     var allDone = games.every(function(g) { return g.finished; });
-    var isCurrent = type === currentRound;
+    var isCurrent = isRoundActive(type, currentRound);
 
     var badge = allDone ? '<span class="status-badge badge-done">Done</span>'
       : isCurrent ? '<span class="status-badge badge-active">Active</span>'
