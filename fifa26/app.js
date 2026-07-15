@@ -13,6 +13,7 @@ var state = {
   selectedRaceUser: null,
   predictionsCache: { data: null, timestamp: 0 },
   leaderboardFilter: 'cumulative',
+  sortBadgeMode: false,
 };
 
 var TEAM_FLAG_MAP = {};
@@ -823,6 +824,25 @@ function renderLeaderboardBadges(userId) {
   return html + '</span>';
 }
 
+function renderBadgeList(badges, userId) {
+  if (!badges || !badges.length) return '';
+  var html = '<span class="lb-badges">';
+  for (var i = 0; i < badges.length; i++) {
+    html += renderBadge(badges[i], 20, userId);
+  }
+  return html + '</span>';
+}
+
+function expandBadges(badges) {
+  var result = [];
+  for (var i = 0; i < badges.length; i++) {
+    for (var j = 0; j < badges[i].count; j++) {
+      result.push({ type: badges[i].type, count: 1, games: badges[i].games });
+    }
+  }
+  return result;
+}
+
 function renderBadgeShowcase(userId) {
   var badges = computeBadges(userId);
   if (!badges.length) return '';
@@ -1329,11 +1349,31 @@ function renderLeaderboard() {
         rounds: scores[uid].rounds
       };
     });
-    result.sort(function(a, b) {
-      return b.totalScore - a.totalScore || a.name.localeCompare(b.name);
+
+    var badgeData = {};
+    state.users.forEach(function(u) {
+      var badges = computeBadges(u.userId);
+      var total = 0;
+      for (var b = 0; b < badges.length; b++) total += badges[b].count;
+      badgeData[u.userId] = { badges: badges, total: total };
     });
+
+    if (state.sortBadgeMode) {
+      result.sort(function(a, b) {
+        var ba = badgeData[a.userId] ? badgeData[a.userId].total : 0;
+        var bb = badgeData[b.userId] ? badgeData[b.userId].total : 0;
+        return bb - ba || a.name.localeCompare(b.name);
+      });
+    } else {
+      result.sort(function(a, b) {
+        return b.totalScore - a.totalScore || a.name.localeCompare(b.name);
+      });
+    }
     result.forEach(function(r, i) {
-      r.rank = i > 0 && r.totalScore === result[i-1].totalScore ? result[i-1].rank : i + 1;
+      r.rank = i > 0 && (state.sortBadgeMode
+        ? (badgeData[r.userId] ? badgeData[r.userId].total : 0) === (badgeData[result[i-1].userId] ? badgeData[result[i-1].userId].total : 0)
+        : r.totalScore === result[i-1].totalScore)
+        ? result[i-1].rank : i + 1;
     });
 
     if (!result.length) {
@@ -1373,23 +1413,43 @@ function renderLeaderboard() {
       var team = user ? state.teams[user.teamId] : null;
       var flagUrl = team ? TEAM_FLAG_MAP[user.teamId] : '';
 
+      var cardBadgesHtml, cardStatsHtml;
+      if (state.sortBadgeMode) {
+        var bi = badgeData[row.userId];
+        var expanded = bi ? expandBadges(bi.badges) : [];
+        cardBadgesHtml = renderBadgeList(expanded, row.userId);
+        cardStatsHtml = '<span class="lb-stats">' +
+          '<span class="lb-score lb-score-badge">' + (bi ? bi.total : 0) + '</span>' +
+          '</span>';
+      } else {
+        cardBadgesHtml = renderLeaderboardBadges(row.userId);
+        cardStatsHtml = '<span class="lb-stats">' +
+          renderFormGuide(fgData[row.userId]) +
+          '<span class="lb-score">' + row.correctCount + '</span>' +
+          '</span>';
+      }
+
       html += '<div class="lb-card' + (isMe ? ' me' : '') + '" data-user-id="' + row.userId + '">' +
         '<div class="lb-main">' +
         '<span class="' + rankClass + '">' + rankStr + '</span>' +
         (flagUrl ? '<img class="lb-flag" src="' + flagUrl + '" alt="" loading="lazy">' : '') +
         '<span class="lb-name' + (row.rank <= 3 ? ' ' + ['gold','silver','bronze'][row.rank - 1] : '') + '">' + escapeHtml(row.name) + '</span>' +
-        renderLeaderboardBadges(row.userId) +
-        '<span class="lb-stats">' +
-        renderFormGuide(fgData[row.userId]) +
-        '<span class="lb-score">' + row.correctCount + '</span>' +
-        '</span>' +
+        cardBadgesHtml +
+        cardStatsHtml +
         '</div>' +
-        renderBar(row, maxScore) +
+        (state.sortBadgeMode ? '' : renderBar(row, maxScore)) +
         '</div>';
     });
 
     html += '</div>';
-    container.innerHTML = '<button class="race-chart-btn" id="rc-btn">&#128200; Race Chart</button>' + html;
+    var badgeBtnClass = 'lb-action-btn' + (state.sortBadgeMode ? ' active' : '');
+    container.innerHTML = '<div class="lb-actions">' +
+      '<button class="race-chart-btn" id="rc-btn">&#128200; Race Chart</button>' +
+      '<button class="' + badgeBtnClass + '" id="badge-mode-btn" type="button">' +
+      '<span>&#129351; Badges</span>' +
+      '<span class="toggle-switch"><span class="toggle-slider"></span></span>' +
+      '</button>' +
+      '</div>' + html;
 
     if (state.selectedRaceUser === null && state.currentUser) {
       state.selectedRaceUser = state.currentUser.userId;
@@ -1399,6 +1459,14 @@ function renderLeaderboard() {
     if (rcBtn) {
       rcBtn.classList.toggle('dimmed', allFinished.length <= 1);
       rcBtn.addEventListener('click', openRaceChartSheet);
+    }
+
+    var badgeBtn = document.getElementById('badge-mode-btn');
+    if (badgeBtn) {
+      badgeBtn.addEventListener('click', function() {
+        state.sortBadgeMode = !state.sortBadgeMode;
+        renderLeaderboard();
+      });
     }
 
     container.querySelectorAll('.lb-card').forEach(function(card) {
