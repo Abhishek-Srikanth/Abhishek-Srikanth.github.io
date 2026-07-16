@@ -272,6 +272,29 @@ function fetchGames() {
             scorers: g.home_scorers || g.away_scorers ? { home: g.home_scorers, away: g.away_scorers } : null,
           };
         });
+        // Resolve "Winner/Loser Match N" labels into actual team IDs by looking up the referenced game's result
+        state.games.forEach(function(game) {
+          ['team1Label', 'team2Label'].forEach(function(labelKey, idx) {
+            var label = game[labelKey];
+            if (!label) return;
+            var labelMatch = label.match(/^(Winner|Loser) Match (\d+)$/i);
+            if (!labelMatch) return;
+            var refGame = state.games.find(function(g) { return g.id === labelMatch[2]; });
+            if (!refGame || !refGame.winner) return;
+            var side = idx === 0 ? 'team1' : 'team2';
+            var idKey = side + 'Id';
+            var nameKey = side + 'Name';
+            if (labelMatch[1].toLowerCase() === 'winner') {
+              game[idKey] = refGame.winner;
+              game[nameKey] = refGame.team1Id === refGame.winner ? refGame.team1Name : refGame.team2Name;
+            } else {
+              var loserId = refGame.team1Id === refGame.winner ? refGame.team2Id : refGame.team1Id;
+              var loserName = refGame.team1Id === refGame.winner ? refGame.team2Name : refGame.team1Name;
+              game[idKey] = loserId;
+              game[nameKey] = loserName;
+            }
+          });
+        });
       }
     }).catch(function(e) { console.error('Games fetch failed', e); });
 }
